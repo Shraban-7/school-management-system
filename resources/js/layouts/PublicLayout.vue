@@ -102,7 +102,7 @@ function isActive(href: string): boolean {
 
         <header class="sticky top-0 z-40 border-b border-[#1e2875]/10 bg-[#f7f3e8]/95 backdrop-blur">
             <div class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
-                <Link href="/" class="flex min-w-0 shrink items-center gap-3" :title="schoolName">
+                <Link href="/" class="flex shrink-0 items-center" :title="schoolName">
                     <img
                         v-if="school.logo_url"
                         :src="school.logo_url"
@@ -112,20 +112,11 @@ function isActive(href: string): boolean {
                     <span
                         v-else
                         class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#1e2875] font-serif text-xl font-bold text-[#f7f3e8] ring-2 ring-[#c9a227]"
+                        aria-hidden="true"
                     >
                         {{ crestInitial }}
                     </span>
-                    <span class="min-w-0">
-                        <span class="block truncate font-serif text-lg leading-tight font-bold text-[#1e2875]">
-                            {{ schoolName }}
-                        </span>
-                        <span
-                            v-if="school.eiin_number"
-                            class="block truncate text-[11px] tracking-widest whitespace-nowrap text-[#1a1a1a]/60 uppercase"
-                        >
-                            EIIN {{ school.eiin_number }}
-                        </span>
-                    </span>
+                    <span class="sr-only">{{ schoolName }}</span>
                 </Link>
 
                 <nav
