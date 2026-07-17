@@ -24,7 +24,7 @@ Status legend: ✅ built · 🟡 partially built · ❌ not started.
 | **Parent/guardian role & login** | ✅ | |
 | **Result / gradesheet generation** | ✅ | Tabulation, merit list, PDF, student/parent views |
 | **Fee / payment management** | ✅ | Manual ledger; bKash/Nagad/Rocket/bank ref tracking (no gateway) |
-| **Website CMS (notices, blog, activities, syllabus)** | ✅ | Admin CRUD under Website sidebar group |
+| **Website CMS (notices, blog, activities, syllabus)** | ✅ | Admin CRUD; syllabus PDF force-download; notice PDF/Word attachments |
 
 ## Missing — recommended priority order
 

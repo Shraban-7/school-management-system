@@ -24,6 +24,8 @@ class UpdatePostRequest extends FormRequest
             'published_at' => ['nullable', 'date'],
             'cover_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'remove_cover_image' => ['boolean'],
+            'attachment' => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:10240'],
+            'remove_attachment' => ['boolean'],
         ];
     }
 }

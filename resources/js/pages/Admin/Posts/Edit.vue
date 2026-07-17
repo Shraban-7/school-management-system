@@ -17,6 +17,8 @@ interface Post {
     is_published: boolean;
     published_at: string | null;
     cover_image_url: string | null;
+    attachment_name: string | null;
+    attachment_download_url: string | null;
 }
 
 const props = defineProps<{
@@ -39,13 +41,20 @@ const form = reactive({
     is_published: props.post.is_published,
     published_at: props.post.published_at ?? '',
     remove_cover_image: false,
+    remove_attachment: false,
 });
 
 const coverImageFile = ref<File | null>(null);
+const attachmentFile = ref<File | null>(null);
 const errors = ref<Record<string, string>>({});
 
 function onCoverImageChange(event: Event) {
     coverImageFile.value =
+        (event.target as HTMLInputElement).files?.[0] ?? null;
+}
+
+function onAttachmentChange(event: Event) {
+    attachmentFile.value =
         (event.target as HTMLInputElement).files?.[0] ?? null;
 }
 
@@ -61,6 +70,8 @@ function submit() {
             published_at: form.published_at || null,
             cover_image: coverImageFile.value,
             remove_cover_image: form.remove_cover_image,
+            attachment: attachmentFile.value,
+            remove_attachment: form.remove_attachment,
         },
         {
             forceFormData: true,
@@ -70,7 +81,9 @@ function submit() {
             onSuccess: () => {
                 errors.value = {};
                 coverImageFile.value = null;
+                attachmentFile.value = null;
                 form.remove_cover_image = false;
+                form.remove_attachment = false;
             },
         },
     );
@@ -252,6 +265,57 @@ const errorClass = 'mt-1 text-xs text-rose-500';
                                             Remove current cover image
                                         </label>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sm:col-span-2">
+                            <label for="attachment" :class="labelClass">
+                                Downloadable attachment (PDF / Word)
+                            </label>
+                            <div class="mt-2 space-y-2">
+                                <p
+                                    v-if="post.attachment_name"
+                                    class="text-sm text-slate-600 dark:text-slate-400"
+                                >
+                                    Current:
+                                    <a
+                                        v-if="post.attachment_download_url"
+                                        :href="post.attachment_download_url"
+                                        class="font-medium text-accent-600 hover:underline"
+                                        target="_blank"
+                                        rel="noopener"
+                                    >
+                                        {{ post.attachment_name }}
+                                    </a>
+                                    <span v-else>{{ post.attachment_name }}</span>
+                                </p>
+                                <input
+                                    id="attachment"
+                                    type="file"
+                                    accept=".pdf,.doc,.docx,application/pdf"
+                                    class="block w-full text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-slate-700 hover:file:bg-slate-200 dark:text-slate-400 dark:file:bg-slate-800 dark:file:text-slate-300 dark:hover:file:bg-slate-700"
+                                    @change="onAttachmentChange"
+                                />
+                                <p v-if="errors.attachment" :class="errorClass">
+                                    {{ errors.attachment }}
+                                </p>
+                                <div
+                                    v-if="post.attachment_name"
+                                    class="flex items-center gap-2"
+                                >
+                                    <input
+                                        id="remove_attachment"
+                                        v-model="form.remove_attachment"
+                                        type="checkbox"
+                                        class="h-4 w-4 rounded border-slate-300 text-accent-600 focus:ring-accent-500 dark:border-slate-600"
+                                    />
+                                    <label
+                                        for="remove_attachment"
+                                        class="text-sm text-slate-600 dark:text-slate-400"
+                                    >
+                                        Remove current attachment
+                                    </label>
                                 </div>
                             </div>
                         </div>

@@ -26,6 +26,7 @@ interface PostItem {
     excerpt: string;
     cover_image_url: string | null;
     published_at: string | null;
+    has_attachment?: boolean;
 }
 
 interface Cta {
@@ -224,7 +225,15 @@ const secondaryCtas = props.homeCtas.slice(1);
                             class="flex items-start justify-between gap-4 px-5 py-4 transition-colors hover:bg-[#f7f3e8]"
                         >
                             <div>
-                                <p class="font-medium text-[#1a1a1a]">{{ notice.title_en }}</p>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <p class="font-medium text-[#1a1a1a]">{{ notice.title_en }}</p>
+                                    <span
+                                        v-if="notice.has_attachment"
+                                        class="inline-flex items-center gap-1 rounded bg-[#1e2875]/10 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-[#1e2875] uppercase"
+                                    >
+                                        PDF
+                                    </span>
+                                </div>
                                 <p class="mt-1 line-clamp-1 text-sm text-[#1a1a1a]/60">{{ notice.excerpt }}</p>
                             </div>
                             <span class="shrink-0 text-xs text-[#1a1a1a]/50">

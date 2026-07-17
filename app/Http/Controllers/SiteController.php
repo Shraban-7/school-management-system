@@ -10,9 +10,11 @@ use App\Models\Post;
 use App\Models\Student;
 use App\Models\Syllabus;
 use App\Models\Teacher;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class SiteController extends Controller
 {
@@ -135,6 +137,7 @@ class SiteController extends Controller
     {
         $items = Syllabus::query()
             ->with(['class:id,class_level,section_name', 'academicSession:id,session_name'])
+            ->whereNotNull('file_path')
             ->orderBy('class_id')
             ->get()
             ->map->toPublicArray();
@@ -145,6 +148,19 @@ class SiteController extends Controller
         ]);
     }
 
+    public function downloadSyllabus(Syllabus $syllabus): StreamedResponse
+    {
+        abort_unless(
+            filled($syllabus->file_path) && Storage::disk('public')->exists($syllabus->file_path),
+            404,
+        );
+
+        return Storage::disk('public')->download(
+            $syllabus->file_path,
+            $syllabus->downloadFilename(),
+        );
+    }
+
     public function notices(): Response
     {
         return $this->postIndex(PostType::NOTICE, 'Site/Notices');
@@ -153,6 +169,25 @@ class SiteController extends Controller
     public function noticeShow(string $slug): Response
     {
         return $this->postShow(PostType::NOTICE, $slug, 'Site/NoticeShow');
+    }
+
+    public function downloadNoticeAttachment(string $slug): StreamedResponse
+    {
+        $post = Post::query()
+            ->ofType(PostType::NOTICE)
+            ->published()
+            ->where('slug', $slug)
+            ->firstOrFail();
+
+        abort_unless(
+            filled($post->attachment_path) && Storage::disk('public')->exists($post->attachment_path),
+            404,
+        );
+
+        return Storage::disk('public')->download(
+            $post->attachment_path,
+            $post->attachmentDownloadFilename(),
+        );
     }
 
     public function blog(): Response

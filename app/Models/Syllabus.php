@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 
 #[Guarded(['*'])]
 class Syllabus extends Model
@@ -26,6 +27,22 @@ class Syllabus extends Model
         return $this->file_path ? asset('storage/'.$this->file_path) : null;
     }
 
+    public function downloadUrl(): ?string
+    {
+        return $this->file_path
+            ? route('syllabus.download', $this)
+            : null;
+    }
+
+    public function downloadFilename(): string
+    {
+        if (filled($this->file_original_name)) {
+            return $this->file_original_name;
+        }
+
+        return Str::slug($this->title ?: 'syllabus').'.pdf';
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -36,6 +53,8 @@ class Syllabus extends Model
             'title' => $this->title,
             'description' => $this->description,
             'file_url' => $this->fileUrl(),
+            'download_url' => $this->downloadUrl(),
+            'file_name' => $this->file_path ? $this->downloadFilename() : null,
             'class_label' => $this->class
                 ? trim($this->class->class_level.' '.$this->class->section_name)
                 : null,

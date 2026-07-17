@@ -28,7 +28,9 @@ Route::get('/admission', [SiteController::class, 'admission'])->name('admission'
 Route::get('/facilities', [SiteController::class, 'facilities'])->name('facilities');
 Route::get('/fees', [SiteController::class, 'fees'])->name('fees');
 Route::get('/syllabus', [SiteController::class, 'syllabus'])->name('syllabus');
+Route::get('/syllabus/{syllabus}/download', [SiteController::class, 'downloadSyllabus'])->name('syllabus.download');
 Route::get('/notices', [SiteController::class, 'notices'])->name('notices');
+Route::get('/notices/{slug}/download', [SiteController::class, 'downloadNoticeAttachment'])->name('notices.download');
 Route::get('/notices/{slug}', [SiteController::class, 'noticeShow'])->name('notices.show');
 Route::get('/blog', [SiteController::class, 'blog'])->name('blog');
 Route::get('/blog/{slug}', [SiteController::class, 'blogShow'])->name('blog.show');

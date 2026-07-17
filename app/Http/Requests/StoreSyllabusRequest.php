@@ -21,7 +21,7 @@ class StoreSyllabusRequest extends FormRequest
             'academic_session_id' => ['nullable', 'exists:academic_sessions,id'],
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'file' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+            'file' => ['required', 'file', 'mimes:pdf', 'max:10240'],
         ];
     }
 }

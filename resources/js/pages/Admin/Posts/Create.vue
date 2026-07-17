@@ -30,10 +30,16 @@ const form = reactive({
 });
 
 const coverImageFile = ref<File | null>(null);
+const attachmentFile = ref<File | null>(null);
 const errors = ref<Record<string, string>>({});
 
 function onCoverImageChange(event: Event) {
     coverImageFile.value =
+        (event.target as HTMLInputElement).files?.[0] ?? null;
+}
+
+function onAttachmentChange(event: Event) {
+    attachmentFile.value =
         (event.target as HTMLInputElement).files?.[0] ?? null;
 }
 
@@ -47,6 +53,7 @@ function submit() {
             is_published: form.is_published,
             published_at: form.published_at || null,
             cover_image: coverImageFile.value,
+            attachment: attachmentFile.value,
         },
         {
             forceFormData: true,
@@ -201,6 +208,25 @@ const errorClass = 'mt-1 text-xs text-rose-500';
                             />
                             <p v-if="errors.cover_image" :class="errorClass">
                                 {{ errors.cover_image }}
+                            </p>
+                        </div>
+
+                        <div class="sm:col-span-2">
+                            <label for="attachment" :class="labelClass">
+                                Downloadable attachment (PDF / Word)
+                            </label>
+                            <input
+                                id="attachment"
+                                type="file"
+                                accept=".pdf,.doc,.docx,application/pdf"
+                                class="mt-2 block w-full text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-slate-700 hover:file:bg-slate-200 dark:text-slate-400 dark:file:bg-slate-800 dark:file:text-slate-300 dark:hover:file:bg-slate-700"
+                                @change="onAttachmentChange"
+                            />
+                            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                Optional. Students and guardians can download this from the public notice page.
+                            </p>
+                            <p v-if="errors.attachment" :class="errorClass">
+                                {{ errors.attachment }}
                             </p>
                         </div>
                     </div>

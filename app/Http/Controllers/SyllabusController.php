@@ -25,6 +25,8 @@ class SyllabusController extends Controller
                 'title' => $s->title,
                 'description' => $s->description,
                 'file_url' => $s->fileUrl(),
+                'download_url' => $s->downloadUrl(),
+                'file_name' => $s->file_path ? $s->downloadFilename() : null,
                 'class_label' => $s->class
                     ? trim($s->class->class_level.' '.$s->class->section_name)
                     : null,
@@ -55,7 +57,9 @@ class SyllabusController extends Controller
         $syllabus->forceFill($validated);
 
         if ($request->hasFile('file')) {
-            $syllabus->file_path = $request->file('file')->store('syllabus', 'public');
+            $file = $request->file('file');
+            $syllabus->file_path = $file->store('syllabus', 'public');
+            $syllabus->file_original_name = $file->getClientOriginalName();
         }
 
         $syllabus->save();
@@ -75,6 +79,8 @@ class SyllabusController extends Controller
                 'title' => $syllabus->title,
                 'description' => $syllabus->description,
                 'file_url' => $syllabus->fileUrl(),
+                'file_name' => $syllabus->file_path ? $syllabus->downloadFilename() : null,
+                'download_url' => $syllabus->downloadUrl(),
             ],
             'classes' => $this->classOptions(),
             'sessions' => $this->sessionOptions(),
@@ -91,13 +97,16 @@ class SyllabusController extends Controller
         if ($request->boolean('remove_file') && $syllabus->file_path) {
             Storage::disk('public')->delete($syllabus->file_path);
             $syllabus->file_path = null;
+            $syllabus->file_original_name = null;
         }
 
         if ($request->hasFile('file')) {
             if ($syllabus->file_path) {
                 Storage::disk('public')->delete($syllabus->file_path);
             }
-            $syllabus->file_path = $request->file('file')->store('syllabus', 'public');
+            $file = $request->file('file');
+            $syllabus->file_path = $file->store('syllabus', 'public');
+            $syllabus->file_original_name = $file->getClientOriginalName();
         }
 
         $syllabus->save();

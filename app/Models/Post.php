@@ -55,6 +55,33 @@ class Post extends Model
             : null;
     }
 
+    public function attachmentUrl(): ?string
+    {
+        return $this->attachment_path
+            ? asset('storage/'.$this->attachment_path)
+            : null;
+    }
+
+    public function attachmentDownloadUrl(): ?string
+    {
+        if (! $this->attachment_path || $this->type !== PostType::NOTICE) {
+            return null;
+        }
+
+        return route('notices.download', $this->slug);
+    }
+
+    public function attachmentDownloadFilename(): string
+    {
+        if (filled($this->attachment_original_name)) {
+            return $this->attachment_original_name;
+        }
+
+        $extension = pathinfo((string) $this->attachment_path, PATHINFO_EXTENSION) ?: 'pdf';
+
+        return Str::slug($this->title_en ?: 'notice').'.'.$extension;
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -68,6 +95,10 @@ class Post extends Model
             'slug' => $this->slug,
             'body' => $this->body,
             'cover_image_url' => $this->coverImageUrl(),
+            'has_attachment' => filled($this->attachment_path),
+            'attachment_url' => $this->attachmentUrl(),
+            'attachment_download_url' => $this->attachmentDownloadUrl(),
+            'attachment_name' => $this->attachment_path ? $this->attachmentDownloadFilename() : null,
             'published_at' => $this->published_at?->toDateString(),
             'excerpt' => Str::limit(strip_tags($this->body), 160),
         ];

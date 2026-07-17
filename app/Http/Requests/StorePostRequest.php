@@ -23,6 +23,7 @@ class StorePostRequest extends FormRequest
             'is_published' => ['boolean'],
             'published_at' => ['nullable', 'date'],
             'cover_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'attachment' => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:10240'],
         ];
     }
 }

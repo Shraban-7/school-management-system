@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import PublicLayout from '@/layouts/PublicLayout.vue';
+import AppIcon from '@/components/AppIcon.vue';
 
 defineOptions({ layout: PublicLayout });
 
@@ -10,6 +11,7 @@ interface PostItem {
     slug: string;
     excerpt: string;
     published_at: string | null;
+    has_attachment?: boolean;
 }
 
 interface PaginatorLink {
@@ -37,13 +39,16 @@ function formatDate(date: string | null): string {
 
 <template>
     <div>
-        <Head title="Notices" />
+        <Head title="School Notices" />
 
         <section class="bg-[#1e2875] text-[#f7f3e8]">
             <div class="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
                 <p class="text-xs font-semibold tracking-[0.25em] text-[#c9a227] uppercase">Noticeboard</p>
                 <div class="mt-2 h-px w-16 bg-[#c9a227]" aria-hidden="true"></div>
-                <h1 class="mt-5 font-serif text-3xl font-bold sm:text-4xl">Notices</h1>
+                <h1 class="mt-5 font-serif text-3xl font-bold sm:text-4xl">School Notices</h1>
+                <p class="mt-3 max-w-2xl text-sm text-[#f7f3e8]/75">
+                    Official school announcements. Some notices include a downloadable PDF.
+                </p>
             </div>
         </section>
 
@@ -52,10 +57,19 @@ function formatDate(date: string | null): string {
                 <li v-for="post in posts.data" :key="post.id">
                     <Link
                         :href="`/notices/${post.slug}`"
-                        class="flex flex-col gap-1 px-6 py-5 transition-colors hover:bg-[#f7f3e8] sm:flex-row sm:items-start sm:justify-between sm:gap-6"
+                        class="flex flex-col gap-2 px-6 py-5 transition-colors hover:bg-[#f7f3e8] sm:flex-row sm:items-start sm:justify-between sm:gap-6"
                     >
                         <div>
-                            <p class="font-serif text-lg font-bold text-[#1e2875]">{{ post.title_en }}</p>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <p class="font-serif text-lg font-bold text-[#1e2875]">{{ post.title_en }}</p>
+                                <span
+                                    v-if="post.has_attachment"
+                                    class="inline-flex items-center gap-1 rounded bg-[#1e2875]/10 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-[#1e2875] uppercase"
+                                >
+                                    <AppIcon name="download" class="h-3 w-3" />
+                                    PDF
+                                </span>
+                            </div>
                             <p class="mt-1 line-clamp-2 text-sm text-[#1a1a1a]/65">{{ post.excerpt }}</p>
                         </div>
                         <span class="shrink-0 text-xs font-medium text-[#1a1a1a]/50 sm:mt-1">
@@ -65,7 +79,7 @@ function formatDate(date: string | null): string {
                 </li>
             </ul>
             <p v-else class="rounded-lg border border-dashed border-[#1e2875]/20 p-8 text-center text-sm text-[#1a1a1a]/60">
-                No notices have been published yet.
+                No school notices have been published yet.
             </p>
 
             <nav v-if="posts.links && posts.links.length > 3" class="mt-8 flex flex-wrap justify-center gap-1" aria-label="Pagination">

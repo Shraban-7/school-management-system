@@ -76,6 +76,12 @@ class PostController extends Controller
             $post->cover_image_path = $request->file('cover_image')->store('posts', 'public');
         }
 
+        if ($request->hasFile('attachment')) {
+            $file = $request->file('attachment');
+            $post->attachment_path = $file->store('posts/attachments', 'public');
+            $post->attachment_original_name = $file->getClientOriginalName();
+        }
+
         $post->save();
 
         return to_route('admin.posts.index', ['type' => $postType->value])
@@ -99,6 +105,8 @@ class PostController extends Controller
                 'is_published' => (bool) $post->is_published,
                 'published_at' => $post->published_at?->toDateString(),
                 'cover_image_url' => $post->coverImageUrl(),
+                'attachment_name' => $post->attachment_path ? $post->attachmentDownloadFilename() : null,
+                'attachment_download_url' => $post->attachmentUrl(),
             ],
         ]);
     }
@@ -134,6 +142,21 @@ class PostController extends Controller
             $post->cover_image_path = $request->file('cover_image')->store('posts', 'public');
         }
 
+        if ($request->boolean('remove_attachment') && $post->attachment_path) {
+            Storage::disk('public')->delete($post->attachment_path);
+            $post->attachment_path = null;
+            $post->attachment_original_name = null;
+        }
+
+        if ($request->hasFile('attachment')) {
+            if ($post->attachment_path) {
+                Storage::disk('public')->delete($post->attachment_path);
+            }
+            $file = $request->file('attachment');
+            $post->attachment_path = $file->store('posts/attachments', 'public');
+            $post->attachment_original_name = $file->getClientOriginalName();
+        }
+
         $post->save();
 
         return to_route('admin.posts.index', ['type' => $postType->value])
@@ -147,6 +170,10 @@ class PostController extends Controller
 
         if ($post->cover_image_path) {
             Storage::disk('public')->delete($post->cover_image_path);
+        }
+
+        if ($post->attachment_path) {
+            Storage::disk('public')->delete($post->attachment_path);
         }
 
         $post->delete();
