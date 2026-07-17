@@ -70,3 +70,4 @@ Status legend: ✅ built · 🟡 partially built · ❌ not started.
 
 Recommended order: **Class routine / timetable** (BD Fri–Sat weekend) →
 then confirm scope for SMS / homework / leave / ID cards with the owner.
+
