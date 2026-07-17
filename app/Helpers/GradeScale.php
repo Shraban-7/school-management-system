@@ -22,13 +22,25 @@ class GradeScale
         ];
     }
 
-    public static function calculate(float $marks, float $fullMarks = 100): array
+    /**
+     * Resolve a subject grade from raw marks.
+     *
+     * When $passMarks is supplied, scoring below it is an automatic F/0.00
+     * regardless of the percentage band — this is the Bangladesh board rule
+     * (a student who fails a subject cannot earn a grade point in it).
+     *
+     * @return array{grade: string, point: float, percentage: float}
+     */
+    public static function calculate(float $marks, float $fullMarks = 100, ?float $passMarks = null): array
     {
         $percentage = ($marks / max($fullMarks, 1)) * 100;
-        $scale = self::all();
         $result = ['grade' => 'F', 'point' => 0.00, 'percentage' => round($percentage, 2)];
 
-        foreach ($scale as $level) {
+        if ($passMarks !== null && $marks < $passMarks) {
+            return $result;
+        }
+
+        foreach (self::all() as $level) {
             if ($percentage >= $level['min'] && $percentage <= $level['max']) {
                 $result['grade'] = $level['grade'];
                 $result['point'] = $level['point'];
@@ -37,5 +49,22 @@ class GradeScale
         }
 
         return $result;
+    }
+
+    /**
+     * Map a computed GPA (average of subject grade points) to a letter grade,
+     * using the standard Bangladesh GPA bands.
+     */
+    public static function letterFromGpa(float $gpa): string
+    {
+        return match (true) {
+            $gpa >= 5.00 => 'A+',
+            $gpa >= 4.00 => 'A',
+            $gpa >= 3.50 => 'A-',
+            $gpa >= 3.00 => 'B',
+            $gpa >= 2.00 => 'C',
+            $gpa >= 1.00 => 'D',
+            default => 'F',
+        };
     }
 }

@@ -3,10 +3,12 @@ import { Link, router, usePage } from '@inertiajs/vue3'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import AppIcon from '@/components/AppIcon.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
+import { useI18n } from '@/composables/useI18n'
 import type { AuthUser } from '@/types/auth'
 
 const page = usePage()
 const user = computed<AuthUser | null>(() => page.props.auth?.user ?? null)
+const { t } = useI18n()
 
 const open = ref(false)
 const root = ref<HTMLElement | null>(null)
@@ -48,9 +50,22 @@ const dashboardByRole: Record<string, string> = {
     teacher: '/teacher/dashboard',
     student: '/student/dashboard',
     staff: '/staff/dashboard',
+    parent: '/parent/dashboard',
 }
 const dashboardUrl = computed(() =>
     user.value ? dashboardByRole[user.value.role] ?? '/' : null,
+)
+
+const roleLabels: Record<string, string> = {
+    admin: 'Admin',
+    headmaster: 'Headmaster',
+    teacher: 'Teacher',
+    student: 'Student',
+    staff: 'Staff',
+    parent: 'Parent/Guardian',
+}
+const roleLabel = computed(() =>
+    user.value ? roleLabels[user.value.role] ?? user.value.role : 'Guest',
 )
 </script>
 
@@ -73,8 +88,8 @@ const dashboardUrl = computed(() =>
                 <span class="block text-sm font-medium leading-tight text-slate-900 dark:text-slate-100">
                     {{ user?.name ?? 'Guest' }}
                 </span>
-                <span class="block text-xs capitalize leading-tight text-slate-500 dark:text-slate-400">
-                    {{ user?.role ?? 'guest' }}
+                <span class="block text-xs leading-tight text-slate-500 dark:text-slate-400">
+                    {{ roleLabel }}
                 </span>
             </span>
             <AppIcon name="chevron-down" class="hidden h-4 w-4 text-slate-400 sm:block" />
@@ -96,9 +111,17 @@ const dashboardUrl = computed(() =>
                     <p class="text-sm font-medium text-slate-900 dark:text-slate-100">
                         {{ user?.name ?? 'Guest' }}
                     </p>
-                    <p class="truncate text-xs text-slate-500 dark:text-slate-400">
-                        {{ user?.email ?? '' }}
+                    <p v-if="user?.email" class="truncate text-xs text-slate-500 dark:text-slate-400">
+                        {{ user.email }}
                     </p>
+                    <p v-if="user?.phone" class="truncate text-xs text-slate-500 dark:text-slate-400">
+                        {{ user.phone }}
+                    </p>
+                    <span
+                        class="mt-2 inline-flex rounded-full bg-accent-100 px-2 py-0.5 text-[11px] font-semibold text-accent-700 dark:bg-accent-900 dark:text-accent-200"
+                    >
+                        {{ roleLabel }}
+                    </span>
                 </div>
                 <div class="py-1">
                     <Link
@@ -108,19 +131,29 @@ const dashboardUrl = computed(() =>
                         @click="close"
                     >
                         <AppIcon name="grid" class="h-4 w-4 text-slate-400" />
-                        Dashboard
+                        {{ t('nav.dashboard') }}
                     </Link>
                     <Link
-                        href="#"
+                        href="/profile"
                         class="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
                         @click="close"
                     >
                         <AppIcon name="user" class="h-4 w-4 text-slate-400" />
-                        Profile
+                        {{ t('nav.my_profile') }}
                     </Link>
+                    <a
+                        href="/"
+                        target="_blank"
+                        rel="noopener"
+                        class="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
+                        @click="close"
+                    >
+                        <AppIcon name="globe" class="h-4 w-4 text-slate-400" />
+                        {{ t('nav.go_to_website') }}
+                    </a>
                 </div>
                 <div class="flex items-center justify-between border-t border-slate-200 px-4 py-2 dark:border-slate-700">
-                    <span class="text-xs text-slate-500 dark:text-slate-400">Theme</span>
+                    <span class="text-xs text-slate-500 dark:text-slate-400">{{ t('profile.theme') }}</span>
                     <ThemeToggle />
                 </div>
                 <div class="border-t border-slate-200 py-1 dark:border-slate-700">
@@ -130,7 +163,7 @@ const dashboardUrl = computed(() =>
                         @click="logout"
                     >
                         <AppIcon name="logout" class="h-4 w-4" />
-                        Sign out
+                        {{ t('profile.sign_out') }}
                     </button>
                 </div>
             </div>

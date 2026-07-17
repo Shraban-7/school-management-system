@@ -45,10 +45,6 @@ class ExamController extends Controller
     {
         return Inertia::render('Admin/Exams/Create', [
             'sidebar' => app(DashboardController::class)->adminSidebar(),
-            'institutions' => Institution::select('id', 'name_en')
-                ->orderBy('name_en')
-                ->get()
-                ->map(fn (Institution $i) => ['value' => $i->id, 'label' => $i->name_en]),
             'sessions' => AcademicSession::select('id', 'session_name')
                 ->orderBy('session_name', 'desc')
                 ->get()
@@ -60,7 +56,6 @@ class ExamController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'institution_id' => ['required', 'exists:institutions,id'],
             'session_id' => ['required', 'exists:academic_sessions,id'],
             'name_en' => ['required', 'string', 'max:255'],
             'name_bn' => ['nullable', 'string', 'max:255'],
@@ -71,7 +66,9 @@ class ExamController extends Controller
             'description' => ['nullable', 'string'],
         ]);
 
-        Exam::create($validated);
+        $validated['institution_id'] = Institution::current()->id;
+
+        (new Exam)->forceFill($validated)->save();
 
         return to_route('admin.exams.index')
             ->with('flash.message', 'Exam created successfully.');
@@ -95,10 +92,6 @@ class ExamController extends Controller
                 'description' => $exam->description,
             ],
             'sidebar' => app(DashboardController::class)->adminSidebar(),
-            'institutions' => Institution::select('id', 'name_en')
-                ->orderBy('name_en')
-                ->get()
-                ->map(fn (Institution $i) => ['value' => $i->id, 'label' => $i->name_en]),
             'sessions' => AcademicSession::select('id', 'session_name')
                 ->orderBy('session_name', 'desc')
                 ->get()
@@ -110,7 +103,6 @@ class ExamController extends Controller
     public function update(Request $request, Exam $exam): RedirectResponse
     {
         $validated = $request->validate([
-            'institution_id' => ['required', 'exists:institutions,id'],
             'session_id' => ['required', 'exists:academic_sessions,id'],
             'name_en' => ['required', 'string', 'max:255'],
             'name_bn' => ['nullable', 'string', 'max:255'],
@@ -121,7 +113,9 @@ class ExamController extends Controller
             'description' => ['nullable', 'string'],
         ]);
 
-        $exam->update($validated);
+        $validated['institution_id'] = Institution::current()->id;
+
+        $exam->forceFill($validated)->save();
 
         return to_route('admin.exams.index')
             ->with('flash.message', 'Exam updated successfully.');
@@ -141,10 +135,16 @@ class ExamController extends Controller
 
         $subjects = Subject::query()
             ->where('institution_id', $exam->institution_id)
-            ->select('id', 'name_en')
+            ->select('id', 'name_en', 'full_marks', 'pass_marks')
             ->orderBy('name_en')
             ->get()
-            ->toArray();
+            ->map(fn (Subject $s) => [
+                'id' => $s->id,
+                'name_en' => $s->name_en,
+                'full_marks' => (float) $s->full_marks,
+                'pass_marks' => (float) $s->pass_marks,
+            ])
+            ->all();
 
         $students = Student::query()
             ->where('institution_id', $exam->institution_id)
@@ -165,11 +165,11 @@ class ExamController extends Controller
         $existingMarks = Mark::query()
             ->where('exam_id', $exam->id)
             ->get()
-            ->keyBy(fn (Mark $m) => $m->student_id . '_' . $m->subject_id)
+            ->keyBy(fn (Mark $m) => $m->student_id.'-'.$m->subject_id)
             ->map(fn (Mark $m) => [
-                'written_marks' => (float) $m->written_marks,
-                'mcq_marks' => (float) $m->mcq_marks,
-                'practical_marks' => (float) $m->practical_marks,
+                'written' => $m->written_marks !== null ? (float) $m->written_marks : null,
+                'mcq' => $m->mcq_marks !== null ? (float) $m->mcq_marks : null,
+                'practical' => $m->practical_marks !== null ? (float) $m->practical_marks : null,
                 'is_absent' => (bool) $m->is_absent,
                 'remarks' => $m->remarks,
             ]);
@@ -202,6 +202,11 @@ class ExamController extends Controller
             'marks.*.remarks' => ['nullable', 'string', 'max:500'],
         ]);
 
+        $subjects = Subject::query()
+            ->whereIn('id', collect($validated['marks'])->pluck('subject_id')->unique())
+            ->get()
+            ->keyBy('id');
+
         foreach ($validated['marks'] as $entry) {
             $written = (float) ($entry['written_marks'] ?? 0);
             $mcq = (float) ($entry['mcq_marks'] ?? 0);
@@ -209,27 +214,33 @@ class ExamController extends Controller
             $total = $written + $mcq + $practical;
             $isAbsent = (bool) ($entry['is_absent'] ?? false);
 
+            $subject = $subjects->get($entry['subject_id']);
+            $fullMarks = (float) ($subject?->full_marks ?: 100);
+            $passMarks = (float) ($subject?->pass_marks ?: 33);
+
             $grade = $isAbsent
                 ? ['grade' => null, 'point' => null]
-                : GradeScale::calculate($total);
+                : GradeScale::calculate($total, $fullMarks, $passMarks);
 
-            Mark::updateOrCreate(
-                [
-                    'exam_id' => $exam->id,
-                    'subject_id' => $entry['subject_id'],
-                    'student_id' => $entry['student_id'],
-                ],
-                [
-                    'written_marks' => $written,
-                    'mcq_marks' => $mcq,
-                    'practical_marks' => $practical,
-                    'total_marks' => $total,
-                    'grade_letter' => $grade['grade'],
-                    'grade_point' => $grade['point'],
-                    'is_absent' => $isAbsent,
-                    'remarks' => $entry['remarks'] ?? null,
-                ]
-            );
+            $mark = Mark::query()->where([
+                'exam_id' => $exam->id,
+                'subject_id' => $entry['subject_id'],
+                'student_id' => $entry['student_id'],
+            ])->first() ?? new Mark;
+
+            $mark->forceFill([
+                'exam_id' => $exam->id,
+                'subject_id' => $entry['subject_id'],
+                'student_id' => $entry['student_id'],
+                'written_marks' => $written,
+                'mcq_marks' => $mcq,
+                'practical_marks' => $practical,
+                'total_marks' => $total,
+                'grade_letter' => $grade['grade'],
+                'grade_point' => $grade['point'],
+                'is_absent' => $isAbsent,
+                'remarks' => $entry['remarks'] ?? null,
+            ])->save();
         }
 
         return to_route('admin.exams.marks', ['exam' => $exam->id])

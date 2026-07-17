@@ -31,7 +31,6 @@ const props = defineProps<{
         is_active: boolean;
     };
     sidebar: SidebarConfig;
-    institutions: { value: number; label: string }[];
     genders: string[];
     designations: string[];
 }>();
@@ -43,7 +42,6 @@ const page = usePage();
 const flash = computed(() => page.props.flash?.message ?? null);
 
 const form = reactive({
-    institution_id: props.teacher.institution_id,
     name_en: props.teacher.name_en,
     name_bn: props.teacher.name_bn,
     gender: props.teacher.gender,
@@ -68,10 +66,7 @@ const errors = ref<Record<string, string>>({});
 function submit() {
     router.put(
         `/admin/teachers/${props.teacher.id}`,
-        {
-            ...form,
-            institution_id: Number(form.institution_id),
-        },
+        { ...form },
         {
             onError: (err) => {
                 errors.value = err;
@@ -378,40 +373,6 @@ function submit() {
                     </h2>
 
                     <div class="grid gap-6 sm:grid-cols-2">
-                        <div>
-                            <label
-                                for="institution_id"
-                                class="block text-sm font-medium text-slate-700 dark:text-slate-300"
-                            >
-                                Institution <span class="text-rose-500">*</span>
-                            </label>
-                            <select
-                                id="institution_id"
-                                v-model="form.institution_id"
-                                class="mt-1 block w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
-                                :class="{
-                                    'border-rose-500': errors.institution_id,
-                                }"
-                            >
-                                <option value="" disabled>
-                                    Select institution
-                                </option>
-                                <option
-                                    v-for="inst in institutions"
-                                    :key="inst.value"
-                                    :value="inst.value"
-                                >
-                                    {{ inst.label }}
-                                </option>
-                            </select>
-                            <p
-                                v-if="errors.institution_id"
-                                class="mt-1 text-xs text-rose-500"
-                            >
-                                {{ errors.institution_id }}
-                            </p>
-                        </div>
-
                         <div>
                             <label
                                 for="designation"

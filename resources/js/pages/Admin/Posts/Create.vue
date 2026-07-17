@@ -1,0 +1,227 @@
+<script setup lang="ts">
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
+import { computed, reactive, ref } from 'vue';
+import DashboardLayout from '@/layouts/DashboardLayout.vue';
+import AppIcon from '@/components/AppIcon.vue';
+import RichTextEditor from '@/components/RichTextEditor.vue';
+import { useSidebarStack } from '@/composables/useNavStack';
+import type { SidebarConfig } from '@/types/sidebar';
+
+defineOptions({ layout: DashboardLayout });
+
+const props = defineProps<{
+    sidebar: SidebarConfig;
+    type: string;
+    typeLabel: string;
+}>();
+
+const sidebarStack = useSidebarStack();
+sidebarStack.set(props.sidebar);
+
+const page = usePage();
+const flash = computed(() => page.props.flash?.message ?? null);
+
+const form = reactive({
+    title_en: '',
+    title_bn: '',
+    body: '',
+    is_published: false,
+    published_at: '',
+});
+
+const coverImageFile = ref<File | null>(null);
+const errors = ref<Record<string, string>>({});
+
+function onCoverImageChange(event: Event) {
+    coverImageFile.value =
+        (event.target as HTMLInputElement).files?.[0] ?? null;
+}
+
+function submit() {
+    router.post(
+        `/admin/posts/${props.type}`,
+        {
+            title_en: form.title_en,
+            title_bn: form.title_bn,
+            body: form.body,
+            is_published: form.is_published,
+            published_at: form.published_at || null,
+            cover_image: coverImageFile.value,
+        },
+        {
+            forceFormData: true,
+            onError: (err) => {
+                errors.value = err;
+            },
+        },
+    );
+}
+
+const inputClass =
+    'mt-1 block w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100';
+const labelClass =
+    'block text-sm font-medium text-slate-700 dark:text-slate-300';
+const errorClass = 'mt-1 text-xs text-rose-500';
+</script>
+
+<template>
+    <div>
+        <Head :title="`Create ${typeLabel}`" />
+
+        <div class="space-y-6">
+            <header class="flex items-center gap-4">
+                <Link
+                    :href="`/admin/posts/${type}`"
+                    class="inline-flex h-9 w-9 items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+                >
+                    <AppIcon name="arrow-left" class="h-5 w-5" />
+                </Link>
+                <div>
+                    <p
+                        class="text-xs font-semibold tracking-widest text-slate-500 uppercase dark:text-slate-400"
+                    >
+                        Website
+                    </p>
+                    <h1
+                        class="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-50"
+                    >
+                        Create {{ typeLabel.toLowerCase() }}
+                    </h1>
+                </div>
+            </header>
+
+            <div
+                v-if="flash"
+                class="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200"
+            >
+                {{ flash }}
+            </div>
+
+            <form @submit.prevent="submit" class="space-y-8">
+                <section
+                    class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                >
+                    <h2
+                        class="mb-4 text-lg font-semibold text-slate-900 dark:text-slate-100"
+                    >
+                        Details
+                    </h2>
+
+                    <div class="grid gap-6 sm:grid-cols-2">
+                        <div>
+                            <label for="title_en" :class="labelClass">
+                                Title (English)
+                                <span class="text-rose-500">*</span>
+                            </label>
+                            <input
+                                id="title_en"
+                                v-model="form.title_en"
+                                type="text"
+                                :class="[
+                                    inputClass,
+                                    { 'border-rose-500': errors.title_en },
+                                ]"
+                            />
+                            <p v-if="errors.title_en" :class="errorClass">
+                                {{ errors.title_en }}
+                            </p>
+                        </div>
+
+                        <div>
+                            <label for="title_bn" :class="labelClass">
+                                Title (Bangla)
+                            </label>
+                            <input
+                                id="title_bn"
+                                v-model="form.title_bn"
+                                type="text"
+                                :class="[
+                                    inputClass,
+                                    { 'border-rose-500': errors.title_bn },
+                                ]"
+                            />
+                            <p v-if="errors.title_bn" :class="errorClass">
+                                {{ errors.title_bn }}
+                            </p>
+                        </div>
+
+                        <div class="sm:col-span-2">
+                            <label for="body" :class="labelClass">
+                                Body <span class="text-rose-500">*</span>
+                            </label>
+                            <RichTextEditor
+                                v-model="form.body"
+                                :invalid="Boolean(errors.body)"
+                            />
+                            <p v-if="errors.body" :class="errorClass">
+                                {{ errors.body }}
+                            </p>
+                        </div>
+
+                        <div>
+                            <label for="published_at" :class="labelClass">
+                                Published date
+                            </label>
+                            <input
+                                id="published_at"
+                                v-model="form.published_at"
+                                type="date"
+                                :class="[
+                                    inputClass,
+                                    { 'border-rose-500': errors.published_at },
+                                ]"
+                            />
+                            <p v-if="errors.published_at" :class="errorClass">
+                                {{ errors.published_at }}
+                            </p>
+                        </div>
+
+                        <div class="flex items-center gap-3 sm:mt-6">
+                            <input
+                                id="is_published"
+                                v-model="form.is_published"
+                                type="checkbox"
+                                class="h-4 w-4 rounded border-slate-300 text-accent-600 focus:ring-accent-500 dark:border-slate-600"
+                            />
+                            <label for="is_published" :class="labelClass">
+                                Published
+                            </label>
+                        </div>
+
+                        <div class="sm:col-span-2">
+                            <label for="cover_image" :class="labelClass">
+                                Cover image
+                            </label>
+                            <input
+                                id="cover_image"
+                                type="file"
+                                accept="image/*"
+                                class="mt-2 block w-full text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-slate-700 hover:file:bg-slate-200 dark:text-slate-400 dark:file:bg-slate-800 dark:file:text-slate-300 dark:hover:file:bg-slate-700"
+                                @change="onCoverImageChange"
+                            />
+                            <p v-if="errors.cover_image" :class="errorClass">
+                                {{ errors.cover_image }}
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="flex items-center gap-3">
+                    <button
+                        type="submit"
+                        class="inline-flex items-center gap-1.5 rounded-md bg-accent-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-accent-700"
+                    >
+                        <AppIcon name="check" class="h-4 w-4" />
+                        Create
+                    </button>
+                    <Link
+                        :href="`/admin/posts/${type}`"
+                        class="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                    >
+                        Cancel
+                    </Link>
+                </div>
+            </form>
+        </div>
+    </div>
+</template>

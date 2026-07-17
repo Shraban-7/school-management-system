@@ -9,7 +9,7 @@ class ExamSeeder extends Seeder
 {
     public function run(): void
     {
-        $institutions = [1, 2, 3];
+        $institutions = [1];
 
         foreach ($institutions as $instId) {
             Exam::insert([

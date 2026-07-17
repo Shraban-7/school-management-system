@@ -9,43 +9,37 @@ class TeacherSeeder extends Seeder
 {
     public function run(): void
     {
-        $teachers = [];
-        $institutions = [1, 2, 3];
-        $names = [
-            ['en' => 'Prof. Abdur Rahman', 'bn' => 'অধ্যাপক আব্দুর রহমান'],
-            ['en' => 'Mrs. Fatima Begum', 'bn' => 'মিসেস ফাতিমা বেগম'],
-            ['en' => 'Md. Kamal Hossain', 'bn' => 'মোঃ কামাল হোসেন'],
-            ['en' => 'Ms. Shahnaz Parvin', 'bn' => 'মিসেস শাহনাজ পারভীন'],
-            ['en' => 'Md. Rafiqul Islam', 'bn' => 'মোঃ রফিকুল ইসলাম'],
+        $people = [
+            ['en' => 'Prof. Abdur Rahman', 'bn' => 'অধ্যাপক আব্দুর রহমান', 'designation' => 'Principal', 'subject' => 'Mathematics', 'qualification' => 'M.Sc', 'gender' => 'Male'],
+            ['en' => 'Mrs. Fatima Begum', 'bn' => 'মিসেস ফাতিমা বেগম', 'designation' => 'Senior Teacher', 'subject' => 'English', 'qualification' => 'M.A', 'gender' => 'Female'],
+            ['en' => 'Md. Kamal Hossain', 'bn' => 'মোঃ কামাল হোসেন', 'designation' => 'Assistant Teacher', 'subject' => 'Bangla', 'qualification' => 'B.Sc (Hons)', 'gender' => 'Male'],
+            ['en' => 'Ms. Shahnaz Parvin', 'bn' => 'মিসেস শাহনাজ পারভীন', 'designation' => 'Assistant Teacher', 'subject' => 'Science', 'qualification' => 'M.Sc', 'gender' => 'Female'],
+            ['en' => 'Md. Rafiqul Islam', 'bn' => 'মোঃ রফিকুল ইসলাম', 'designation' => 'Demonstrator', 'subject' => 'ICT', 'qualification' => 'M.Sc', 'gender' => 'Male'],
+            ['en' => 'Mr. Jahangir Alam', 'bn' => 'জনাব জাহাঙ্গীর আলম', 'designation' => 'Librarian', 'subject' => null, 'qualification' => 'B.A', 'gender' => 'Male'],
+            ['en' => 'Ms. Nasrin Akter', 'bn' => 'মিসেস নাসরিন আক্তার', 'designation' => 'Clerk', 'subject' => null, 'qualification' => 'HSC', 'gender' => 'Female'],
+            ['en' => 'Md. Sohel Rana', 'bn' => 'মোঃ সোহেল রানা', 'designation' => 'Accountant', 'subject' => null, 'qualification' => 'B.Com', 'gender' => 'Male'],
         ];
-        $designations = ['Principal', 'Senior Teacher', 'Assistant Teacher', 'Assistant Teacher', 'Demonstrator'];
-        $subjects = ['Mathematics', 'English', 'Bangla', 'Science', 'ICT'];
 
-        foreach ($institutions as $instId) {
-            foreach ($names as $i => $name) {
-                $teachers[] = [
-                    'institution_id' => $instId,
-                    'name_en' => $name['en'],
-                    'name_bn' => $name['bn'],
-                    'father_name' => 'Mr. '.fake('en_BD')->firstName().' '.fake('en_BD')->lastName(),
-                    'mother_name' => 'Mrs. '.fake('en_BD')->firstName().' '.fake('en_BD')->lastName(),
-                    'date_of_birth' => now()->subYears(rand(30, 55))->subDays(rand(1, 365)),
-                    'gender' => $i < 2 ? 'Male' : ($i < 4 ? 'Female' : 'Male'),
-                    'religion' => 'Islam',
-                    'mobile' => '+8801'.rand(300000000, 399999999),
-                    'email' => strtolower(str_replace(['.', ' ', '(', ')'], '', str_replace('Prof. ', '', $name['en']))).$instId.'@school.edu.bd',
-                    'nid_number' => (string) rand(1000000000, 9999999999),
-                    'qualification' => ['M.Sc', 'M.A', 'B.Sc (Hons)', 'M.Sc', 'M.Sc'][$i],
-                    'designation' => $designations[$i],
-                    'subject_specialization' => $subjects[$i],
-                    'joining_date' => now()->subYears(rand(1, 15))->subDays(rand(1, 365)),
-                    'is_active' => true,
-                ];
-            }
-        }
-
-        foreach ($teachers as $t) {
-            Teacher::create($t);
+        foreach ($people as $i => $person) {
+            $teacher = new Teacher;
+            $teacher->forceFill([
+                'institution_id' => 1,
+                'name_en' => $person['en'],
+                'name_bn' => $person['bn'],
+                'father_name' => 'Mr. Rahman',
+                'mother_name' => 'Mrs. Begum',
+                'date_of_birth' => now()->subYears(30 + $i)->subDays(10),
+                'gender' => $person['gender'],
+                'religion' => 'Islam',
+                'mobile' => '+8801'.(300000000 + $i),
+                'email' => 'staff'.$i.'@school.edu.bd',
+                'nid_number' => (string) (1000000000 + $i),
+                'qualification' => $person['qualification'],
+                'designation' => $person['designation'],
+                'subject_specialization' => $person['subject'],
+                'joining_date' => now()->subYears(max(1, 8 - $i)),
+                'is_active' => true,
+            ])->save();
         }
     }
 }

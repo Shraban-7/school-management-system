@@ -10,7 +10,7 @@ class SubjectSeeder extends Seeder
     public function run(): void
     {
         $subjects = [];
-        $institutions = [1, 2, 3];
+        $institutions = [1];
         $common = [
             ['name_en' => 'Bangla', 'name_bn' => 'বাংলা', 'code' => 'BAN'],
             ['name_en' => 'English', 'name_bn' => 'ইংরেজি', 'code' => 'ENG'],

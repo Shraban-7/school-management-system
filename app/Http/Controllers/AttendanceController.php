@@ -3,9 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\AttendanceRecord;
-use App\Models\Student;
 use App\Models\ClassesAndSection;
-use App\Models\Institution;
+use App\Models\Student;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -77,18 +76,19 @@ class AttendanceController extends Controller
         ]);
 
         foreach ($validated['records'] as $record) {
-            AttendanceRecord::updateOrCreate(
-                [
-                    'student_id' => $record['student_id'],
-                    'date' => $validated['date'],
-                ],
-                [
-                    'classes_and_sections_id' => $validated['class_id'],
-                    'status' => $record['status'],
-                    'remarks' => $record['remarks'] ?? null,
-                    'taken_by' => $request->user()->id,
-                ]
-            );
+            $attendance = AttendanceRecord::query()->where([
+                'student_id' => $record['student_id'],
+                'date' => $validated['date'],
+            ])->first() ?? new AttendanceRecord;
+
+            $attendance->forceFill([
+                'student_id' => $record['student_id'],
+                'date' => $validated['date'],
+                'classes_and_sections_id' => $validated['class_id'],
+                'status' => $record['status'],
+                'remarks' => $record['remarks'] ?? null,
+                'taken_by' => $request->user()->id,
+            ])->save();
         }
 
         return redirect()->back()

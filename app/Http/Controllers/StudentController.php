@@ -16,7 +16,7 @@ class StudentController extends Controller
     public function index(Request $request): Response
     {
         $students = Student::query()
-            ->with('institution:id,name_en', 'session:id,session_name', 'class:id,class_level,section_name')
+            ->with('institution:id,name_en', 'academicSession:id,session_name', 'class:id,class_level,section_name')
             ->orderBy('created_at', 'desc')
             ->paginate(15)
             ->through(fn (Student $s) => [
@@ -27,7 +27,7 @@ class StudentController extends Controller
                 'gender' => $s->gender,
                 'class_name' => $s->class?->class_level,
                 'section_name' => $s->class?->section_name,
-                'session_name' => $s->session?->session_name,
+                'session_name' => $s->academicSession?->session_name,
                 'institution_name' => $s->institution?->name_en,
                 'is_active' => (bool) $s->is_active,
                 'created_at' => $s->created_at?->toDateString(),
@@ -41,12 +41,6 @@ class StudentController extends Controller
 
     public function create(): Response
     {
-        $institutions = Institution::query()
-            ->select('id', 'name_en')
-            ->orderBy('name_en')
-            ->get()
-            ->map(fn (Institution $i) => ['value' => $i->id, 'label' => $i->name_en]);
-
         $sessions = AcademicSession::query()
             ->select('id', 'session_name')
             ->orderBy('session_name')
@@ -63,7 +57,6 @@ class StudentController extends Controller
 
         return Inertia::render('Admin/Students/Create', [
             'sidebar' => app(DashboardController::class)->adminSidebar(),
-            'institutions' => $institutions,
             'sessions' => $sessions,
             'classes' => $classes,
             'genders' => ['Male', 'Female', 'Other'],
@@ -78,7 +71,6 @@ class StudentController extends Controller
             'name_en' => ['required', 'string', 'max:255'],
             'name_bn' => ['required', 'string'],
             'gender' => ['required'],
-            'institution_id' => ['required', 'exists:institutions,id'],
             'session_id' => ['required', 'exists:academic_sessions,id'],
             'class_id' => ['required', 'exists:classes_and_sections,id'],
             'roll_number' => ['required', 'string', 'max:20'],
@@ -110,7 +102,9 @@ class StudentController extends Controller
             'is_active' => ['boolean'],
         ]);
 
-        Student::create($validated);
+        $validated['institution_id'] = Institution::current()->id;
+
+        (new Student)->forceFill($validated)->save();
 
         return to_route('admin.students.index')
             ->with('flash.message', 'Student created successfully.');
@@ -118,7 +112,7 @@ class StudentController extends Controller
 
     public function show(Student $student): Response
     {
-        $student->load('institution', 'session', 'class');
+        $student->load('institution', 'academicSession', 'class');
 
         return Inertia::render('Admin/Students/Show', [
             'student' => [
@@ -160,7 +154,7 @@ class StudentController extends Controller
                 'created_at' => $student->created_at?->toDateTimeString(),
                 'updated_at' => $student->updated_at?->toDateTimeString(),
                 'institution_name' => $student->institution?->name_en,
-                'session_name' => $student->session?->session_name,
+                'session_name' => $student->academicSession?->session_name,
                 'class_level' => $student->class?->class_level,
                 'class_section' => $student->class?->section_name,
             ],
@@ -170,13 +164,7 @@ class StudentController extends Controller
 
     public function edit(Student $student): Response
     {
-        $student->load('institution', 'session', 'class');
-
-        $institutions = Institution::query()
-            ->select('id', 'name_en')
-            ->orderBy('name_en')
-            ->get()
-            ->map(fn (Institution $i) => ['value' => $i->id, 'label' => $i->name_en]);
+        $student->load('institution', 'academicSession', 'class');
 
         $sessions = AcademicSession::query()
             ->select('id', 'session_name')
@@ -231,7 +219,6 @@ class StudentController extends Controller
                 'is_active' => (bool) $student->is_active,
             ],
             'sidebar' => app(DashboardController::class)->adminSidebar(),
-            'institutions' => $institutions,
             'sessions' => $sessions,
             'classes' => $classes,
             'genders' => ['Male', 'Female', 'Other'],
@@ -242,14 +229,13 @@ class StudentController extends Controller
 
     public function update(Request $request, Student $student): RedirectResponse
     {
-        $institutionId = $request->input('institution_id', $student->institution_id);
+        $institutionId = Institution::current()->id;
         $classId = $request->input('class_id', $student->class_id);
 
         $validated = $request->validate([
             'name_en' => ['required', 'string', 'max:255'],
             'name_bn' => ['required', 'string'],
             'gender' => ['required'],
-            'institution_id' => ['required', 'exists:institutions,id'],
             'session_id' => ['required', 'exists:academic_sessions,id'],
             'class_id' => ['required', 'exists:classes_and_sections,id'],
             'roll_number' => [
@@ -284,7 +270,9 @@ class StudentController extends Controller
             'is_active' => ['boolean'],
         ]);
 
-        $student->update($validated);
+        $validated['institution_id'] = $institutionId;
+
+        $student->forceFill($validated)->save();
 
         return to_route('admin.students.index')
             ->with('flash.message', 'Student updated successfully.');

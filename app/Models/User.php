@@ -7,6 +7,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -39,7 +40,18 @@ class User extends Authenticatable
             UserRole::TEACHER => route('teacher.dashboard'),
             UserRole::STUDENT => route('student.dashboard'),
             UserRole::STAFF => route('staff.dashboard'),
+            UserRole::PARENT => route('parent.dashboard'),
             default => route('home'),
         };
+    }
+
+    /**
+     * Students linked to this user when role = PARENT.
+     */
+    public function children(): BelongsToMany
+    {
+        return $this->belongsToMany(Student::class, 'student_guardians')
+            ->withPivot('relation')
+            ->withTimestamps();
     }
 }

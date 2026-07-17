@@ -2,14 +2,14 @@
 
 namespace App\Enums;
 
-enum UserRole :string
+enum UserRole: string
 {
     case ADMIN = 'admin';
     case HEADMASTER = 'headmaster';
     case TEACHER = 'teacher';
     case STUDENT = 'student';
     case STAFF = 'staff';
-
+    case PARENT = 'parent';
 
     public function title(): string
     {
@@ -19,6 +19,7 @@ enum UserRole :string
             self::TEACHER => 'Teacher',
             self::STUDENT => 'Student',
             self::STAFF => 'Staff',
+            self::PARENT => 'Parent/Guardian',
         };
     }
 }

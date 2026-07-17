@@ -1,7 +1,7 @@
 <?php
 
-test('returns a successful response', function () {
-    $response = $this->get(route('home'));
+test('shows the public school homepage for guests', function () {
+    makeInstitution();
 
-    $response->assertOk();
+    $this->get(route('home'))->assertSuccessful();
 });

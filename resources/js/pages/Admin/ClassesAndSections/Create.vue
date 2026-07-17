@@ -10,7 +10,6 @@ defineOptions({ layout: DashboardLayout });
 
 const props = defineProps<{
     sidebar: SidebarConfig;
-    institutions: { value: number; label: string }[];
     versions: string[];
     groupStreams: string[];
 }>();
@@ -19,7 +18,6 @@ const sidebarStack = useSidebarStack();
 sidebarStack.set(props.sidebar);
 
 const form = reactive({
-    institution_id: '' as string | number,
     version: '',
     class_level: '',
     group_stream: '',
@@ -34,7 +32,6 @@ function submit() {
         '/admin/classes-and-sections',
         {
             ...form,
-            institution_id: Number(form.institution_id),
             group_stream: form.group_stream || null,
             room_number: form.room_number || null,
         },
@@ -84,40 +81,6 @@ function submit() {
                     </h2>
 
                     <div class="grid gap-6 sm:grid-cols-2">
-                        <div class="sm:col-span-2">
-                            <label
-                                for="institution_id"
-                                class="block text-sm font-medium text-slate-700 dark:text-slate-300"
-                            >
-                                Institution <span class="text-rose-500">*</span>
-                            </label>
-                            <select
-                                id="institution_id"
-                                v-model="form.institution_id"
-                                class="mt-1 block w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
-                                :class="{
-                                    'border-rose-500': errors.institution_id,
-                                }"
-                            >
-                                <option value="" disabled>
-                                    Select institution
-                                </option>
-                                <option
-                                    v-for="inst in institutions"
-                                    :key="inst.value"
-                                    :value="inst.value"
-                                >
-                                    {{ inst.label }}
-                                </option>
-                            </select>
-                            <p
-                                v-if="errors.institution_id"
-                                class="mt-1 text-xs text-rose-500"
-                            >
-                                {{ errors.institution_id }}
-                            </p>
-                        </div>
-
                         <div>
                             <label
                                 for="version"

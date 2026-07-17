@@ -10,7 +10,6 @@ defineOptions({ layout: DashboardLayout });
 
 const props = defineProps<{
     sidebar: SidebarConfig;
-    institutions: { value: string | number; label: string }[];
     sessions: { value: string | number; label: string }[];
     classes: { value: string | number; label: string }[];
     genders: string[];
@@ -33,7 +32,6 @@ const form = reactive({
     religion: '',
     nationality: '',
     birth_certificate_number: '',
-    institution_id: '' as string | number,
     session_id: '' as string | number,
     class_id: '' as string | number,
     roll_number: '',
@@ -74,7 +72,6 @@ function submit() {
             religion: form.religion,
             nationality: form.nationality,
             birth_certificate_number: form.birth_certificate_number,
-            institution_id: Number(form.institution_id),
             session_id: Number(form.session_id),
             class_id: Number(form.class_id),
             roll_number: form.roll_number,
@@ -365,40 +362,6 @@ function submit() {
                                 class="mt-1 text-xs text-rose-500"
                             >
                                 {{ errors.birth_certificate_number }}
-                            </p>
-                        </div>
-
-                        <div>
-                            <label
-                                for="institution_id"
-                                class="block text-sm font-medium text-slate-700 dark:text-slate-300"
-                            >
-                                Institution <span class="text-rose-500">*</span>
-                            </label>
-                            <select
-                                id="institution_id"
-                                v-model="form.institution_id"
-                                class="mt-1 block w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
-                                :class="{
-                                    'border-rose-500': errors.institution_id,
-                                }"
-                            >
-                                <option value="" disabled>
-                                    Select institution
-                                </option>
-                                <option
-                                    v-for="inst in institutions"
-                                    :key="inst.value"
-                                    :value="inst.value"
-                                >
-                                    {{ inst.label }}
-                                </option>
-                            </select>
-                            <p
-                                v-if="errors.institution_id"
-                                class="mt-1 text-xs text-rose-500"
-                            >
-                                {{ errors.institution_id }}
                             </p>
                         </div>
 

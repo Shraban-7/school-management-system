@@ -20,7 +20,10 @@
     "dependencies": {
         "@inertiajs/vite": "^3.0.0",
         "@inertiajs/vue3": "^3.0.0",
+        "@lucide/vue": "^1.25.0",
         "@tailwindcss/vite": "^4.1.11",
+        "@tiptap/starter-kit": "^3.28.0",
+        "@tiptap/vue-3": "^3.28.0",
         "@vitejs/plugin-vue": "^6.0.0",
         "clsx": "^2.1.1",
         "concurrently": "^9.0.1",

@@ -33,21 +33,13 @@ class TeacherController extends Controller
 
         return Inertia::render('Admin/Teachers/Index', [
             'teachers' => $teachers,
-            ...DashboardController::getSidebar(),
+            'sidebar' => app(DashboardController::class)->adminSidebar(),
         ]);
     }
 
     public function create(): Response
     {
-        $institutions = Institution::select('id', 'name_en')
-            ->get()
-            ->map(fn ($institution) => [
-                'value' => $institution->id,
-                'label' => $institution->name_en,
-            ]);
-
         return Inertia::render('Admin/Teachers/Create', [
-            'institutions' => $institutions,
             'genders' => ['Male', 'Female', 'Other'],
             'designations' => [
                 'Principal',
@@ -63,14 +55,13 @@ class TeacherController extends Controller
                 'Peon',
                 'Other',
             ],
-            ...DashboardController::getSidebar(),
+            'sidebar' => app(DashboardController::class)->adminSidebar(),
         ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'institution_id' => 'required|exists:institutions,id',
             'name_en' => 'required|string',
             'name_bn' => 'required|string',
             'designation' => 'required|string',
@@ -90,7 +81,9 @@ class TeacherController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        Teacher::create($validated);
+        $validated['institution_id'] = Institution::current()->id;
+
+        (new Teacher)->forceFill($validated)->save();
 
         return redirect()->route('admin.teachers.index')
             ->with('success', 'Teacher created successfully.');
@@ -99,13 +92,6 @@ class TeacherController extends Controller
     public function edit(Teacher $teacher): Response
     {
         $teacher->load('institution');
-
-        $institutions = Institution::select('id', 'name_en')
-            ->get()
-            ->map(fn ($institution) => [
-                'value' => $institution->id,
-                'label' => $institution->name_en,
-            ]);
 
         return Inertia::render('Admin/Teachers/Edit', [
             'teacher' => [
@@ -129,7 +115,6 @@ class TeacherController extends Controller
                 'joining_date' => $teacher->joining_date,
                 'is_active' => (bool) $teacher->is_active,
             ],
-            'institutions' => $institutions,
             'genders' => ['Male', 'Female', 'Other'],
             'designations' => [
                 'Principal',
@@ -145,14 +130,13 @@ class TeacherController extends Controller
                 'Peon',
                 'Other',
             ],
-            ...DashboardController::getSidebar(),
+            'sidebar' => app(DashboardController::class)->adminSidebar(),
         ]);
     }
 
     public function update(Request $request, Teacher $teacher): RedirectResponse
     {
         $validated = $request->validate([
-            'institution_id' => 'required|exists:institutions,id',
             'name_en' => 'required|string',
             'name_bn' => 'required|string',
             'designation' => 'required|string',
@@ -172,7 +156,9 @@ class TeacherController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        $teacher->update($validated);
+        $validated['institution_id'] = Institution::current()->id;
+
+        $teacher->forceFill($validated)->save();
 
         return redirect()->route('admin.teachers.index')
             ->with('success', 'Teacher updated successfully.');

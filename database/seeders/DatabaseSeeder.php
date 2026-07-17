@@ -36,11 +36,20 @@ class DatabaseSeeder extends Seeder
         // 4. Students
         $this->call(StudentSeeder::class);
 
+        // 4a. Guardian/parent logins linked to students
+        $this->call(GuardianSeeder::class);
+
         // 5. Exams & marks
         $this->call(ExamSeeder::class);
         $this->call(MarkSeeder::class);
 
         // 6. Attendance
         $this->call(AttendanceRecordSeeder::class);
+
+        // 7. Fees (structures + sample monthly invoices)
+        $this->call(FeeSeeder::class);
+
+        // 8. Public website content (notices, blog, activities, syllabus)
+        $this->call(WebsiteContentSeeder::class);
     }
 }

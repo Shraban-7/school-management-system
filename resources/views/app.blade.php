@@ -1,12 +1,29 @@
+@php
+    $siteSchool = null;
+    try {
+        if (\Illuminate\Support\Facades\Schema::hasTable('institutions')) {
+            $siteSchool = \App\Models\Institution::query()->orderBy('id')->first();
+        }
+    } catch (\Throwable) {
+        $siteSchool = null;
+    }
+    $siteLogo = $siteSchool?->logoUrl();
+    $siteTitle = $siteSchool?->name_en ?: config('app.name', 'Laravel');
+@endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <link rel="icon" href="/favicon.ico" sizes="any">
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        @if ($siteLogo)
+            <link rel="icon" href="{{ $siteLogo }}">
+            <link rel="apple-touch-icon" href="{{ $siteLogo }}">
+        @else
+            <link rel="icon" href="/favicon.ico" sizes="any">
+            <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+            <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        @endif
 
         <script>
             (function () {
@@ -25,7 +42,7 @@
 
         @vite(['resources/css/app.css', 'resources/js/app.ts', "resources/js/pages/{$page['component']}.vue"])
         <x-inertia::head>
-            <title>{{ config('app.name', 'Laravel') }}</title>
+            <title>{{ $siteTitle }}</title>
         </x-inertia::head>
     </head>
     <body class="font-sans antialiased">

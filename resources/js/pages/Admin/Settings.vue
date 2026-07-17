@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import DashboardLayout from '@/layouts/DashboardLayout.vue';
 import AppIcon from '@/components/AppIcon.vue';
@@ -56,6 +56,13 @@ const values = ref<Record<string, string | number | boolean>>(
                         Control application variables, integrations, and
                         defaults.
                     </p>
+                    <Link
+                        href="/admin/settings/school"
+                        class="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-accent-700 hover:text-accent-800 dark:text-accent-300"
+                    >
+                        <AppIcon name="globe" class="h-4 w-4" />
+                        Edit school profile (public website)
+                    </Link>
                 </div>
                 <button
                     type="button"

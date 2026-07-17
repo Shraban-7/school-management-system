@@ -24,7 +24,12 @@ const props = defineProps<{
         institution_name: string;
         session_name: string;
     };
-    subjects: { id: number; name_en: string }[];
+    subjects: {
+        id: number;
+        name_en: string;
+        full_marks: number;
+        pass_marks: number;
+    }[];
     students: { id: number; name_en: string; roll_number: string }[];
     marks: Record<string, MarkData>;
     sidebar: SidebarConfig;
@@ -33,21 +38,28 @@ const props = defineProps<{
 const sidebarStack = useSidebarStack();
 sidebarStack.set(props.sidebar);
 
-const grades = computed(() => {
-    return [
-        { min: 80, label: 'A+' },
-        { min: 70, label: 'A' },
-        { min: 60, label: 'A-' },
-        { min: 50, label: 'B' },
-        { min: 40, label: 'C' },
-        { min: 33, label: 'D' },
-        { min: 0, label: 'F' },
-    ];
-});
+const gradeBands = [
+    { min: 80, label: 'A+' },
+    { min: 70, label: 'A' },
+    { min: 60, label: 'A-' },
+    { min: 50, label: 'B' },
+    { min: 40, label: 'C' },
+    { min: 33, label: 'D' },
+    { min: 0, label: 'F' },
+];
 
-function computeGrade(total: number): string {
-    for (const g of grades.value) {
-        if (total >= g.min) return g.label;
+const subjectById = computed(() =>
+    Object.fromEntries(props.subjects.map((s) => [s.id, s])),
+);
+
+function computeGrade(total: number, subjectId: number): string {
+    const subject = subjectById.value[subjectId];
+    const full = subject?.full_marks || 100;
+    const pass = subject?.pass_marks ?? 33;
+    if (total < pass) return 'F';
+    const percentage = (total / full) * 100;
+    for (const g of gradeBands) {
+        if (percentage >= g.min) return g.label;
     }
     return 'F';
 }
@@ -77,22 +89,22 @@ function total(k: string): number | null {
     return w + mc + p;
 }
 
-function gradeLabel(k: string): string {
-    const t = total(k);
+function gradeLabel(studentId: number, subjectId: number): string {
+    const t = total(key(studentId, subjectId));
     if (t === null) return '—';
-    return computeGrade(t);
+    return computeGrade(t, subjectId);
 }
 
 const saving = ref(false);
 
 function save() {
     saving.value = true;
-    const records: {
+    const marks: {
         student_id: number;
         subject_id: number;
-        written: number | null;
-        mcq: number | null;
-        practical: number | null;
+        written_marks: number | null;
+        mcq_marks: number | null;
+        practical_marks: number | null;
         is_absent: boolean;
     }[] = [];
     for (const student of props.students) {
@@ -100,12 +112,12 @@ function save() {
             const k = key(student.id, subject.id);
             const m = grid[k];
             if (m) {
-                records.push({
+                marks.push({
                     student_id: student.id,
                     subject_id: subject.id,
-                    written: m.written,
-                    mcq: m.mcq,
-                    practical: m.practical,
+                    written_marks: m.written,
+                    mcq_marks: m.mcq,
+                    practical_marks: m.practical,
                     is_absent: m.is_absent,
                 });
             }
@@ -113,7 +125,7 @@ function save() {
     }
     router.post(
         `/admin/exams/${props.exam.id}/marks`,
-        { records },
+        { marks },
         {
             onFinish: () => {
                 saving.value = false;
@@ -327,7 +339,8 @@ function save() {
                                             :class="[
                                                 'inline-flex rounded-full px-2 py-0.5 text-xs font-medium',
                                                 gradeLabel(
-                                                    key(student.id, subject.id),
+                                                    student.id,
+                                                    subject.id,
                                                 ) === 'F'
                                                     ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300'
                                                     : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300',
@@ -335,7 +348,8 @@ function save() {
                                         >
                                             {{
                                                 gradeLabel(
-                                                    key(student.id, subject.id),
+                                                    student.id,
+                                                    subject.id,
                                                 )
                                             }}
                                         </span>

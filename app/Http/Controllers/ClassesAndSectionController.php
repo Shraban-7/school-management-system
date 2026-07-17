@@ -37,15 +37,8 @@ class ClassesAndSectionController extends Controller
 
     public function create(): Response
     {
-        $institutions = Institution::query()
-            ->select('id', 'name_en')
-            ->orderBy('name_en')
-            ->get()
-            ->map(fn (Institution $i) => ['value' => $i->id, 'label' => $i->name_en]);
-
         return Inertia::render('Admin/ClassesAndSections/Create', [
             'sidebar' => app(DashboardController::class)->adminSidebar(),
-            'institutions' => $institutions,
             'versions' => ['Bangla Medium', 'English Version', 'English Medium'],
             'groupStreams' => ['Science', 'Arts', 'Commerce', 'General'],
         ]);
@@ -54,7 +47,6 @@ class ClassesAndSectionController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'institution_id' => ['required', 'exists:institutions,id'],
             'version' => ['required', 'string', 'max:20'],
             'class_level' => ['required', 'string', 'max:50'],
             'group_stream' => ['nullable', 'string', 'max:50'],
@@ -62,7 +54,9 @@ class ClassesAndSectionController extends Controller
             'room_number' => ['nullable', 'string', 'max:20'],
         ]);
 
-        ClassesAndSection::create($validated);
+        $validated['institution_id'] = Institution::current()->id;
+
+        (new ClassesAndSection)->forceFill($validated)->save();
 
         return to_route('admin.classes-and-sections.index')
             ->with('flash.message', 'Class & section created successfully.');
@@ -70,12 +64,6 @@ class ClassesAndSectionController extends Controller
 
     public function edit(ClassesAndSection $classesAndSection): Response
     {
-        $institutions = Institution::query()
-            ->select('id', 'name_en')
-            ->orderBy('name_en')
-            ->get()
-            ->map(fn (Institution $i) => ['value' => $i->id, 'label' => $i->name_en]);
-
         return Inertia::render('Admin/ClassesAndSections/Edit', [
             'item' => [
                 'id' => $classesAndSection->id,
@@ -87,7 +75,6 @@ class ClassesAndSectionController extends Controller
                 'room_number' => $classesAndSection->room_number,
             ],
             'sidebar' => app(DashboardController::class)->adminSidebar(),
-            'institutions' => $institutions,
             'versions' => ['Bangla Medium', 'English Version', 'English Medium'],
             'groupStreams' => ['Science', 'Arts', 'Commerce', 'General'],
         ]);
@@ -96,7 +83,6 @@ class ClassesAndSectionController extends Controller
     public function update(Request $request, ClassesAndSection $classesAndSection): RedirectResponse
     {
         $validated = $request->validate([
-            'institution_id' => ['required', 'exists:institutions,id'],
             'version' => ['required', 'string', 'max:20'],
             'class_level' => ['required', 'string', 'max:50'],
             'group_stream' => ['nullable', 'string', 'max:50'],
@@ -104,7 +90,9 @@ class ClassesAndSectionController extends Controller
             'room_number' => ['nullable', 'string', 'max:20'],
         ]);
 
-        $classesAndSection->update($validated);
+        $validated['institution_id'] = Institution::current()->id;
+
+        $classesAndSection->forceFill($validated)->save();
 
         return to_route('admin.classes-and-sections.index')
             ->with('flash.message', 'Class & section updated successfully.');

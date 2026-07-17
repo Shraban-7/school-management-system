@@ -14,8 +14,8 @@ class Subject extends Model
     protected function casts(): array
     {
         return [
-            'full_marks' => 'decimal',
-            'pass_marks' => 'decimal',
+            'full_marks' => 'decimal:1',
+            'pass_marks' => 'decimal:1',
             'is_active' => 'boolean',
         ];
     }

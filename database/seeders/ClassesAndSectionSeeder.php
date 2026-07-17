@@ -10,7 +10,7 @@ class ClassesAndSectionSeeder extends Seeder
     public function run(): void
     {
         $classes = [];
-        $institutions = [1, 2, 3];
+        $institutions = [1];
         $levels = ['Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10'];
         $sections = ['A', 'B', 'C'];
 

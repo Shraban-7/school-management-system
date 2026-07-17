@@ -43,14 +43,6 @@ class SubjectController extends Controller
     {
         return Inertia::render('Admin/Subjects/Create', [
             'sidebar' => app(DashboardController::class)->adminSidebar(),
-            'institutions' => Institution::query()
-                ->select('id', 'name_en')
-                ->orderBy('name_en')
-                ->get()
-                ->map(fn (Institution $i) => [
-                    'value' => $i->id,
-                    'label' => $i->name_en,
-                ]),
             'groupStreams' => ['Science', 'Arts', 'Commerce', 'General', 'None'],
             'subjectTypes' => ['compulsory', 'optional'],
             'classLevels' => ['Play', 'Nursery', 'KG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
@@ -60,7 +52,6 @@ class SubjectController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'institution_id' => ['required', 'exists:institutions,id'],
             'name_en' => ['required', 'string', 'max:255'],
             'name_bn' => ['required', 'string', 'max:255'],
             'code' => ['nullable', 'string', 'max:20'],
@@ -73,6 +64,7 @@ class SubjectController extends Controller
         ]);
 
         $validated['pass_marks'] = min($validated['pass_marks'], $validated['full_marks']);
+        $validated['institution_id'] = Institution::current()->id;
 
         $request->validate([
             'name_en' => [
@@ -82,7 +74,7 @@ class SubjectController extends Controller
             ],
         ]);
 
-        Subject::create($validated);
+        (new Subject)->forceFill($validated)->save();
 
         return to_route('admin.subjects.index')
             ->with('flash.message', 'Subject created successfully.');
@@ -105,14 +97,6 @@ class SubjectController extends Controller
                 'is_active' => (bool) $subject->is_active,
             ],
             'sidebar' => app(DashboardController::class)->adminSidebar(),
-            'institutions' => Institution::query()
-                ->select('id', 'name_en')
-                ->orderBy('name_en')
-                ->get()
-                ->map(fn (Institution $i) => [
-                    'value' => $i->id,
-                    'label' => $i->name_en,
-                ]),
             'groupStreams' => ['Science', 'Arts', 'Commerce', 'General', 'None'],
             'subjectTypes' => ['compulsory', 'optional'],
             'classLevels' => ['Play', 'Nursery', 'KG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
@@ -122,7 +106,6 @@ class SubjectController extends Controller
     public function update(Request $request, Subject $subject): RedirectResponse
     {
         $validated = $request->validate([
-            'institution_id' => ['required', 'exists:institutions,id'],
             'name_en' => ['required', 'string', 'max:255'],
             'name_bn' => ['required', 'string', 'max:255'],
             'code' => ['nullable', 'string', 'max:20'],
@@ -135,6 +118,7 @@ class SubjectController extends Controller
         ]);
 
         $validated['pass_marks'] = min($validated['pass_marks'], $validated['full_marks']);
+        $validated['institution_id'] = Institution::current()->id;
 
         $request->validate([
             'name_en' => [
@@ -145,7 +129,7 @@ class SubjectController extends Controller
             ],
         ]);
 
-        $subject->update($validated);
+        $subject->forceFill($validated)->save();
 
         return to_route('admin.subjects.index')
             ->with('flash.message', 'Subject updated successfully.');

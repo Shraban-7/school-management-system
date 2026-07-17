@@ -30,6 +30,6 @@ class AttendanceRecord extends Model
 
     public function takenBy(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'taken_by')->nullable();
+        return $this->belongsTo(User::class, 'taken_by');
     }
 }

@@ -14,11 +14,11 @@ class Mark extends Model
     protected function casts(): array
     {
         return [
-            'written_marks' => 'decimal',
-            'mcq_marks' => 'decimal',
-            'practical_marks' => 'decimal',
-            'total_marks' => 'decimal',
-            'grade_point' => 'decimal',
+            'written_marks' => 'decimal:1',
+            'mcq_marks' => 'decimal:1',
+            'practical_marks' => 'decimal:1',
+            'total_marks' => 'decimal:1',
+            'grade_point' => 'decimal:2',
             'is_absent' => 'boolean',
         ];
     }

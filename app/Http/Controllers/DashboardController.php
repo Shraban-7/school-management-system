@@ -3,7 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Enums\UserRole;
+use App\Enums\PostType;
+use App\Models\AttendanceRecord;
+use App\Models\Exam;
+use App\Models\Post;
+use App\Models\Student;
 use App\Models\User;
+use App\Services\FeeService;
+use App\Services\ResultService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -22,6 +29,7 @@ class DashboardController extends Controller
             UserRole::TEACHER => $this->teacherData($user),
             UserRole::STUDENT => $this->studentData($user),
             UserRole::STAFF => $this->staffData($user),
+            UserRole::PARENT => $this->parentData($user),
         };
 
         return Inertia::render('Dashboard', $data);
@@ -159,7 +167,7 @@ class DashboardController extends Controller
                 ['label' => 'Students', 'value' => '—', 'icon' => 'graduation-cap', 'tone' => 'accent'],
                 ['label' => 'Teachers', 'value' => '—', 'icon' => 'briefcase', 'tone' => 'success'],
                 ['label' => 'Attendance today', 'value' => '—', 'icon' => 'check', 'tone' => 'warning'],
-                ['label' => 'Open notices', 'value' => 0, 'icon' => 'megaphone'],
+                ['label' => 'Open notices', 'value' => Post::query()->ofType(PostType::NOTICE)->published()->count(), 'icon' => 'megaphone', 'href' => '/notices'],
             ],
             'cards' => [
                 [
@@ -244,7 +252,7 @@ class DashboardController extends Controller
             'stats' => [
                 ['label' => 'Open tasks', 'value' => '—', 'icon' => 'check', 'tone' => 'warning'],
                 ['label' => 'Completed today', 'value' => '—', 'icon' => 'sparkles', 'tone' => 'success'],
-                ['label' => 'Active notices', 'value' => '—', 'icon' => 'megaphone', 'tone' => 'accent'],
+                ['label' => 'Active notices', 'value' => Post::query()->ofType(PostType::NOTICE)->published()->count(), 'icon' => 'megaphone', 'tone' => 'accent', 'href' => '/notices'],
                 ['label' => 'Pending requests', 'value' => '—', 'icon' => 'clock'],
             ],
             'cards' => [
@@ -261,47 +269,163 @@ class DashboardController extends Controller
     }
 
     /**
+     * @return array<string, mixed>
+     */
+    protected function parentData(User $user): array
+    {
+        $children = $user->children()->with(['class', 'institution'])->get();
+        $childIds = $children->pluck('id');
+
+        $attendance = AttendanceRecord::query()
+            ->whereIn('student_id', $childIds)
+            ->get(['status']);
+        $attendanceAvg = $attendance->isNotEmpty()
+            ? round($attendance->where('status', 'present')->count() / $attendance->count() * 100).'%'
+            : '—';
+
+        $resultService = app(ResultService::class);
+        $resultItems = $children->map(function (Student $child) use ($resultService) {
+            $exam = Exam::query()
+                ->where('institution_id', $child->institution_id)
+                ->where('is_published', true)
+                ->orderByDesc('start_date')
+                ->first();
+
+            if ($exam === null) {
+                return ['label' => $child->name_en, 'value' => 'No published exam'];
+            }
+
+            $result = $resultService->studentResult($child, $exam);
+
+            $value = match (true) {
+                ! $result['has_marks'] => 'No marks yet',
+                $result['passed'] === true => 'GPA '.number_format((float) $result['gpa'], 2).' ('.$result['grade'].')',
+                default => 'Failed',
+            };
+
+            return ['label' => $child->name_en.' — '.$exam->name_en, 'value' => $value];
+        });
+
+        $feeService = app(FeeService::class);
+        $totalFeesDue = $children->sum(fn (Student $c) => $feeService->studentDueSummary($c)['total_due']);
+        $feesDueLabel = $children->isEmpty()
+            ? '—'
+            : '৳'.number_format($totalFeesDue, 0);
+
+        return [
+            'role' => 'parent',
+            'title' => 'Your children',
+            'subtitle' => 'Track attendance, results, and fee status for your children.',
+            'stats' => [
+                ['label' => 'Children', 'value' => $children->count(), 'icon' => 'users', 'tone' => 'accent'],
+                ['label' => 'Attendance (avg)', 'value' => $attendanceAvg, 'icon' => 'check', 'tone' => 'success'],
+                ['label' => 'Fees due', 'value' => $feesDueLabel, 'icon' => 'wallet', 'tone' => 'warning', 'href' => '/parent/fees'],
+                ['label' => 'Published notices', 'value' => Post::query()->ofType(PostType::NOTICE)->published()->count(), 'icon' => 'bell', 'href' => '/notices'],
+            ],
+            'cards' => [
+                [
+                    'title' => 'Your children',
+                    'items' => $children->isEmpty()
+                        ? [['label' => 'No children linked to this account yet', 'value' => '—']]
+                        : $children->map(fn (Student $c) => [
+                            'label' => $c->name_en,
+                            'value' => $c->class
+                                ? trim($c->class->class_level.' '.$c->class->section_name)
+                                : '—',
+                        ])->all(),
+                ],
+                [
+                    'title' => 'Latest results',
+                    'items' => $resultItems->isEmpty()
+                        ? [['label' => 'No results available yet', 'value' => '—']]
+                        : $resultItems->all(),
+                ],
+            ],
+            'sidebar' => $this->roleSidebar('parent'),
+            'notificationCount' => 0,
+        ];
+    }
+
+    /**
+     * Every role sees the full menu; unauthorized pages show a
+     * "not authorized" modal instead of hiding the links (owner request).
+     *
      * @return array<int, array<string, mixed>>
      */
-    public function adminSidebar(): array
+    public function fullSidebar(string $role): array
     {
+        $groups = [
+            [
+                'title' => __('ui.sidebar.overview'),
+                'items' => [
+                    ['label' => __('ui.sidebar.dashboard'), 'href' => "/{$role}/dashboard", 'match' => "{$role}/dashboard", 'icon' => 'home'],
+                ],
+            ],
+        ];
+
+        if ($role === 'student') {
+            $groups[] = [
+                'title' => __('ui.sidebar.my_academics'),
+                'items' => [
+                    ['label' => __('ui.sidebar.my_results'), 'href' => '/student/results', 'match' => 'student/results', 'icon' => 'sparkles'],
+                ],
+            ];
+        }
+
+        if ($role === 'parent') {
+            $groups[] = [
+                'title' => __('ui.sidebar.children'),
+                'items' => [
+                    ['label' => __('ui.sidebar.results'), 'href' => '/parent/results', 'match' => 'parent/results', 'icon' => 'sparkles'],
+                    ['label' => __('ui.sidebar.fees'), 'href' => '/parent/fees', 'match' => 'parent/fees', 'icon' => 'wallet'],
+                ],
+            ];
+        }
+
         return [
+            ...$groups,
             [
-                'title' => 'Overview',
+                'title' => __('ui.sidebar.school'),
                 'items' => [
-                    ['label' => 'Dashboard', 'href' => '/admin/dashboard', 'match' => 'admin/dashboard', 'icon' => 'home'],
+                    ['label' => __('ui.sidebar.school_profile'), 'href' => '/admin/settings/school', 'match' => 'admin/settings/school', 'icon' => 'globe'],
+                    ['label' => __('ui.sidebar.academic_sessions'), 'href' => '/admin/academic-sessions', 'match' => 'admin/academic-sessions', 'icon' => 'calendar'],
+                    ['label' => __('ui.sidebar.classes_sections'), 'href' => '/admin/classes-and-sections', 'match' => 'admin/classes-and-sections', 'icon' => 'grid'],
                 ],
             ],
             [
-                'title' => 'Institution',
+                'title' => __('ui.sidebar.people'),
                 'items' => [
-                    ['label' => 'Institutions', 'href' => '/admin/institutions', 'match' => 'admin/institutions', 'icon' => 'globe'],
-                    ['label' => 'Academic sessions', 'href' => '/admin/academic-sessions', 'match' => 'admin/academic-sessions', 'icon' => 'calendar'],
-                    ['label' => 'Classes & sections', 'href' => '/admin/classes-and-sections', 'match' => 'admin/classes-and-sections', 'icon' => 'grid'],
+                    ['label' => __('ui.sidebar.students'), 'href' => '/admin/students', 'match' => 'admin/students', 'icon' => 'graduation-cap'],
+                    ['label' => __('ui.sidebar.teachers'), 'href' => '/admin/teachers', 'match' => 'admin/teachers', 'icon' => 'briefcase'],
+                    ['label' => __('ui.sidebar.users'), 'href' => '/admin/users', 'match' => 'admin/users', 'icon' => 'users'],
                 ],
             ],
             [
-                'title' => 'People',
+                'title' => __('ui.sidebar.academic'),
                 'items' => [
-                    ['label' => 'Students', 'href' => '/admin/students', 'match' => 'admin/students', 'icon' => 'graduation-cap'],
-                    ['label' => 'Teachers', 'href' => '/admin/teachers', 'match' => 'admin/teachers', 'icon' => 'briefcase'],
-                    ['label' => 'Users', 'href' => '/admin/users', 'match' => 'admin/users', 'icon' => 'users'],
+                    ['label' => __('ui.sidebar.subjects'), 'href' => '/admin/subjects', 'match' => 'admin/subjects', 'icon' => 'book-open'],
+                    ['label' => __('ui.sidebar.exams'), 'href' => '/admin/exams', 'match' => 'admin/exams', 'icon' => 'sparkles'],
+                    ['label' => __('ui.sidebar.results'), 'href' => '/admin/results', 'match' => 'admin/results', 'icon' => 'graduation-cap'],
+                    ['label' => __('ui.sidebar.fee_structures'), 'href' => '/admin/fees/structures', 'match' => 'admin/fees/structures', 'icon' => 'wallet'],
+                    ['label' => __('ui.sidebar.fee_invoices'), 'href' => '/admin/fees/invoices', 'match' => 'admin/fees/invoices', 'icon' => 'list'],
+                    ['label' => __('ui.sidebar.attendance'), 'href' => '/admin/attendance', 'match' => 'admin/attendance', 'icon' => 'check'],
                 ],
             ],
             [
-                'title' => 'Academic',
+                'title' => __('ui.sidebar.website'),
                 'items' => [
-                    ['label' => 'Subjects', 'href' => '/admin/subjects', 'match' => 'admin/subjects', 'icon' => 'book-open'],
-                    ['label' => 'Exams', 'href' => '/admin/exams', 'match' => 'admin/exams', 'icon' => 'sparkles'],
-                    ['label' => 'Attendance', 'href' => '/admin/attendance', 'match' => 'admin/attendance', 'icon' => 'check'],
+                    ['label' => __('ui.sidebar.notices'), 'href' => '/admin/posts/notice', 'match' => 'admin/posts/notice', 'icon' => 'megaphone'],
+                    ['label' => __('ui.sidebar.blog'), 'href' => '/admin/posts/blog', 'match' => 'admin/posts/blog', 'icon' => 'book-open'],
+                    ['label' => __('ui.sidebar.activities'), 'href' => '/admin/posts/activity', 'match' => 'admin/posts/activity', 'icon' => 'sparkles'],
+                    ['label' => __('ui.sidebar.syllabus'), 'href' => '/admin/syllabus', 'match' => 'admin/syllabus', 'icon' => 'list'],
                 ],
             ],
             [
-                'title' => 'System',
+                'title' => __('ui.sidebar.system'),
                 'items' => [
-                    ['label' => 'Activity log', 'href' => '/admin/activity', 'match' => 'admin/activity', 'icon' => 'activity'],
-                    ['label' => 'Notifications', 'href' => '/admin/notifications', 'match' => 'admin/notifications', 'icon' => 'bell', 'badge' => 2],
-                    ['label' => 'Settings', 'href' => '/admin/settings', 'match' => 'admin/settings', 'icon' => 'settings'],
+                    ['label' => __('ui.sidebar.activity_log'), 'href' => '/admin/activity', 'match' => 'admin/activity', 'icon' => 'activity'],
+                    ['label' => __('ui.sidebar.notifications'), 'href' => '/admin/notifications', 'match' => 'admin/notifications', 'icon' => 'bell', 'badge' => 2],
+                    ['label' => __('ui.sidebar.settings'), 'href' => '/admin/settings', 'match' => 'admin/settings', 'icon' => 'settings'],
                 ],
             ],
         ];
@@ -310,15 +434,32 @@ class DashboardController extends Controller
     /**
      * @return array<int, array<string, mixed>>
      */
+    public function adminSidebar(): array
+    {
+        return $this->fullSidebar('admin');
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     protected function roleSidebar(string $role): array
     {
-        return [
-            [
-                'title' => 'Overview',
-                'items' => [
-                    ['label' => 'Dashboard', 'href' => "/{$role}/dashboard", 'match' => "{$role}/dashboard", 'icon' => 'home'],
-                ],
-            ],
-        ];
+        return $this->fullSidebar($role);
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function studentSidebar(): array
+    {
+        return $this->fullSidebar('student');
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function parentSidebar(): array
+    {
+        return $this->fullSidebar('parent');
     }
 }

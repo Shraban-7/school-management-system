@@ -26,7 +26,7 @@ class MarkSeeder extends Seeder
                     $mcq = round(rand(10, 28) + rand(0, 99) / 100, 1);
                     $practical = round(rand(5, 18) + rand(0, 99) / 100, 1);
                     $total = $written + $mcq + $practical;
-                    $result = GradeScale::calculate($total, 100);
+                    $result = GradeScale::calculate($total, (float) $subject->full_marks, (float) $subject->pass_marks);
                     $isAbsent = fake()->boolean(10);
 
                     Mark::create([
