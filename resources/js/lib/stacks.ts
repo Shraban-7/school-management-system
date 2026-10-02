@@ -1,5 +1,3 @@
-import { inject, reactive, type App, type InjectionKey } from 'vue';
-
 export type StackItem = object | string | number | boolean | null;
 
 export type Stacks = {
@@ -9,58 +7,61 @@ export type Stacks = {
     clear(name: string): void;
     reset(): void;
     get<T extends StackItem>(name: string): T[];
+    subscribe(listener: () => void): () => void;
 };
 
-export const STACKS_KEY: InjectionKey<Stacks> = Symbol('stacks');
+const store: Record<string, StackItem[]> = {};
+const listeners = new Set<() => void>();
 
-const state = reactive<Record<string, StackItem[]>>({});
+function notify() {
+    listeners.forEach((listener) => listener());
+}
 
 function readArray(name: string): StackItem[] {
-    if (!state[name]) {
-        state[name] = [];
+    if (!store[name]) {
+        store[name] = [];
     }
-    return state[name];
+    return store[name];
 }
 
-function createStacks(): Stacks {
-    return {
-        push<T extends StackItem>(name: string, item: T): void {
-            readArray(name).push(item);
-        },
-        prepend<T extends StackItem>(name: string, item: T): void {
-            readArray(name).unshift(item);
-        },
-        set<T extends StackItem>(name: string, items: T[]): void {
-            state[name] = items.map((item) => item);
-        },
-        clear(name: string): void {
-            state[name] = [];
-        },
-        reset(): void {
-            for (const key of Object.keys(state)) {
-                state[key] = [];
-            }
-        },
-        get<T extends StackItem>(name: string): T[] {
-            return (state[name] ?? []) as T[];
-        },
-    };
-}
-
-export const StacksPlugin = {
-    install(app: App): void {
-        const stacks = createStacks();
-        app.provide(STACKS_KEY, stacks);
-        app.config.globalProperties.$stacks = stacks;
+export const stacks: Stacks = {
+    push<T extends StackItem>(name: string, item: T): void {
+        readArray(name).push(item);
+        notify();
+    },
+    prepend<T extends StackItem>(name: string, item: T): void {
+        readArray(name).unshift(item);
+        notify();
+    },
+    set<T extends StackItem>(name: string, items: T[]): void {
+        store[name] = items.map((item) => item);
+        notify();
+    },
+    clear(name: string): void {
+        store[name] = [];
+        notify();
+    },
+    reset(): void {
+        for (const key of Object.keys(store)) {
+            store[key] = [];
+        }
+        notify();
+    },
+    get<T extends StackItem>(name: string): T[] {
+        return (store[name] ?? []) as T[];
+    },
+    subscribe(listener: () => void): () => void {
+        listeners.add(listener);
+        return () => {
+            listeners.delete(listener);
+        };
     },
 };
 
 export function useStacks(): Stacks {
-    return inject(STACKS_KEY, createStacks());
+    return stacks;
 }
 
 export function resetStacks(): void {
-    for (const key of Object.keys(state)) {
-        state[key] = [];
-    }
+    stacks.reset();
 }

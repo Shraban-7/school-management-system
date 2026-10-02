@@ -1,5 +1,5 @@
-import { computed } from 'vue';
-import { router, usePage } from '@inertiajs/vue3';
+import { router, usePage } from '@inertiajs/react';
+import { useCallback } from 'react';
 
 type TranslationTree = Record<string, unknown>;
 
@@ -48,50 +48,49 @@ export function bilingual(
 
 export function useI18n() {
     const page = usePage();
+    const props = page.props as Record<string, unknown>;
+    const locale = (props.locale as string) ?? 'en';
+    const translations = (props.translations as TranslationTree) ?? {};
+    const isBangla = locale === 'bn';
 
-    const locale = computed(
-        () =>
-            ((page.props as Record<string, unknown>).locale as string) ?? 'en',
+    const t = useCallback(
+        (
+            key: string,
+            replacements: Record<string, string | number> = {},
+        ): string => {
+            const value = resolveKey(translations, key) ?? key;
+            return applyReplacements(value, replacements);
+        },
+        [translations],
     );
-    const translations = computed(
-        () =>
-            ((page.props as Record<string, unknown>)
-                .translations as TranslationTree) ?? {},
+
+    const bi = useCallback(
+        (en: string | null | undefined, bn: string | null | undefined): string => {
+            if (isBangla) {
+                return (bn && bn.trim() !== '' ? bn : en) ?? '';
+            }
+            return (en && en.trim() !== '' ? en : bn) ?? '';
+        },
+        [isBangla],
     );
-    const isBangla = computed(() => locale.value === 'bn');
 
-    function t(
-        key: string,
-        replacements: Record<string, string | number> = {},
-    ): string {
-        const value = resolveKey(translations.value, key) ?? key;
-        return applyReplacements(value, replacements);
-    }
+    const setLocale = useCallback(
+        (next: 'en' | 'bn'): void => {
+            if (next === locale) {
+                return;
+            }
 
-    function bi(
-        en: string | null | undefined,
-        bn: string | null | undefined,
-    ): string {
-        if (isBangla.value) {
-            return (bn && bn.trim() !== '' ? bn : en) ?? '';
-        }
-        return (en && en.trim() !== '' ? en : bn) ?? '';
-    }
-
-    function setLocale(next: 'en' | 'bn'): void {
-        if (next === locale.value) {
-            return;
-        }
-
-        router.post(
-            '/locale',
-            { locale: next },
-            {
-                preserveScroll: true,
-                preserveState: false,
-            },
-        );
-    }
+            router.post(
+                '/locale',
+                { locale: next },
+                {
+                    preserveScroll: true,
+                    preserveState: false,
+                },
+            );
+        },
+        [locale],
+    );
 
     return {
         locale,

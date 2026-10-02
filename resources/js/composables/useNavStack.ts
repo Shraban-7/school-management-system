@@ -1,4 +1,4 @@
-import { onMounted } from 'vue';
+import { useEffect } from 'react';
 import { useStacks, type StackItem } from '@/lib/stacks';
 import type { NavLink, NavAction } from '@/types/nav';
 import type { SidebarConfig } from '@/types/sidebar';
@@ -120,7 +120,7 @@ export function useDashboardHeaderStack(
 
 export function pushStacksOnMount(name: string, items: StackItem[]): void {
     const stacks = useStacks();
-    onMounted(() => {
+    useEffect(() => {
         stacks.set(name, items);
-    });
+    }, [name, items, stacks]);
 }

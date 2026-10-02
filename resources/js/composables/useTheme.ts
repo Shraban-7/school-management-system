@@ -1,4 +1,4 @@
-import { onMounted, ref, watch } from 'vue';
+import { useCallback, useEffect, useState } from 'react';
 
 export type Theme = 'light' | 'dark';
 
@@ -24,42 +24,38 @@ function applyTheme(theme: Theme): void {
     document.documentElement.classList.toggle('dark', theme === 'dark');
 }
 
-const theme = ref<Theme>(readInitialTheme());
+export function useTheme() {
+    const [theme, setThemeState] = useState<Theme>(readInitialTheme);
 
-if (typeof window !== 'undefined') {
-    applyTheme(theme.value);
+    useEffect(() => {
+        applyTheme(theme);
+        if (typeof window !== 'undefined') {
+            window.localStorage.setItem(STORAGE_KEY, theme);
+        }
+    }, [theme]);
 
-    window
-        .matchMedia('(prefers-color-scheme: dark)')
-        .addEventListener('change', (event) => {
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const media = window.matchMedia('(prefers-color-scheme: dark)');
+        const listener = (event: MediaQueryListEvent) => {
             if (window.localStorage.getItem(STORAGE_KEY)) {
                 return;
             }
             const next: Theme = event.matches ? 'dark' : 'light';
-            theme.value = next;
+            setThemeState(next);
             applyTheme(next);
-        });
-}
+        };
+        media.addEventListener('change', listener);
+        return () => media.removeEventListener('change', listener);
+    }, []);
 
-watch(theme, (value) => {
-    applyTheme(value);
-    if (typeof window !== 'undefined') {
-        window.localStorage.setItem(STORAGE_KEY, value);
-    }
-});
+    const setTheme = useCallback((next: Theme): void => {
+        setThemeState(next);
+    }, []);
 
-export function useTheme() {
-    onMounted(() => {
-        applyTheme(theme.value);
-    });
-
-    function setTheme(next: Theme): void {
-        theme.value = next;
-    }
-
-    function toggle(): void {
-        theme.value = theme.value === 'dark' ? 'light' : 'dark';
-    }
+    const toggle = useCallback((): void => {
+        setThemeState((prev) => (prev === 'dark' ? 'light' : 'dark'));
+    }, []);
 
     return { theme, setTheme, toggle };
 }
