@@ -3,6 +3,7 @@ import { Head, router, usePage, Link } from '@inertiajs/react';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import AppIcon from '@/components/AppIcon';
 import { useSidebarStack } from '@/composables/useNavStack';
+import { useI18n } from '@/composables/useI18n';
 import type { SidebarConfig } from '@/types/sidebar';
 
 interface Template {
@@ -93,6 +94,7 @@ export default function CommunicationIndex({
     preselectedClassId = null,
     preselectedDate,
 }: Props) {
+    const { t, bi, formatNumber, formatDate, locale } = useI18n();
     const sidebarStack = useSidebarStack();
     useEffect(() => {
         if (sidebar) {
@@ -202,7 +204,7 @@ export default function CommunicationIndex({
     }
 
     function deleteTemplate(id: number) {
-        if (!confirm('Are you sure you want to delete this custom template?')) {
+        if (!confirm(t('common.confirm_delete'))) {
             return;
         }
         router.delete(`/admin/communication/templates/${id}`);
@@ -236,7 +238,7 @@ export default function CommunicationIndex({
 
     return (
         <DashboardLayout>
-            <Head title="SMS & Email Broadcast Hub" />
+            <Head title={t('sidebar.sms_email')} />
 
             <div className="space-y-6">
                 {/* Header */}
@@ -247,18 +249,18 @@ export default function CommunicationIndex({
                                 href="/admin/settings"
                                 className="text-xs font-semibold tracking-widest text-slate-500 uppercase hover:text-accent-600 dark:text-slate-400"
                             >
-                                Settings
+                                {t('sidebar.settings')}
                             </Link>
                             <span className="text-xs text-slate-400">/</span>
                             <span className="text-xs font-semibold tracking-widest text-accent-600 uppercase dark:text-accent-400">
-                                Communication
+                                {t('sidebar.communication')}
                             </span>
                         </div>
                         <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-50">
-                            SMS &amp; Email Broadcast Hub
+                            {t('sidebar.sms_email')}
                         </h1>
                         <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                            Send instant SMS notifications and branded custom template emails to parents, students, and staff.
+                            {t('communication.subtitle')}
                         </p>
                     </div>
 
@@ -269,7 +271,7 @@ export default function CommunicationIndex({
                             className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
                         >
                             <AppIcon name="cog" className="h-4 w-4" />
-                            Gateway Credentials
+                            {t('communication.gateway_credentials')}
                         </button>
                     </div>
                 </header>
@@ -286,44 +288,44 @@ export default function CommunicationIndex({
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                     <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                         <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-                            <span>Total SMS Sent</span>
+                            <span>{t('communication.total_sms_sent')}</span>
                             <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
                         </div>
                         <div className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
-                            {stats.total_sms.toLocaleString()}
+                            {formatNumber(stats.total_sms)}
                         </div>
                         <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                            Gateway: {settings.sms_provider.toUpperCase()}
+                            {t('communication.gateway')}: {settings.sms_provider.toUpperCase()}
                         </span>
                     </div>
 
                     <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                         <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-                            <span>Total Custom Emails</span>
+                            <span>{t('communication.total_email_sent')}</span>
                             <span className="inline-block h-2 w-2 rounded-full bg-sky-500" />
                         </div>
                         <div className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
-                            {stats.total_email.toLocaleString()}
+                            {formatNumber(stats.total_email)}
                         </div>
                         <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                            Mailer: {settings.mail_mailer.toUpperCase()}
+                            {t('communication.mailer')}: {settings.mail_mailer.toUpperCase()}
                         </span>
                     </div>
 
                     <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                         <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-                            <span>Today's Dispatches</span>
+                            <span>{t('communication.today_dispatches')}</span>
                             <AppIcon name="clock" className="h-3.5 w-3.5 text-accent-500" />
                         </div>
                         <div className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
-                            {stats.today_total.toLocaleString()}
+                            {formatNumber(stats.today_total)}
                         </div>
-                        <span className="text-[11px] text-slate-500 dark:text-slate-400">Activity today</span>
+                        <span className="text-[11px] text-slate-500 dark:text-slate-400">{t('communication.activity_today')}</span>
                     </div>
 
                     <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                         <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-                            <span>System Gateways</span>
+                            <span>{t('communication.system_gateways')}</span>
                             <AppIcon name="server" className="h-3.5 w-3.5 text-emerald-500" />
                         </div>
                         <div className="mt-2 flex items-center gap-2">
@@ -334,7 +336,7 @@ export default function CommunicationIndex({
                                         : 'bg-slate-100 text-slate-500'
                                 }`}
                             >
-                                SMS {stats.sms_enabled ? 'ON' : 'OFF'}
+                                {t('communication.sms')} {stats.sms_enabled ? 'ON' : 'OFF'}
                             </span>
                             <span
                                 className={`rounded px-1.5 py-0.5 text-xs font-semibold ${
@@ -343,11 +345,11 @@ export default function CommunicationIndex({
                                         : 'bg-slate-100 text-slate-500'
                                 }`}
                             >
-                                Email {stats.email_enabled ? 'ON' : 'OFF'}
+                                {t('communication.email')} {stats.email_enabled ? 'ON' : 'OFF'}
                             </span>
                         </div>
                         <span className="mt-1 block text-[11px] text-slate-500 dark:text-slate-400">
-                            {stats.sms_enabled && stats.email_enabled ? 'Both active' : 'Check configuration'}
+                            {stats.sms_enabled && stats.email_enabled ? t('communication.both_active') : t('communication.check_config')}
                         </span>
                     </div>
                 </div>
@@ -364,7 +366,7 @@ export default function CommunicationIndex({
                         }`}
                     >
                         <AppIcon name="megaphone" className="h-4 w-4" />
-                        Compose &amp; Broadcast
+                        {t('communication.compose_broadcast')}
                     </button>
                     <button
                         type="button"
@@ -376,7 +378,7 @@ export default function CommunicationIndex({
                         }`}
                     >
                         <AppIcon name="list" className="h-4 w-4" />
-                        Message &amp; Email Templates ({templates.length})
+                        {t('communication.templates_tab')} ({formatNumber(templates.length)})
                     </button>
                     <button
                         type="button"
@@ -388,7 +390,7 @@ export default function CommunicationIndex({
                         }`}
                     >
                         <AppIcon name="cog" className="h-4 w-4" />
-                        SMS &amp; Email Gateways
+                        {t('communication.gateways_tab')}
                     </button>
                     <button
                         type="button"
@@ -400,7 +402,7 @@ export default function CommunicationIndex({
                         }`}
                     >
                         <AppIcon name="activity" className="h-4 w-4" />
-                        Delivery History ({logs.length})
+                        {t('communication.logs_tab')} ({formatNumber(logs.length)})
                     </button>
                 </div>
 
@@ -412,12 +414,12 @@ export default function CommunicationIndex({
                             <div className="space-y-6 lg:col-span-2">
                                 <section className={sectionClass}>
                                     <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
-                                        1. Channel &amp; Recipients
+                                        {t('communication.step_channel_recipients')}
                                     </h2>
 
                                     {/* Channel selection */}
                                     <div className="mt-4">
-                                        <label className={labelClass}>Transmission Channel</label>
+                                        <label className={labelClass}>{t('communication.transmission_channel')}</label>
                                         <div className="mt-2 grid grid-cols-3 gap-3">
                                             <button
                                                 type="button"
@@ -429,7 +431,7 @@ export default function CommunicationIndex({
                                                 }`}
                                             >
                                                 <AppIcon name="phone" className="h-4 w-4" />
-                                                SMS Only
+                                                {t('communication.sms_only')}
                                             </button>
                                             <button
                                                 type="button"
@@ -441,7 +443,7 @@ export default function CommunicationIndex({
                                                 }`}
                                             >
                                                 <AppIcon name="mail" className="h-4 w-4" />
-                                                Email Only
+                                                {t('communication.email_only')}
                                             </button>
                                             <button
                                                 type="button"
@@ -453,21 +455,21 @@ export default function CommunicationIndex({
                                                 }`}
                                             >
                                                 <AppIcon name="megaphone" className="h-4 w-4" />
-                                                SMS + Email
+                                                {t('communication.both')}
                                             </button>
                                         </div>
                                     </div>
 
                                     {/* Audience selection */}
                                     <div className="mt-5">
-                                        <label className={labelClass}>Target Audience</label>
+                                        <label className={labelClass}>{t('communication.target_audience')}</label>
                                         <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
                                             {[
-                                                { id: 'all_guardians', label: 'All Guardians', icon: 'users' },
-                                                { id: 'class', label: 'Specific Class', icon: 'graduation-cap' },
-                                                { id: 'absent_today', label: "Today's Absentees", icon: 'bell' },
-                                                { id: 'teachers', label: 'Teachers & Staff', icon: 'briefcase' },
-                                                { id: 'custom', label: 'Custom Recipient', icon: 'user' },
+                                                { id: 'all_guardians', label: t('communication.all_guardians'), icon: 'users' },
+                                                { id: 'class', label: t('communication.specific_class'), icon: 'graduation-cap' },
+                                                { id: 'absent_today', label: t('communication.absent_today'), icon: 'bell' },
+                                                { id: 'teachers', label: t('communication.teachers_staff'), icon: 'briefcase' },
+                                                { id: 'custom', label: t('communication.custom_recipient'), icon: 'user' },
                                             ].map((item) => (
                                                 <button
                                                     key={item.id}
@@ -490,7 +492,7 @@ export default function CommunicationIndex({
                                     {audience === 'class' && (
                                         <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950">
                                             <label htmlFor="classId" className={labelClass}>
-                                                Select Target Class &amp; Section <span className="text-rose-500">*</span>
+                                                {t('communication.select_class')} <span className="text-rose-500">*</span>
                                             </label>
                                             <select
                                                 id="classId"
@@ -499,7 +501,7 @@ export default function CommunicationIndex({
                                                 required
                                                 className={inputClass}
                                             >
-                                                <option value="">-- Choose a class --</option>
+                                                <option value="">{t('communication.choose_class')}</option>
                                                 {classes.map((c) => (
                                                     <option key={c.id} value={c.id}>
                                                         {c.class_level} - {c.section_name} ({c.version})
@@ -513,7 +515,7 @@ export default function CommunicationIndex({
                                         <div className="mt-4 grid gap-4 rounded-lg border border-amber-200 bg-amber-50/70 p-4 sm:grid-cols-2 dark:border-amber-900/60 dark:bg-amber-950/30">
                                             <div>
                                                 <label htmlFor="absent_date" className={labelClass}>
-                                                    Attendance Date
+                                                    {t('attendance.date')}
                                                 </label>
                                                 <input
                                                     id="absent_date"
@@ -525,7 +527,7 @@ export default function CommunicationIndex({
                                             </div>
                                             <div>
                                                 <label htmlFor="absent_class" className={labelClass}>
-                                                    Filter by Class (Optional)
+                                                    {t('communication.filter_class')}
                                                 </label>
                                                 <select
                                                     id="absent_class"
@@ -533,7 +535,7 @@ export default function CommunicationIndex({
                                                     onChange={(e) => setClassId(e.target.value)}
                                                     className={inputClass}
                                                 >
-                                                    <option value="">All Classes</option>
+                                                    <option value="">{t('common.all_classes')}</option>
                                                     {classes.map((c) => (
                                                         <option key={c.id} value={c.id}>
                                                             {c.class_level} - {c.section_name}
@@ -542,7 +544,7 @@ export default function CommunicationIndex({
                                                 </select>
                                             </div>
                                             <p className="text-xs text-amber-800 sm:col-span-2 dark:text-amber-200">
-                                                Only guardians of students with status marked <strong>Absent</strong> on this date will be dispatched.
+                                                {t('communication.absentees_notice')}
                                             </p>
                                         </div>
                                     )}
@@ -550,7 +552,7 @@ export default function CommunicationIndex({
                                     {audience === 'custom' && (
                                         <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950">
                                             <label htmlFor="custom_recipient" className={labelClass}>
-                                                Phone Number or Email Address <span className="text-rose-500">*</span>
+                                                {t('communication.phone_or_email')} <span className="text-rose-500">*</span>
                                             </label>
                                             <input
                                                 id="custom_recipient"
@@ -569,18 +571,18 @@ export default function CommunicationIndex({
                                 <section className={sectionClass}>
                                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                                         <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
-                                            2. Compose Message
+                                            {t('communication.step_compose')}
                                         </h2>
 
                                         {/* Template selector */}
                                         <div className="flex items-center gap-2">
-                                            <span className="text-xs text-slate-500">Template:</span>
+                                            <span className="text-xs text-slate-500">{t('communication.template_label')}</span>
                                             <select
                                                 value={selectedTemplateSlug}
                                                 onChange={(e) => applyTemplate(e.target.value)}
                                                 className="rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
                                             >
-                                                <option value="">-- Choose template --</option>
+                                                <option value="">{t('communication.choose_template')}</option>
                                                 {templates.map((t) => (
                                                     <option key={t.slug} value={t.slug}>
                                                         {t.title} ({t.type.toUpperCase()})
@@ -593,7 +595,7 @@ export default function CommunicationIndex({
                                     {/* Placeholders quick pills */}
                                     <div className="mt-4">
                                         <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                                            Insert Dynamic Placeholders:
+                                            {t('communication.insert_placeholders')}
                                         </span>
                                         <div className="mt-1.5 flex flex-wrap gap-1.5">
                                             {[
@@ -620,7 +622,7 @@ export default function CommunicationIndex({
                                     {channel !== 'sms' && (
                                         <div className="mt-4">
                                             <label htmlFor="subject" className={labelClass}>
-                                                Email Subject <span className="text-rose-500">*</span>
+                                                {t('communication.subject')} <span className="text-rose-500">*</span>
                                             </label>
                                             <input
                                                 id="subject"
@@ -639,7 +641,7 @@ export default function CommunicationIndex({
                                     {selectedTemplateSlug === 'fee_reminder' && (
                                         <div className="mt-4">
                                             <label htmlFor="due_amount" className={labelClass}>
-                                                Due Amount ({'{amount}'})
+                                                {t('communication.due_amount')} ({'{amount}'})
                                             </label>
                                             <input
                                                 id="due_amount"
@@ -656,7 +658,7 @@ export default function CommunicationIndex({
                                     <div className="mt-4">
                                         <div className="flex items-center justify-between">
                                             <label htmlFor="message" className={labelClass}>
-                                                Message Body <span className="text-rose-500">*</span>
+                                                {t('communication.message_body')} <span className="text-rose-500">*</span>
                                             </label>
                                             {channel !== 'email' && (
                                                 <span
@@ -666,7 +668,7 @@ export default function CommunicationIndex({
                                                             : 'text-slate-500'
                                                     }`}
                                                 >
-                                                    {smsLength} / {maxCharsPerSms} chars ({smsCount} SMS
+                                                    {formatNumber(smsLength)} / {formatNumber(maxCharsPerSms)} {t('communication.characters')} ({formatNumber(smsCount)} {t('communication.sms')}
                                                     {isUnicode ? ' - Unicode' : ''})
                                                 </span>
                                             )}
@@ -692,7 +694,7 @@ export default function CommunicationIndex({
                                                 className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
                                             >
                                                 <AppIcon name="eye" className="h-4 w-4" />
-                                                Preview Branded Email
+                                                {t('communication.preview_email')}
                                             </button>
                                         ) : (
                                             <div />
@@ -704,7 +706,7 @@ export default function CommunicationIndex({
                                             className="inline-flex items-center gap-2 rounded-lg bg-accent-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-accent-700 disabled:opacity-50"
                                         >
                                             <AppIcon name="megaphone" className="h-4 w-4" />
-                                            {isSending ? 'Sending Broadcast...' : 'Send Broadcast Now'}
+                                            {isSending ? t('communication.sending') : t('communication.send_now')}
                                         </button>
                                     </div>
                                 </section>
@@ -714,32 +716,24 @@ export default function CommunicationIndex({
                             <div className="space-y-6">
                                 <section className={sectionClass}>
                                     <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                                        Broadcast Guidance
+                                        {t('communication.guidance_title')}
                                     </h3>
                                     <ul className="mt-3 space-y-2.5 text-xs text-slate-600 dark:text-slate-400">
                                         <li className="flex items-start gap-2">
                                             <AppIcon name="check" className="h-4 w-4 shrink-0 text-emerald-500" />
-                                            <span>
-                                                <strong>All Guardians:</strong> Broadcasts to all students' registered primary guardian mobile phones and emails.
-                                            </span>
+                                            <span>{t('communication.guidance_guardians')}</span>
                                         </li>
                                         <li className="flex items-start gap-2">
                                             <AppIcon name="check" className="h-4 w-4 shrink-0 text-emerald-500" />
-                                            <span>
-                                                <strong>Today's Absentees:</strong> Automatically syncs with the attendance register and notifies guardians of missing children.
-                                            </span>
+                                            <span>{t('communication.guidance_absentees')}</span>
                                         </li>
                                         <li className="flex items-start gap-2">
                                             <AppIcon name="check" className="h-4 w-4 shrink-0 text-emerald-500" />
-                                            <span>
-                                                <strong>Branded Shell:</strong> All emails automatically include the institution's official logo, board affiliation, and contact details.
-                                            </span>
+                                            <span>{t('communication.guidance_branded')}</span>
                                         </li>
                                         <li className="flex items-start gap-2">
                                             <AppIcon name="check" className="h-4 w-4 shrink-0 text-emerald-500" />
-                                            <span>
-                                                <strong>Placeholders:</strong> Dynamically substituted per recipient at delivery time.
-                                            </span>
+                                            <span>{t('communication.guidance_placeholders')}</span>
                                         </li>
                                     </ul>
                                 </section>
@@ -747,7 +741,7 @@ export default function CommunicationIndex({
                                 {/* Mini Email Shell Preview */}
                                 <section className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950">
                                     <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                                        Live Email Layout Preview
+                                        {t('communication.live_email_preview')}
                                     </span>
                                     <div className="mt-3 rounded-lg border border-slate-200 bg-white p-3 text-xs shadow-sm dark:border-slate-800 dark:bg-slate-900">
                                         <div className="border-b border-indigo-500 pb-2 text-center">
@@ -759,11 +753,11 @@ export default function CommunicationIndex({
                                                 />
                                             ) : (
                                                 <div className="font-bold text-slate-900 dark:text-slate-100">
-                                                    {school.name_en}
+                                                    {bi(school.name_en, school.name_bn)}
                                                 </div>
                                             )}
                                             <span className="text-[10px] text-slate-400">
-                                                EIIN: {school.eiin_number}
+                                                EIIN: {formatNumber(school.eiin_number)}
                                             </span>
                                         </div>
                                         <div className="py-2.5">
@@ -775,7 +769,7 @@ export default function CommunicationIndex({
                                             </p>
                                         </div>
                                         <div className="border-t border-slate-100 pt-2 text-center text-[10px] text-slate-400 dark:border-slate-800">
-                                            © {new Date().getFullYear()} {school.name_en}
+                                            © {formatNumber(new Date().getFullYear())} {bi(school.name_en, school.name_bn)}
                                         </div>
                                     </div>
                                 </section>
@@ -790,10 +784,10 @@ export default function CommunicationIndex({
                         <div className="flex items-center justify-between">
                             <div>
                                 <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-                                    Pre-defined &amp; Custom Templates
+                                    {t('communication.templates_title')}
                                 </h2>
                                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                                    Manage message templates for frequent broadcasts such as fee notices, exam results, and emergency announcements.
+                                    {t('communication.templates_subtitle')}
                                 </p>
                             </div>
                             <button
@@ -802,7 +796,7 @@ export default function CommunicationIndex({
                                 className="inline-flex items-center gap-1.5 rounded-lg bg-accent-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-accent-700"
                             >
                                 <AppIcon name="plus" className="h-4 w-4" />
-                                Add Custom Template
+                                {t('communication.add_template')}
                             </button>
                         </div>
 
@@ -811,7 +805,7 @@ export default function CommunicationIndex({
                             <form onSubmit={submitNewTemplate} className={`${sectionClass} border-accent-300 ring-2 ring-accent-500/20`}>
                                 <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
                                     <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                                        Create New Communication Template
+                                        {t('communication.create_template')}
                                     </h3>
                                     <button
                                         type="button"
@@ -824,7 +818,7 @@ export default function CommunicationIndex({
 
                                 <div className="mt-4 grid gap-4 sm:grid-cols-2">
                                     <div>
-                                        <label className={labelClass}>Template Title</label>
+                                        <label className={labelClass}>{t('communication.template_title')}</label>
                                         <input
                                             type="text"
                                             required
@@ -835,19 +829,19 @@ export default function CommunicationIndex({
                                         />
                                     </div>
                                     <div>
-                                        <label className={labelClass}>Channel Type</label>
+                                        <label className={labelClass}>{t('communication.channel_type')}</label>
                                         <select
                                             value={newTemplate.type}
                                             onChange={(e) => setNewTemplate((prev) => ({ ...prev, type: e.target.value as any }))}
                                             className={inputClass}
                                         >
-                                            <option value="both">Both SMS &amp; Email</option>
-                                            <option value="email">Email Only</option>
-                                            <option value="sms">SMS Only</option>
+                                            <option value="both">{t('communication.both')}</option>
+                                            <option value="email">{t('communication.email_only')}</option>
+                                            <option value="sms">{t('communication.sms_only')}</option>
                                         </select>
                                     </div>
                                     <div className="sm:col-span-2">
-                                        <label className={labelClass}>Email Subject</label>
+                                        <label className={labelClass}>{t('communication.subject')}</label>
                                         <input
                                             type="text"
                                             value={newTemplate.subject}
@@ -857,7 +851,7 @@ export default function CommunicationIndex({
                                         />
                                     </div>
                                     <div className="sm:col-span-2">
-                                        <label className={labelClass}>Template Body (Supports Placeholders)</label>
+                                        <label className={labelClass}>{t('communication.template_body')}</label>
                                         <textarea
                                             rows={4}
                                             required
@@ -875,13 +869,13 @@ export default function CommunicationIndex({
                                         onClick={() => setIsCreatingTemplate(false)}
                                         className="rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
                                     >
-                                        Cancel
+                                        {t('common.cancel')}
                                     </button>
                                     <button
                                         type="submit"
                                         className="rounded-lg bg-accent-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-accent-700"
                                     >
-                                        Save Template
+                                        {t('common.save')}
                                     </button>
                                 </div>
                             </form>
@@ -907,14 +901,14 @@ export default function CommunicationIndex({
                                                 {tpl.type}
                                             </span>
                                             {tpl.is_system ? (
-                                                <span className="text-[10px] font-medium text-slate-400">System Built-in</span>
+                                                <span className="text-[10px] font-medium text-slate-400">{t('communication.system_builtin')}</span>
                                             ) : (
                                                 <button
                                                     type="button"
                                                     onClick={() => deleteTemplate(tpl.id)}
                                                     className="text-xs text-rose-500 hover:underline"
                                                 >
-                                                    Delete
+                                                    {t('common.delete')}
                                                 </button>
                                             )}
                                         </div>
@@ -941,7 +935,7 @@ export default function CommunicationIndex({
                                             className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300"
                                         >
                                             <AppIcon name="megaphone" className="h-3.5 w-3.5" />
-                                            Use for Broadcast
+                                            {t('communication.use_for_broadcast')}
                                         </button>
                                     </div>
                                 </div>
@@ -960,7 +954,7 @@ export default function CommunicationIndex({
                                     <div className="flex items-center gap-2">
                                         <AppIcon name="phone" className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                                         <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
-                                            SMS Gateway Configuration
+                                            {t('communication.sms_gw_config')}
                                         </h2>
                                     </div>
                                     <label className="flex items-center gap-2 text-xs font-semibold">
@@ -970,16 +964,16 @@ export default function CommunicationIndex({
                                             onChange={(e) => setGwForm((prev) => ({ ...prev, sms_enabled: e.target.checked }))}
                                             className="h-4 w-4 rounded border-slate-300 text-accent-600"
                                         />
-                                        Enable SMS
+                                        {t('communication.enable_sms')}
                                     </label>
                                 </div>
                                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                                    Connect any HTTP SMS gateway (e.g. BulkSMS BD, Greenweb, Twilio, Onnorokom, or Generic API).
+                                    {t('communication.sms_gw_help')}
                                 </p>
 
                                 <div className="mt-5 space-y-4">
                                     <div>
-                                        <label className={labelClass}>SMS Provider</label>
+                                        <label className={labelClass}>{t('communication.sms_provider')}</label>
                                         <select
                                             value={gwForm.sms_provider}
                                             onChange={(e) => setGwForm((prev) => ({ ...prev, sms_provider: e.target.value }))}
@@ -994,7 +988,7 @@ export default function CommunicationIndex({
                                     </div>
 
                                     <div>
-                                        <label className={labelClass}>API Endpoint URL</label>
+                                        <label className={labelClass}>{t('communication.api_url')}</label>
                                         <input
                                             type="text"
                                             value={gwForm.sms_api_url ?? ''}
@@ -1005,7 +999,7 @@ export default function CommunicationIndex({
                                     </div>
 
                                     <div>
-                                        <label className={labelClass}>API Secret Key / Token</label>
+                                        <label className={labelClass}>{t('communication.api_key')}</label>
                                         <input
                                             type="password"
                                             value={gwForm.sms_api_key ?? ''}
@@ -1016,7 +1010,7 @@ export default function CommunicationIndex({
                                     </div>
 
                                     <div>
-                                        <label className={labelClass}>Masking / Sender ID</label>
+                                        <label className={labelClass}>{t('communication.sender_id')}</label>
                                         <input
                                             type="text"
                                             value={gwForm.sms_sender_id ?? ''}
@@ -1034,7 +1028,7 @@ export default function CommunicationIndex({
                                     <div className="flex items-center gap-2">
                                         <AppIcon name="mail" className="h-5 w-5 text-sky-600 dark:text-sky-400" />
                                         <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
-                                            Email / SMTP Settings
+                                            {t('communication.smtp_config')}
                                         </h2>
                                     </div>
                                     <label className="flex items-center gap-2 text-xs font-semibold">
@@ -1044,17 +1038,17 @@ export default function CommunicationIndex({
                                             onChange={(e) => setGwForm((prev) => ({ ...prev, email_enabled: e.target.checked }))}
                                             className="h-4 w-4 rounded border-slate-300 text-accent-600"
                                         />
-                                        Enable Email
+                                        {t('communication.enable_email')}
                                     </label>
                                 </div>
                                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                                    SMTP server configuration for sending custom templated emails.
+                                    {t('communication.smtp_help')}
                                 </p>
 
                                 <div className="mt-5 space-y-4">
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className={labelClass}>Mailer Transport</label>
+                                            <label className={labelClass}>{t('communication.mailer_transport')}</label>
                                             <select
                                                 value={gwForm.mail_mailer}
                                                 onChange={(e) => setGwForm((prev) => ({ ...prev, mail_mailer: e.target.value }))}
@@ -1068,7 +1062,7 @@ export default function CommunicationIndex({
                                         </div>
 
                                         <div>
-                                            <label className={labelClass}>SMTP Host</label>
+                                            <label className={labelClass}>{t('communication.smtp_host')}</label>
                                             <input
                                                 type="text"
                                                 value={gwForm.mail_host ?? ''}
@@ -1081,7 +1075,7 @@ export default function CommunicationIndex({
 
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className={labelClass}>SMTP Port</label>
+                                            <label className={labelClass}>{t('communication.smtp_port')}</label>
                                             <input
                                                 type="number"
                                                 value={gwForm.mail_port}
@@ -1091,7 +1085,7 @@ export default function CommunicationIndex({
                                         </div>
 
                                         <div>
-                                            <label className={labelClass}>Encryption</label>
+                                            <label className={labelClass}>{t('communication.encryption')}</label>
                                             <select
                                                 value={gwForm.mail_encryption ?? 'tls'}
                                                 onChange={(e) => setGwForm((prev) => ({ ...prev, mail_encryption: e.target.value }))}
@@ -1106,7 +1100,7 @@ export default function CommunicationIndex({
 
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className={labelClass}>Username</label>
+                                            <label className={labelClass}>{t('communication.username')}</label>
                                             <input
                                                 type="text"
                                                 value={gwForm.mail_username ?? ''}
@@ -1117,7 +1111,7 @@ export default function CommunicationIndex({
                                         </div>
 
                                         <div>
-                                            <label className={labelClass}>Password</label>
+                                            <label className={labelClass}>{t('auth.password')}</label>
                                             <input
                                                 type="password"
                                                 value={gwForm.mail_password ?? ''}
@@ -1130,7 +1124,7 @@ export default function CommunicationIndex({
 
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className={labelClass}>From Sender Email</label>
+                                            <label className={labelClass}>{t('communication.from_email')}</label>
                                             <input
                                                 type="email"
                                                 value={gwForm.mail_from_address ?? ''}
@@ -1141,7 +1135,7 @@ export default function CommunicationIndex({
                                         </div>
 
                                         <div>
-                                            <label className={labelClass}>From Sender Name</label>
+                                            <label className={labelClass}>{t('communication.from_name')}</label>
                                             <input
                                                 type="text"
                                                 value={gwForm.mail_from_name ?? ''}
@@ -1162,7 +1156,7 @@ export default function CommunicationIndex({
                                 className="inline-flex items-center gap-2 rounded-lg bg-accent-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-accent-700 disabled:opacity-50"
                             >
                                 <AppIcon name="check" className="h-4 w-4" />
-                                {isSavingGw ? 'Saving Gateways...' : 'Save Gateway Credentials'}
+                                {isSavingGw ? t('communication.saving_gateways') : t('communication.save_gateways')}
                             </button>
                         </div>
                     </form>
@@ -1174,10 +1168,10 @@ export default function CommunicationIndex({
                         <div className="flex items-center justify-between pb-4">
                             <div>
                                 <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
-                                    Recent Transmission Logs
+                                    {t('communication.logs_title')}
                                 </h2>
                                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                                    Real-time delivery status for sent SMS notices and custom emails.
+                                    {t('communication.logs_subtitle')}
                                 </p>
                             </div>
                         </div>
@@ -1186,19 +1180,19 @@ export default function CommunicationIndex({
                             <table className="w-full text-left text-xs">
                                 <thead>
                                     <tr className="border-b border-slate-200 text-slate-500 dark:border-slate-800 dark:text-slate-400">
-                                        <th className="py-2.5 font-semibold">Channel</th>
-                                        <th className="py-2.5 font-semibold">Recipient</th>
-                                        <th className="py-2.5 font-semibold">Audience Type</th>
-                                        <th className="py-2.5 font-semibold">Subject / Message Preview</th>
-                                        <th className="py-2.5 font-semibold">Sent At</th>
-                                        <th className="py-2.5 font-semibold">Status</th>
+                                        <th className="py-2.5 font-semibold">{t('communication.channel')}</th>
+                                        <th className="py-2.5 font-semibold">{t('communication.recipient')}</th>
+                                        <th className="py-2.5 font-semibold">{t('communication.audience_type')}</th>
+                                        <th className="py-2.5 font-semibold">{t('communication.preview')}</th>
+                                        <th className="py-2.5 font-semibold">{t('communication.sent_at')}</th>
+                                        <th className="py-2.5 font-semibold">{t('common.status')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                                     {logs.length === 0 ? (
                                         <tr>
                                             <td colSpan={6} className="py-8 text-center text-slate-400">
-                                                No communication logs recorded yet. Send your first broadcast message!
+                                                {t('communication.no_messages')}
                                             </td>
                                         </tr>
                                     ) : (
@@ -1217,7 +1211,7 @@ export default function CommunicationIndex({
                                                         ) : (
                                                             <AppIcon name="mail" className="h-3 w-3" />
                                                         )}
-                                                        {log.channel}
+                                                        {log.channel === 'sms' ? t('communication.sms') : t('communication.email')}
                                                     </span>
                                                 </td>
                                                 <td className="py-3">
@@ -1244,7 +1238,7 @@ export default function CommunicationIndex({
                                                     </p>
                                                 </td>
                                                 <td className="py-3 text-slate-500 whitespace-nowrap">
-                                                    {new Date(log.created_at).toLocaleString([], {
+                                                    {new Date(log.created_at).toLocaleString(locale === 'bn' ? 'bn-BD' : 'en-US', {
                                                         month: 'short',
                                                         day: 'numeric',
                                                         hour: '2-digit',
@@ -1259,7 +1253,7 @@ export default function CommunicationIndex({
                                                                 : 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300'
                                                         }`}
                                                     >
-                                                        {log.status === 'sent' ? 'Delivered' : 'Failed'}
+                                                        {log.status === 'sent' ? t('communication.status_delivered') : t('communication.status_failed')}
                                                     </span>
                                                     {log.error_message && (
                                                         <div className="text-[10px] text-rose-500 max-w-[150px] truncate" title={log.error_message}>
@@ -1282,7 +1276,7 @@ export default function CommunicationIndex({
                         <div className="flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-slate-900">
                             <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-slate-800">
                                 <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                                    Official Branded Email Preview
+                                    {t('communication.preview_modal_title')}
                                 </h3>
                                 <button
                                     type="button"
@@ -1305,10 +1299,10 @@ export default function CommunicationIndex({
                                             />
                                         )}
                                         <h2 className="mt-2 text-lg font-bold text-slate-900 dark:text-slate-100">
-                                            {school.name_en}
+                                            {bi(school.name_en, school.name_bn)}
                                         </h2>
                                         <p className="text-xs text-slate-500 dark:text-slate-400">
-                                            EIIN: {school.eiin_number} • {school.board_affiliation} Board
+                                            EIIN: {formatNumber(school.eiin_number)} • {school.board_affiliation}
                                         </p>
                                     </div>
 
@@ -1326,10 +1320,10 @@ export default function CommunicationIndex({
 
                                     {/* Footer */}
                                     <div className="border-t border-slate-100 bg-slate-50/70 p-4 text-center text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-950">
-                                        <p className="font-semibold text-slate-700 dark:text-slate-300">{school.name_en}</p>
+                                        <p className="font-semibold text-slate-700 dark:text-slate-300">{bi(school.name_en, school.name_bn)}</p>
                                         <p className="mt-0.5">{school.address} • Tel: {school.phone}</p>
                                         <p className="mt-1 text-[11px] text-slate-400">
-                                            © {new Date().getFullYear()} {school.name_en}. All rights reserved.
+                                            © {formatNumber(new Date().getFullYear())} {bi(school.name_en, school.name_bn)}. {t('site.rights')}
                                         </p>
                                     </div>
                                 </div>
@@ -1341,7 +1335,7 @@ export default function CommunicationIndex({
                                     onClick={() => setShowEmailPreview(false)}
                                     className="rounded-lg bg-accent-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-accent-700"
                                 >
-                                    Close Preview
+                                    {t('common.close')}
                                 </button>
                             </div>
                         </div>

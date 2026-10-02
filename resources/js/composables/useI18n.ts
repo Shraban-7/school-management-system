@@ -57,8 +57,10 @@ export function useI18n() {
         (
             key: string,
             replacements: Record<string, string | number> = {},
+            fallback?: string,
         ): string => {
-            const value = resolveKey(translations, key) ?? key;
+            const resolved = resolveKey(translations, key);
+            const value = resolved ?? (fallback !== undefined ? fallback : key);
             return applyReplacements(value, replacements);
         },
         [translations],
@@ -70,6 +72,39 @@ export function useI18n() {
                 return (bn && bn.trim() !== '' ? bn : en) ?? '';
             }
             return (en && en.trim() !== '' ? en : bn) ?? '';
+        },
+        [isBangla],
+    );
+
+    const formatNumber = useCallback(
+        (num: number | string | null | undefined): string => {
+            if (num === null || num === undefined) return '';
+            if (!isBangla) return String(num);
+            const bnDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+            return String(num).replace(/[0-9]/g, (d) => bnDigits[Number(d)]);
+        },
+        [isBangla],
+    );
+
+    const formatDate = useCallback(
+        (
+            dateInput: Date | string | number | null | undefined,
+            options?: Intl.DateTimeFormatOptions,
+        ): string => {
+            if (!dateInput) return '';
+            try {
+                const d =
+                    typeof dateInput === 'string' || typeof dateInput === 'number'
+                        ? new Date(dateInput)
+                        : dateInput;
+                return new Intl.DateTimeFormat(isBangla ? 'bn-BD' : 'en-US', options ?? {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                }).format(d);
+            } catch {
+                return String(dateInput);
+            }
         },
         [isBangla],
     );
@@ -97,6 +132,8 @@ export function useI18n() {
         isBangla,
         t,
         bi,
+        formatNumber,
+        formatDate,
         setLocale,
     };
 }

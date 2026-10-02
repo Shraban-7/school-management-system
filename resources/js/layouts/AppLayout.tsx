@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link, router, usePage } from '@inertiajs/react';
 import Navbar from '@/components/Navbar';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { useI18n } from '@/composables/useI18n';
 import { useStacks } from '@/lib/stacks';
 import type { NavLink, NavAction } from '@/types/nav';
 import type { AuthUser } from '@/types/auth';
@@ -21,12 +23,6 @@ const dashboardByRole: Record<string, string> = {
     staff: '/staff/dashboard',
 };
 
-const defaultLinks: NavLink[] = [
-    { label: 'Home', href: '/', match: 'home' },
-    { label: 'About', href: '/about', match: 'about' },
-    { label: 'Contact', href: '/contact', match: 'contact' },
-];
-
 export default function AppLayout({
     brand = 'SMS App',
     brandLogo = '',
@@ -38,12 +34,19 @@ export default function AppLayout({
     const props = page.props as Record<string, unknown>;
     const auth = props.auth as { user?: AuthUser | null } | undefined;
     const user = auth?.user ?? null;
+    const { t, bi } = useI18n();
     const stacks = useStacks();
     const [, setTick] = useState(0);
 
     useEffect(() => {
         return stacks.subscribe(() => setTick((t) => t + 1));
     }, [stacks]);
+
+    const defaultLinks: NavLink[] = [
+        { label: t('nav.home', {}, 'Home'), href: '/', match: 'home' },
+        { label: t('nav.about', {}, 'About'), href: '/about', match: 'about' },
+        { label: t('nav.contact', {}, 'Contact'), href: '/contact', match: 'contact' },
+    ];
 
     const currentUrl = page.url;
     const dashboardUrl = user ? (dashboardByRole[user.role] ?? '/') : null;
@@ -53,19 +56,19 @@ export default function AppLayout({
               ...(dashboardUrl
                   ? [
                         {
-                            label: 'Dashboard',
+                            label: t('nav.dashboard', {}, 'Dashboard'),
                             href: dashboardUrl,
                             variant: 'primary' as const,
                         },
                     ]
                   : []),
               {
-                  label: 'Logout',
+                  label: t('nav.logout', {}, 'Logout'),
                   variant: 'secondary' as const,
                   onClick: () => router.post('/logout'),
               },
           ]
-        : [{ label: 'Sign in', href: '/login', variant: 'primary' as const }];
+        : [{ label: t('auth.sign_in', {}, 'Sign in'), href: '/login', variant: 'primary' as const }];
 
     const navItems = stacks.get<NavLink>('app.nav');
     const links = navItems.length > 0 ? navItems : defaultLinks;
@@ -130,7 +133,8 @@ export default function AppLayout({
                     </>
                 )}
                 actions={
-                    <>
+                    <div className="flex items-center gap-3">
+                        <LanguageSwitcher variant="public" />
                         {actions.map((act, i) =>
                             act.href ? (
                                 <Link
@@ -151,7 +155,7 @@ export default function AppLayout({
                                 </button>
                             ),
                         )}
-                    </>
+                    </div>
                 }
                 mobile={() => (
                     <>
@@ -168,7 +172,10 @@ export default function AppLayout({
                     </>
                 )}
                 mobileActions={
-                    <>
+                    <div className="space-y-2">
+                        <div className="flex justify-center pb-2">
+                            <LanguageSwitcher variant="public" />
+                        </div>
                         {mActions.map((act, i) =>
                             act.href ? (
                                 <Link
@@ -189,7 +196,7 @@ export default function AppLayout({
                                 </button>
                             ),
                         )}
-                    </>
+                    </div>
                 }
             />
 
@@ -199,7 +206,7 @@ export default function AppLayout({
 
             <footer className="border-t border-slate-200 bg-white">
                 <div className="mx-auto max-w-7xl px-4 py-6 text-sm text-slate-500 sm:px-6 lg:px-8">
-                    &copy; {new Date().getFullYear()} {brand}. All rights reserved.
+                    &copy; {new Date().getFullYear()} {brand}. {t('site.rights', {}, 'All rights reserved.')}
                 </div>
             </footer>
         </main>

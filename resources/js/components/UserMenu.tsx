@@ -46,7 +46,10 @@ export default function UserMenu() {
 
     const initial = user?.name?.charAt(0).toUpperCase() ?? '?';
     const dashboardUrl = user ? (dashboardByRole[user.role] ?? '/') : null;
-    const roleLabel = user ? (roleLabels[user.role] ?? user.role) : 'Guest';
+    const roleKey = user ? `roles.${user.role}` : 'roles.guest';
+    const roleLabel = user
+        ? t(roleKey, {}, roleLabels[user.role] ?? user.role)
+        : t('roles.guest', {}, 'Guest');
 
     function logout() {
         setOpen(false);

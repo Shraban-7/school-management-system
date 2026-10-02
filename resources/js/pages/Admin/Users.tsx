@@ -3,6 +3,7 @@ import { Head, usePage } from '@inertiajs/react';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import AppIcon from '@/components/AppIcon';
 import { useSidebarStack } from '@/composables/useNavStack';
+import { useI18n } from '@/composables/useI18n';
 import type { SidebarConfig } from '@/types/sidebar';
 
 interface UserRow {
@@ -21,6 +22,7 @@ interface AdminUsersProps {
 }
 
 export default function AdminUsers({ users, sidebar }: AdminUsersProps) {
+    const { t, formatNumber } = useI18n();
     const sidebarStack = useSidebarStack();
     useEffect(() => {
         if (sidebar) {
@@ -65,19 +67,19 @@ export default function AdminUsers({ users, sidebar }: AdminUsersProps) {
 
     return (
         <DashboardLayout>
-            <Head title="Users" />
+            <Head title={t('users.title', {}, 'Users')} />
 
             <div className="space-y-6">
                 <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                         <p className="text-xs font-semibold tracking-widest text-slate-500 uppercase dark:text-slate-400">
-                            Management
+                            {t('common.management', {}, 'Management')}
                         </p>
                         <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-50">
-                            Users
+                            {t('users.title', {}, 'Users')}
                         </h1>
                         <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                            Manage every account, role assignment, and access state.
+                            {t('users.subtitle', {}, 'Manage every account, role assignment, and access state.')}
                         </p>
                     </div>
                     <button
@@ -85,7 +87,7 @@ export default function AdminUsers({ users, sidebar }: AdminUsersProps) {
                         className="inline-flex items-center gap-1.5 self-start rounded-md bg-accent-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-accent-700 sm:self-auto"
                     >
                         <AppIcon name="plus" className="h-4 w-4" />
-                        Invite user
+                        {t('users.invite_user', {}, 'Invite user')}
                     </button>
                 </header>
 
@@ -107,7 +109,7 @@ export default function AdminUsers({ users, sidebar }: AdminUsersProps) {
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                     type="search"
-                                    placeholder="Search by name or email…"
+                                    placeholder={t('users.search_placeholder', {}, 'Search by name or email…')}
                                     className="h-9 w-full rounded-md border border-slate-200 bg-white pr-3 pl-9 text-sm text-slate-900 placeholder-slate-400 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder-slate-500"
                                 />
                             </label>
@@ -116,17 +118,17 @@ export default function AdminUsers({ users, sidebar }: AdminUsersProps) {
                                 onChange={(e) => setRoleFilter(e.target.value)}
                                 className="h-9 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
                             >
-                                <option value="">All roles</option>
+                                <option value="">{t('users.all_roles', {}, 'All roles')}</option>
                                 {roles.map((role) => (
                                     <option key={role} value={role}>
-                                        {role}
+                                        {t(`roles.${role}`, {}, role)}
                                     </option>
                                 ))}
                             </select>
                         </div>
                         <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                             <span>
-                                {filtered.length} of {users.length} users
+                                {formatNumber(filtered.length)} / {formatNumber(users.length)} {t('users.title', {}, 'users')}
                             </span>
                         </div>
                     </div>
@@ -135,12 +137,12 @@ export default function AdminUsers({ users, sidebar }: AdminUsersProps) {
                         <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
                             <thead className="bg-slate-50 text-left text-xs font-semibold tracking-wider text-slate-500 uppercase dark:bg-slate-950/40 dark:text-slate-400">
                                 <tr>
-                                    <th className="px-4 py-3">Name</th>
-                                    <th className="px-4 py-3">Role</th>
-                                    <th className="px-4 py-3">Phone</th>
-                                    <th className="px-4 py-3">Status</th>
-                                    <th className="px-4 py-3">Joined</th>
-                                    <th className="px-4 py-3 text-right">Actions</th>
+                                    <th className="px-4 py-3">{t('users.user_name', {}, 'Name')}</th>
+                                    <th className="px-4 py-3">{t('users.role', {}, 'Role')}</th>
+                                    <th className="px-4 py-3">{t('users.phone', {}, 'Phone')}</th>
+                                    <th className="px-4 py-3">{t('common.status', {}, 'Status')}</th>
+                                    <th className="px-4 py-3">{t('users.joined', {}, 'Joined')}</th>
+                                    <th className="px-4 py-3 text-right">{t('common.actions', {}, 'Actions')}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -170,7 +172,7 @@ export default function AdminUsers({ users, sidebar }: AdminUsersProps) {
                                                     user.role,
                                                 )}`}
                                             >
-                                                {user.role}
+                                                {t(`roles.${user.role}`, {}, user.role)}
                                             </span>
                                         </td>
                                         <td className="px-4 py-3 font-mono text-xs text-slate-600 dark:text-slate-300">
@@ -191,7 +193,7 @@ export default function AdminUsers({ users, sidebar }: AdminUsersProps) {
                                                             : 'bg-slate-400'
                                                     }`}
                                                 />
-                                                {user.is_active ? 'Active' : 'Disabled'}
+                                                {user.is_active ? t('common.active', {}, 'Active') : t('common.inactive', {}, 'Disabled')}
                                             </span>
                                         </td>
                                         <td className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400">
@@ -202,7 +204,7 @@ export default function AdminUsers({ users, sidebar }: AdminUsersProps) {
                                                 <button
                                                     type="button"
                                                     className="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
-                                                    aria-label="Edit user"
+                                                    aria-label={t('common.edit', {}, 'Edit')}
                                                 >
                                                     <AppIcon
                                                         name="pencil"
@@ -212,7 +214,7 @@ export default function AdminUsers({ users, sidebar }: AdminUsersProps) {
                                                 <button
                                                     type="button"
                                                     className="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-500 hover:bg-rose-50 hover:text-rose-600 dark:text-slate-400 dark:hover:bg-rose-950/30 dark:hover:text-rose-400"
-                                                    aria-label="Delete user"
+                                                    aria-label={t('common.delete', {}, 'Delete')}
                                                 >
                                                     <AppIcon
                                                         name="trash"
@@ -229,7 +231,7 @@ export default function AdminUsers({ users, sidebar }: AdminUsersProps) {
                                             colSpan={6}
                                             className="px-4 py-12 text-center text-sm text-slate-500 dark:text-slate-400"
                                         >
-                                            No users match your filters.
+                                            {t('users.no_users', {}, 'No users match your filters.')}
                                         </td>
                                     </tr>
                                 )}

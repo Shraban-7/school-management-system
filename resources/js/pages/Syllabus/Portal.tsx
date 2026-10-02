@@ -50,7 +50,7 @@ export default function SyllabusPortal({ syllabuses }: SyllabusPortalProps) {
 
     return (
         <DashboardLayout>
-            <Head title="Syllabus" />
+            <Head title={t('sidebar.syllabus')} />
 
             <div className="space-y-6">
                 <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -62,7 +62,7 @@ export default function SyllabusPortal({ syllabuses }: SyllabusPortalProps) {
                             {t('sidebar.syllabus')}
                         </h1>
                         <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                            Class syllabus documents and academic outlines.
+                            {t('syllabus.subtitle')}
                         </p>
                     </div>
 
@@ -73,7 +73,7 @@ export default function SyllabusPortal({ syllabuses }: SyllabusPortalProps) {
                                 onChange={(e) => setSelectedClass(e.target.value)}
                                 className="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                             >
-                                <option value="">All classes</option>
+                                <option value="">{t('common.all_classes')}</option>
                                 {classOptions.map((c) => (
                                     <option key={c} value={c}>
                                         {c}
@@ -87,7 +87,7 @@ export default function SyllabusPortal({ syllabuses }: SyllabusPortalProps) {
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 type="search"
-                                placeholder="Search syllabus…"
+                                placeholder={t('syllabus.search_placeholder')}
                                 className="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                             />
                         </div>
@@ -133,19 +133,19 @@ export default function SyllabusPortal({ syllabuses }: SyllabusPortalProps) {
                                                 className="truncate text-xs text-slate-400"
                                                 title={item.file_name ?? ''}
                                             >
-                                                {item.file_name ?? 'PDF document'}
+                                                {item.file_name ?? t('syllabus.pdf_doc')}
                                             </span>
                                             <a
                                                 href={item.download_url}
                                                 className="inline-flex items-center gap-1.5 rounded-md bg-accent-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition hover:bg-accent-700"
                                             >
                                                 <AppIcon name="download" className="h-3.5 w-3.5" />
-                                                Download
+                                                {t('common.download')}
                                             </a>
                                         </div>
                                     ) : (
                                         <span className="text-xs text-slate-400">
-                                            No file attached
+                                            {t('syllabus.no_file')}
                                         </span>
                                     )}
                                 </div>
@@ -159,10 +159,10 @@ export default function SyllabusPortal({ syllabuses }: SyllabusPortalProps) {
                             className="mx-auto h-8 w-8 text-slate-300 dark:text-slate-600"
                         />
                         <p className="mt-2 text-sm font-medium">
-                            No syllabus documents available.
+                            {t('syllabus.no_syllabus')}
                         </p>
                         <p className="mt-1 text-xs text-slate-400">
-                            Class syllabuses uploaded by teachers or admin will appear here.
+                            {t('syllabus.empty_help')}
                         </p>
                     </div>
                 )}

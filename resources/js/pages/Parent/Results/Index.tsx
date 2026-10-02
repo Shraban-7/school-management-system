@@ -3,11 +3,13 @@ import { Head, Link } from '@inertiajs/react';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import AppIcon from '@/components/AppIcon';
 import { useSidebarStack } from '@/composables/useNavStack';
+import { useI18n } from '@/composables/useI18n';
 import type { SidebarConfig } from '@/types/sidebar';
 
 interface Child {
     id: number;
     name_en: string;
+    name_bn?: string | null;
     roll_number: string | null;
     class_label: string | null;
     href: string;
@@ -22,6 +24,7 @@ export default function ParentResultsIndex({
     children,
     sidebar,
 }: ParentResultsIndexProps) {
+    const { t, bi, formatNumber } = useI18n();
     const sidebarStack = useSidebarStack();
     useEffect(() => {
         if (sidebar) {
@@ -31,18 +34,18 @@ export default function ParentResultsIndex({
 
     return (
         <DashboardLayout>
-            <Head title="Children's Results" />
+            <Head title={`${t('results.title')} - ${t('results.choose_child')}`} />
 
             <div className="space-y-6">
                 <header>
                     <p className="text-xs font-semibold tracking-widest text-slate-500 uppercase dark:text-slate-400">
-                        Results
+                        {t('results.title')}
                     </p>
                     <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-50">
-                        Choose a child
+                        {t('results.choose_child')}
                     </h1>
                     <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                        View published exam results for each of your children.
+                        {t('results.parent_results_subtitle')}
                     </p>
                 </header>
 
@@ -57,12 +60,12 @@ export default function ParentResultsIndex({
                                 <AppIcon name="user" className="h-5 w-5" />
                             </div>
                             <h2 className="mt-4 font-semibold text-slate-900 dark:text-slate-100">
-                                {child.name_en}
+                                {bi(child.name_en, child.name_bn)}
                             </h2>
                             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                 {child.class_label ?? '—'}
                                 {child.roll_number && (
-                                    <span> · Roll {child.roll_number}</span>
+                                    <span> · {t('results.roll')} {formatNumber(child.roll_number)}</span>
                                 )}
                             </p>
                         </Link>
@@ -70,7 +73,7 @@ export default function ParentResultsIndex({
 
                     {children.length === 0 && (
                         <div className="col-span-full rounded-xl border border-dashed border-slate-300 py-16 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
-                            No children are linked to your account yet.
+                            {t('results.no_children_linked')}
                         </div>
                     )}
                 </section>

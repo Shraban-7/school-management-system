@@ -3,6 +3,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import AppIcon from '@/components/AppIcon';
 import { useSidebarStack } from '@/composables/useNavStack';
+import { useI18n } from '@/composables/useI18n';
 import type { SidebarConfig } from '@/types/sidebar';
 
 interface StudentRow {
@@ -33,6 +34,7 @@ interface Props {
 const initial = (name: string) => name.charAt(0).toUpperCase();
 
 export default function StudentsIndex({ students, sidebar }: Props) {
+    const { t, bi, isBangla, formatNumber } = useI18n();
     const sidebarStack = useSidebarStack();
     useEffect(() => {
         sidebarStack.set(sidebar);
@@ -46,32 +48,32 @@ export default function StudentsIndex({ students, sidebar }: Props) {
         ? students.data
         : students.data.filter(
               (s) =>
-                  s.name_en.toLowerCase().includes(search.toLowerCase()) ||
+                  s.name_en?.toLowerCase().includes(search.toLowerCase()) ||
                   s.name_bn?.toLowerCase().includes(search.toLowerCase()) ||
                   String(s.roll_number).includes(search),
           );
 
     function destroy(id: number) {
-        if (confirm('Are you sure you want to delete this student?')) {
+        if (confirm(isBangla ? 'আপনি কি নিশ্চিত যে আপনি এই শিক্ষার্থীকে মুছে ফেলতে চান?' : 'Are you sure you want to delete this student?')) {
             router.delete(`/admin/students/${id}`);
         }
     }
 
     return (
         <DashboardLayout>
-            <Head title="Students" />
+            <Head title={t('students.title', undefined, 'Students')} />
 
             <div className="space-y-6">
                 <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                         <p className="text-xs font-semibold tracking-widest text-slate-500 uppercase dark:text-slate-400">
-                            Management
+                            {isBangla ? 'ব্যবস্থাপনা' : 'Management'}
                         </p>
                         <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-50">
-                            Students
+                            {t('students.title', undefined, 'Students')}
                         </h1>
                         <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                            Manage all students in the system.
+                            {isBangla ? 'সিস্টেমের সকল শিক্ষার্থীর তথ্য ও তালিকা পরিচালনা করুন।' : 'Manage all students in the system.'}
                         </p>
                     </div>
                     <Link
@@ -79,7 +81,7 @@ export default function StudentsIndex({ students, sidebar }: Props) {
                         className="inline-flex items-center gap-1.5 self-start rounded-md bg-accent-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-accent-700 sm:self-auto"
                     >
                         <AppIcon name="plus" className="h-4 w-4" />
-                        Add student
+                        {t('students.add_student', undefined, 'Add student')}
                     </Link>
                 </header>
 
@@ -100,12 +102,12 @@ export default function StudentsIndex({ students, sidebar }: Props) {
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 type="search"
-                                placeholder="Search by name or roll…"
+                                placeholder={isBangla ? 'নাম বা রোল নম্বর দিয়ে খুঁজুন…' : 'Search by name or roll…'}
                                 className="h-9 w-full rounded-md border border-slate-200 bg-white pr-3 pl-9 text-sm text-slate-900 placeholder-slate-400 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder-slate-500"
                             />
                         </label>
                         <span className="text-xs text-slate-500 dark:text-slate-400">
-                            {filtered.length} of {students.total} students
+                            {isBangla ? `${formatNumber(filtered.length)} / ${formatNumber(students.total)} শিক্ষার্থী` : `${filtered.length} of ${students.total} students`}
                         </span>
                     </div>
 
@@ -113,14 +115,14 @@ export default function StudentsIndex({ students, sidebar }: Props) {
                         <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
                             <thead className="bg-slate-50 text-left text-xs font-semibold tracking-wider text-slate-500 uppercase dark:bg-slate-950/40 dark:text-slate-400">
                                 <tr>
-                                    <th className="px-4 py-3">Photo</th>
-                                    <th className="px-4 py-3">Name (EN)</th>
-                                    <th className="px-4 py-3">Roll</th>
-                                    <th className="px-4 py-3">Class</th>
-                                    <th className="px-4 py-3">Section</th>
-                                    <th className="px-4 py-3">Gender</th>
-                                    <th className="px-4 py-3">Status</th>
-                                    <th className="px-4 py-3 text-right">Actions</th>
+                                    <th className="px-4 py-3">{isBangla ? 'ছবি' : 'Photo'}</th>
+                                    <th className="px-4 py-3">{t('students.student_name', undefined, 'Name')}</th>
+                                    <th className="px-4 py-3">{t('students.roll_number', undefined, 'Roll')}</th>
+                                    <th className="px-4 py-3">{t('students.class', undefined, 'Class')}</th>
+                                    <th className="px-4 py-3">{t('students.section', undefined, 'Section')}</th>
+                                    <th className="px-4 py-3">{t('students.gender', undefined, 'Gender')}</th>
+                                    <th className="px-4 py-3">{t('students.status', undefined, 'Status')}</th>
+                                    <th className="px-4 py-3 text-right">{t('common.actions', undefined, 'Actions')}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -140,19 +142,31 @@ export default function StudentsIndex({ students, sidebar }: Props) {
                                                 </div>
                                             ) : (
                                                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-100 text-xs font-semibold text-accent-700 dark:bg-accent-950/40 dark:text-accent-300">
-                                                    {initial(student.name_en)}
+                                                    {initial(student.name_en || student.name_bn || 'S')}
                                                 </div>
                                             )}
                                         </td>
                                         <td className="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">
-                                            {student.name_en}
+                                            <div>{bi(student.name_en, student.name_bn)}</div>
+                                            {isBangla && student.name_en && (
+                                                <div className="text-xs text-slate-400">
+                                                    {student.name_en}
+                                                </div>
+                                            )}
+                                            {!isBangla && student.name_bn && (
+                                                <div className="text-xs text-slate-400">
+                                                    {student.name_bn}
+                                                </div>
+                                            )}
                                         </td>
                                         <td className="px-4 py-3 font-mono text-xs">
-                                            {student.roll_number}
+                                            {student.roll_number ? formatNumber(student.roll_number) : '—'}
                                         </td>
                                         <td className="px-4 py-3">{student.class_name}</td>
                                         <td className="px-4 py-3">{student.section_name}</td>
-                                        <td className="px-4 py-3 capitalize">{student.gender}</td>
+                                        <td className="px-4 py-3 capitalize">
+                                            {student.gender === 'male' ? (isBangla ? 'ছাত্র' : 'Male') : student.gender === 'female' ? (isBangla ? 'ছাত্রী' : 'Female') : student.gender}
+                                        </td>
                                         <td className="px-4 py-3">
                                             <span
                                                 className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${
@@ -168,7 +182,7 @@ export default function StudentsIndex({ students, sidebar }: Props) {
                                                             : 'bg-slate-400'
                                                     }`}
                                                 />
-                                                {student.is_active ? 'Active' : 'Inactive'}
+                                                {student.is_active ? t('common.active', undefined, 'Active') : t('common.inactive', undefined, 'Inactive')}
                                             </span>
                                         </td>
                                         <td className="px-4 py-3 text-right">
@@ -176,21 +190,24 @@ export default function StudentsIndex({ students, sidebar }: Props) {
                                                 <Link
                                                     href={`/admin/students/${student.id}`}
                                                     className="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
-                                                    aria-label="View student"
+                                                    aria-label={t('common.view', undefined, 'View student')}
+                                                    title={t('common.view', undefined, 'View student')}
                                                 >
                                                     <AppIcon name="eye" className="h-4 w-4" />
                                                 </Link>
                                                 <Link
                                                     href={`/admin/students/${student.id}/edit`}
                                                     className="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
-                                                    aria-label="Edit student"
+                                                    aria-label={t('common.edit', undefined, 'Edit student')}
+                                                    title={t('common.edit', undefined, 'Edit student')}
                                                 >
                                                     <AppIcon name="pencil" className="h-4 w-4" />
                                                 </Link>
                                                 <button
                                                     type="button"
                                                     className="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-500 hover:bg-rose-50 hover:text-rose-600 dark:text-slate-400 dark:hover:bg-rose-950/30 dark:hover:text-rose-400"
-                                                    aria-label="Delete student"
+                                                    aria-label={t('common.delete', undefined, 'Delete student')}
+                                                    title={t('common.delete', undefined, 'Delete student')}
                                                     onClick={() => destroy(student.id)}
                                                 >
                                                     <AppIcon name="trash" className="h-4 w-4" />
@@ -205,7 +222,7 @@ export default function StudentsIndex({ students, sidebar }: Props) {
                                             colSpan={8}
                                             className="px-4 py-12 text-center text-sm text-slate-500 dark:text-slate-400"
                                         >
-                                            No students found.
+                                            {isBangla ? 'কোনো শিক্ষার্থী পাওয়া যায়নি।' : 'No students found.'}
                                         </td>
                                     </tr>
                                 )}

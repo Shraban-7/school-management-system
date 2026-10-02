@@ -3,11 +3,13 @@ import { Head, Link } from '@inertiajs/react';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import AppIcon from '@/components/AppIcon';
 import { useSidebarStack } from '@/composables/useNavStack';
+import { useI18n } from '@/composables/useI18n';
 import type { SidebarConfig } from '@/types/sidebar';
 
 interface ExamRow {
     id: number;
     name_en: string;
+    name_bn?: string | null;
     exam_type: string;
     session_name: string | null;
 }
@@ -23,6 +25,7 @@ export default function StudentResultsIndex({
     hasProfile,
     sidebar,
 }: StudentResultsIndexProps) {
+    const { t, bi } = useI18n();
     const sidebarStack = useSidebarStack();
     useEffect(() => {
         if (sidebar) {
@@ -32,24 +35,24 @@ export default function StudentResultsIndex({
 
     return (
         <DashboardLayout>
-            <Head title="My Results" />
+            <Head title={t('results.my_results')} />
 
             <div className="space-y-6">
                 <header>
                     <p className="text-xs font-semibold tracking-widest text-slate-500 uppercase dark:text-slate-400">
-                        Academic
+                        {t('sidebar.academic')}
                     </p>
                     <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-50">
-                        My results
+                        {t('results.my_results')}
                     </h1>
                     <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                        View and download your published exam gradesheets.
+                        {t('results.my_results_subtitle')}
                     </p>
                 </header>
 
                 {!hasProfile ? (
                     <div className="rounded-xl border border-dashed border-amber-300 bg-amber-50 p-6 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">
-                        Your login is not yet linked to a student record. Please contact the school office.
+                        {t('results.student_not_linked')}
                     </div>
                 ) : (
                     <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -63,7 +66,7 @@ export default function StudentResultsIndex({
                                     <AppIcon name="graduation-cap" className="h-5 w-5" />
                                 </div>
                                 <h2 className="mt-4 font-semibold text-slate-900 dark:text-slate-100">
-                                    {exam.name_en}
+                                    {bi(exam.name_en, exam.name_bn)}
                                 </h2>
                                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                     {exam.exam_type}
@@ -74,7 +77,7 @@ export default function StudentResultsIndex({
 
                         {exams.length === 0 && (
                             <div className="col-span-full rounded-xl border border-dashed border-slate-300 py-16 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
-                                No published results yet.
+                                {t('results.no_results')}
                             </div>
                         )}
                     </section>

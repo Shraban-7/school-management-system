@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import AppIcon from '@/components/AppIcon';
 import { useSidebarStack } from '@/composables/useNavStack';
+import { useI18n } from '@/composables/useI18n';
 import type { SidebarConfig } from '@/types/sidebar';
 
 interface ExamRow {
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export default function Index({ exams, sidebar }: Props) {
+    const { t, bi } = useI18n();
     const sidebarStack = useSidebarStack();
     useEffect(() => {
         sidebarStack.set(sidebar);
@@ -28,18 +30,18 @@ export default function Index({ exams, sidebar }: Props) {
 
     return (
         <DashboardLayout>
-            <Head title="Results" />
+            <Head title={t('results.title', {}, 'Results')} />
 
             <div className="space-y-6">
                 <header>
                     <p className="text-xs font-semibold tracking-widest text-slate-500 uppercase dark:text-slate-400">
-                        Academic
+                        {t('sidebar.academic', {}, 'Academic')}
                     </p>
                     <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-50">
-                        Results &amp; gradesheets
+                        {t('results.title', {}, 'Results & gradesheets')}
                     </h1>
                     <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                        Select an exam to view tabulation, class ranking, and printable gradesheets.
+                        {t('results.subtitle', {}, 'Select an exam to view tabulation, class ranking, and printable gradesheets.')}
                     </p>
                 </header>
 
@@ -61,11 +63,11 @@ export default function Index({ exams, sidebar }: Props) {
                                             : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
                                     }`}
                                 >
-                                    {exam.is_published ? 'Published' : 'Draft'}
+                                    {exam.is_published ? t('exams.published', {}, 'Published') : t('exams.draft', {}, 'Draft')}
                                 </span>
                             </div>
                             <h2 className="mt-4 font-semibold text-slate-900 dark:text-slate-100">
-                                {exam.name_en}
+                                {bi(exam.name_en, exam.name_bn)}
                             </h2>
                             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                 {exam.exam_type}
@@ -76,7 +78,7 @@ export default function Index({ exams, sidebar }: Props) {
 
                     {exams.length === 0 && (
                         <div className="col-span-full rounded-xl border border-dashed border-slate-300 py-16 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
-                            No exams found. Create an exam and enter marks first.
+                            {t('results.no_results', {}, 'No exams found. Create an exam and enter marks first.')}
                         </div>
                     )}
                 </section>

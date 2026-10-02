@@ -3,6 +3,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import AppIcon from '@/components/AppIcon';
 import { useSidebarStack } from '@/composables/useNavStack';
+import { useI18n } from '@/composables/useI18n';
 import type { SidebarConfig } from '@/types/sidebar';
 
 type Field = {
@@ -53,6 +54,7 @@ interface AdminSettingsProps {
 }
 
 export default function AdminSettings({ groups = [], sidebar, school, commSettings }: AdminSettingsProps) {
+    const { t, isBangla, formatNumber } = useI18n();
     const sidebarStack = useSidebarStack();
     useEffect(() => {
         if (sidebar) {
@@ -179,19 +181,19 @@ export default function AdminSettings({ groups = [], sidebar, school, commSettin
 
     return (
         <DashboardLayout>
-            <Head title="Settings" />
+            <Head title={t('settings.title', {}, 'Settings')} />
 
             <div className="space-y-6">
                 <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                         <p className="text-xs font-semibold tracking-widest text-slate-500 uppercase dark:text-slate-400">
-                            Management &amp; System
+                            {t('common.management', {}, 'Management')} &amp; {t('sidebar.system', {}, 'System')}
                         </p>
                         <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-50">
-                            Settings
+                            {t('settings.title', {}, 'Settings')}
                         </h1>
                         <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                            Configure mandatory institutional identity for official management documents and system preferences.
+                            {t('settings.subtitle', {}, 'Configure mandatory institutional identity for official management documents and system preferences.')}
                         </p>
                     </div>
 
@@ -201,7 +203,7 @@ export default function AdminSettings({ groups = [], sidebar, school, commSettin
                             className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                         >
                             <AppIcon name="server" className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                            ZKTeco Biometrics &amp; RFID
+                            {t('settings.zkteco_settings', {}, 'ZKTeco Biometrics & RFID')}
                         </Link>
                     </div>
                 </header>
@@ -225,7 +227,7 @@ export default function AdminSettings({ groups = [], sidebar, school, commSettin
                         }`}
                     >
                         <AppIcon name="cog" className="h-4 w-4" />
-                        Institution Profile (Mandatory)
+                        {t('settings.school_profile', {}, 'Institution Profile (Mandatory)')}
                     </button>
                     <button
                         type="button"
@@ -237,7 +239,7 @@ export default function AdminSettings({ groups = [], sidebar, school, commSettin
                         }`}
                     >
                         <AppIcon name="mail" className="h-4 w-4" />
-                        SMS &amp; Email Gateways
+                        {t('communication.title', {}, 'SMS & Email Gateways')}
                     </button>
                     <button
                         type="button"
@@ -249,7 +251,7 @@ export default function AdminSettings({ groups = [], sidebar, school, commSettin
                         }`}
                     >
                         <AppIcon name="settings" className="h-4 w-4" />
-                        System Variables
+                        {t('sidebar.settings', {}, 'System Variables')}
                     </button>
                     <button
                         type="button"
@@ -261,7 +263,7 @@ export default function AdminSettings({ groups = [], sidebar, school, commSettin
                         }`}
                     >
                         <AppIcon name="server" className="h-4 w-4" />
-                        Biometrics &amp; Hardware
+                        {t('sidebar.zkteco', {}, 'Biometrics & Hardware')}
                     </button>
                 </div>
 
@@ -269,13 +271,13 @@ export default function AdminSettings({ groups = [], sidebar, school, commSettin
                 {activeTab === 'institution' && (
                     <form onSubmit={submitInstitution} className="space-y-6">
                         <div className="rounded-lg border border-sky-200 bg-sky-50/70 p-4 text-xs text-sky-900 dark:border-sky-900/60 dark:bg-sky-950/30 dark:text-sky-200">
-                            <span className="font-semibold uppercase tracking-wider">Mandatory Management Information:</span>{' '}
-                            The details below are permanently printed on official student ID cards, monthly fee receipts, grade sheets, transcripts, and exam admit cards.
+                            <span className="font-semibold uppercase tracking-wider">{t('settings.mandatory_title', {}, 'Mandatory Management Information:')}</span>{' '}
+                            {t('settings.mandatory_notice', {}, 'The details below are permanently printed on official student ID cards, monthly fee receipts, grade sheets, transcripts, and exam admit cards.')}
                         </div>
 
                         {/* Identity & Accreditation */}
                         <section className={sectionClass}>
-                            <h2 className={sectionTitleClass}>Institutional Identity &amp; Accreditation</h2>
+                            <h2 className={sectionTitleClass}>{t('settings.identity_section', {}, 'Institutional Identity & Accreditation')}</h2>
                             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                 Official registered details with the Ministry of Education and Education Board.
                             </p>
@@ -283,7 +285,7 @@ export default function AdminSettings({ groups = [], sidebar, school, commSettin
                             <div className="mt-5 grid gap-5 sm:grid-cols-2">
                                 <div>
                                     <label htmlFor="name_en" className={labelClass}>
-                                        Institution Name (English) <span className="text-rose-500">*</span>
+                                        {t('settings.school_name_en', {}, 'Institution Name (English)')} <span className="text-rose-500">*</span>
                                     </label>
                                     <input
                                         id="name_en"
@@ -299,7 +301,7 @@ export default function AdminSettings({ groups = [], sidebar, school, commSettin
 
                                 <div>
                                     <label htmlFor="name_bn" className={labelClass}>
-                                        Institution Name (Bangla) <span className="text-rose-500">*</span>
+                                        {t('settings.school_name_bn', {}, 'Institution Name (Bangla)')} <span className="text-rose-500">*</span>
                                     </label>
                                     <input
                                         id="name_bn"
@@ -315,7 +317,7 @@ export default function AdminSettings({ groups = [], sidebar, school, commSettin
 
                                 <div>
                                     <label htmlFor="eiin_number" className={labelClass}>
-                                        EIIN Number <span className="text-rose-500">*</span>
+                                        {t('settings.eiin', {}, 'EIIN Number')} <span className="text-rose-500">*</span>
                                     </label>
                                     <input
                                         id="eiin_number"
@@ -331,7 +333,7 @@ export default function AdminSettings({ groups = [], sidebar, school, commSettin
 
                                 <div>
                                     <label htmlFor="board_affiliation" className={labelClass}>
-                                        Education Board Affiliation <span className="text-rose-500">*</span>
+                                        {t('settings.board', {}, 'Education Board Affiliation')} <span className="text-rose-500">*</span>
                                     </label>
                                     <input
                                         id="board_affiliation"
@@ -347,7 +349,7 @@ export default function AdminSettings({ groups = [], sidebar, school, commSettin
 
                                 <div>
                                     <label htmlFor="established_year" className={labelClass}>
-                                        Year Established
+                                        {t('settings.established_year', {}, 'Year Established')}
                                     </label>
                                     <input
                                         id="established_year"
@@ -372,7 +374,7 @@ export default function AdminSettings({ groups = [], sidebar, school, commSettin
                                     />
                                     <div>
                                         <label htmlFor="mpo_status" className="text-sm font-medium text-slate-800 dark:text-slate-200">
-                                            MPO Enlisted Institution
+                                            {t('settings.mpo_status', {}, 'MPO Enlisted Institution')}
                                         </label>
                                         <p className="text-xs text-slate-500 dark:text-slate-400">
                                             Check if the institution receives government monthly pay order (MPO) subvention.
@@ -384,7 +386,7 @@ export default function AdminSettings({ groups = [], sidebar, school, commSettin
 
                         {/* Administrative Contact & Location */}
                         <section className={sectionClass}>
-                            <h2 className={sectionTitleClass}>Administrative Contact &amp; Campus</h2>
+                            <h2 className={sectionTitleClass}>{t('site.contact_office', {}, 'Administrative Contact & Campus')}</h2>
                             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                 Official communication channels used for notices, reports, and parent communication.
                             </p>
@@ -392,7 +394,7 @@ export default function AdminSettings({ groups = [], sidebar, school, commSettin
                             <div className="mt-5 grid gap-5 sm:grid-cols-2">
                                 <div className="sm:col-span-2">
                                     <label htmlFor="address" className={labelClass}>
-                                        Campus / Institutional Address
+                                        {t('settings.address', {}, 'Campus / Institutional Address')}
                                     </label>
                                     <textarea
                                         id="address"
@@ -407,7 +409,7 @@ export default function AdminSettings({ groups = [], sidebar, school, commSettin
 
                                 <div>
                                     <label htmlFor="phone" className={labelClass}>
-                                        Official Telephone / Mobile
+                                        {t('settings.phone', {}, 'Official Telephone / Mobile')}
                                     </label>
                                     <input
                                         id="phone"
@@ -422,7 +424,7 @@ export default function AdminSettings({ groups = [], sidebar, school, commSettin
 
                                 <div>
                                     <label htmlFor="email" className={labelClass}>
-                                        Official Email Address
+                                        {t('settings.email', {}, 'Official Email Address')}
                                     </label>
                                     <input
                                         id="email"
@@ -437,7 +439,7 @@ export default function AdminSettings({ groups = [], sidebar, school, commSettin
 
                                 <div className="sm:col-span-2">
                                     <label htmlFor="website" className={labelClass}>
-                                        Official Website / Portal URL (Optional)
+                                        {t('settings.website', {}, 'Official Website / Portal URL (Optional)')}
                                     </label>
                                     <input
                                         id="website"
@@ -454,7 +456,7 @@ export default function AdminSettings({ groups = [], sidebar, school, commSettin
 
                         {/* Institutional Logo */}
                         <section className={sectionClass}>
-                            <h2 className={sectionTitleClass}>Institutional Logo &amp; Seal</h2>
+                            <h2 className={sectionTitleClass}>{t('settings.logo', {}, 'Institutional Logo & Seal')}</h2>
                             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                 This official emblem appears on student ID cards, payment vouchers, marksheets, and report cards.
                             </p>
@@ -533,7 +535,7 @@ export default function AdminSettings({ groups = [], sidebar, school, commSettin
                                 className="inline-flex items-center gap-2 rounded-lg bg-accent-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-accent-700 disabled:opacity-50"
                             >
                                 <AppIcon name="check" className="h-4 w-4" />
-                                {isSaving ? 'Saving Changes...' : 'Save Institution Profile'}
+                                {isSaving ? t('common.saving', {}, 'Saving Changes...') : t('common.save_changes', {}, 'Save Institution Profile')}
                             </button>
                         </div>
                     </form>

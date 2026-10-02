@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import AppIcon from '@/components/AppIcon';
 import { useSidebarStack } from '@/composables/useNavStack';
+import { useI18n } from '@/composables/useI18n';
 import type { SidebarConfig } from '@/types/sidebar';
 
 interface ExamRow {
@@ -31,6 +32,7 @@ interface Props {
 }
 
 export default function Index({ exams, sidebar }: Props) {
+    const { t, bi, isBangla, formatNumber } = useI18n();
     const sidebarStack = useSidebarStack();
     useEffect(() => {
         sidebarStack.set(sidebar);
@@ -70,23 +72,23 @@ export default function Index({ exams, sidebar }: Props) {
             if (!search) return true;
             const q = search.toLowerCase();
             return (
-                exam.name_en.toLowerCase().includes(q) ||
+                exam.name_en?.toLowerCase().includes(q) ||
                 exam.name_bn?.toLowerCase().includes(q) ||
-                exam.exam_type.toLowerCase().includes(q) ||
+                exam.exam_type?.toLowerCase().includes(q) ||
                 exam.session_name?.toLowerCase().includes(q)
             );
         });
     }, [exams.data, search, statusFilter, typeFilter]);
 
     function destroy(id: number, name: string) {
-        if (confirm(`Are you sure you want to delete "${name}"? All associated marks will be removed.`)) {
+        if (confirm(isBangla ? `আপনি কি নিশ্চিত যে "${name}" মুছে ফেলতে চান? সংশ্লিষ্ট সকল নম্বর মুছে যাবে।` : `Are you sure you want to delete "${name}"? All associated marks will be removed.`)) {
             router.delete(`/admin/exams/${id}`);
         }
     }
 
     return (
         <DashboardLayout>
-            <Head title="Exams & Evaluations" />
+            <Head title={t('exams.title', undefined, 'Exams & Evaluations')} />
 
             <div className="w-full max-w-full space-y-6">
                 {/* Header */}
@@ -94,18 +96,18 @@ export default function Index({ exams, sidebar }: Props) {
                     <div>
                         <div className="flex items-center gap-2">
                             <span className="inline-flex h-6 items-center rounded-md bg-accent-500/10 px-2 text-xs font-semibold tracking-wider text-accent-700 uppercase dark:bg-accent-500/20 dark:text-accent-300">
-                                Academics
+                                {isBangla ? 'শিক্ষা কার্যক্রম' : 'Academics'}
                             </span>
                             <span className="text-xs text-slate-400 dark:text-slate-500">/</span>
                             <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                                Evaluations
+                                {isBangla ? 'পরীক্ষা ও মূল্যায়ন' : 'Evaluations'}
                             </span>
                         </div>
                         <h1 className="mt-1.5 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-50">
-                            Exams & Marks
+                            {t('exams.title', undefined, 'Exams & Marks')}
                         </h1>
                         <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                            Configure exam schedules, manage student marks, and view grade distributions.
+                            {isBangla ? 'পরীক্ষার সময়সূচি তৈরি, নম্বর ইনপুট এবং মূল্যায়ন পরিচালনা করুন।' : 'Configure exam schedules, manage student marks, and view grade distributions.'}
                         </p>
                     </div>
 
@@ -115,7 +117,7 @@ export default function Index({ exams, sidebar }: Props) {
                             className="inline-flex items-center gap-2 rounded-xl bg-accent-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-accent-700 focus:ring-2 focus:ring-accent-500/30 focus:outline-none dark:shadow-accent-950/40"
                         >
                             <AppIcon name="plus" className="h-4 w-4" />
-                            Create Exam
+                            {t('exams.add_exam', undefined, 'Create Exam')}
                         </Link>
                     </div>
                 </header>
@@ -134,10 +136,10 @@ export default function Index({ exams, sidebar }: Props) {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                                    Total Exams
+                                    {t('exams.total_exams', undefined, 'Total Exams')}
                                 </p>
                                 <p className="mt-1.5 text-2xl font-bold text-slate-900 dark:text-slate-50">
-                                    {stats.total}
+                                    {formatNumber(stats.total)}
                                 </p>
                             </div>
                             <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent-50 text-accent-600 dark:bg-accent-950/50 dark:text-accent-400">
@@ -150,10 +152,10 @@ export default function Index({ exams, sidebar }: Props) {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                                    Published
+                                    {t('exams.published', undefined, 'Published')}
                                 </p>
                                 <p className="mt-1.5 text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-                                    {stats.published}
+                                    {formatNumber(stats.published)}
                                 </p>
                             </div>
                             <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400">
@@ -166,10 +168,10 @@ export default function Index({ exams, sidebar }: Props) {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                                    Draft
+                                    {t('exams.draft', undefined, 'Draft')}
                                 </p>
                                 <p className="mt-1.5 text-2xl font-bold text-slate-700 dark:text-slate-300">
-                                    {stats.draft}
+                                    {formatNumber(stats.draft)}
                                 </p>
                             </div>
                             <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
@@ -194,7 +196,7 @@ export default function Index({ exams, sidebar }: Props) {
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                     type="search"
-                                    placeholder="Search exams…"
+                                    placeholder={isBangla ? 'পরীক্ষার নাম দিয়ে খুঁজুন…' : 'Search exams…'}
                                     className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50/50 pr-3 pl-9 text-sm text-slate-900 placeholder-slate-400 transition focus:border-accent-500 focus:bg-white focus:ring-2 focus:ring-accent-500/20 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:bg-slate-900"
                                 />
                                 {search && (
@@ -219,7 +221,7 @@ export default function Index({ exams, sidebar }: Props) {
                                             : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                                     }`}
                                 >
-                                    All
+                                    {isBangla ? 'সকল' : 'All'}
                                 </button>
                                 <button
                                     type="button"
@@ -230,7 +232,7 @@ export default function Index({ exams, sidebar }: Props) {
                                             : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                                     }`}
                                 >
-                                    Published
+                                    {t('exams.published', undefined, 'Published')}
                                 </button>
                                 <button
                                     type="button"
@@ -241,7 +243,7 @@ export default function Index({ exams, sidebar }: Props) {
                                             : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                                     }`}
                                 >
-                                    Draft
+                                    {t('exams.draft', undefined, 'Draft')}
                                 </button>
                             </div>
 
@@ -252,7 +254,7 @@ export default function Index({ exams, sidebar }: Props) {
                                     onChange={(e) => setTypeFilter(e.target.value)}
                                     className="h-9 rounded-lg border border-slate-200 bg-slate-50/50 px-2.5 text-xs font-medium text-slate-700 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300 [&>option]:bg-white dark:[&>option]:bg-slate-900"
                                 >
-                                    <option value="all">All Types</option>
+                                    <option value="all">{isBangla ? 'সকল ধরন' : 'All Types'}</option>
                                     {availableTypes.map((t) => (
                                         <option key={t} value={t}>
                                             {t}
@@ -263,7 +265,11 @@ export default function Index({ exams, sidebar }: Props) {
                         </div>
 
                         <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                            Showing <strong className="text-slate-800 dark:text-slate-200">{filtered.length}</strong> of {exams.total} exams
+                            {isBangla ? (
+                                <>মোট <strong className="text-slate-800 dark:text-slate-200">{formatNumber(exams.total)}</strong> টির মধ্যে <strong className="text-slate-800 dark:text-slate-200">{formatNumber(filtered.length)}</strong> টি পরীক্ষা প্রদর্শিত</>
+                            ) : (
+                                <>Showing <strong className="text-slate-800 dark:text-slate-200">{filtered.length}</strong> of {exams.total} exams</>
+                            )}
                         </span>
                     </div>
 
@@ -272,12 +278,12 @@ export default function Index({ exams, sidebar }: Props) {
                         <table className="w-full min-w-[760px] divide-y divide-slate-200/80 text-left text-sm dark:divide-slate-800">
                             <thead className="bg-slate-50/80 text-xs font-semibold tracking-wider text-slate-600 uppercase dark:bg-slate-950/70 dark:text-slate-300">
                                 <tr>
-                                    <th className="px-5 py-3.5">Exam Name</th>
-                                    <th className="px-4 py-3.5">Type</th>
-                                    <th className="px-4 py-3.5">Session</th>
-                                    <th className="px-4 py-3.5">Dates</th>
-                                    <th className="px-4 py-3.5">Status</th>
-                                    <th className="px-5 py-3.5 text-right">Actions</th>
+                                    <th className="px-5 py-3.5">{t('exams.exam_name', undefined, 'Exam Name')}</th>
+                                    <th className="px-4 py-3.5">{t('exams.exam_type', undefined, 'Type')}</th>
+                                    <th className="px-4 py-3.5">{t('exams.session', undefined, 'Session')}</th>
+                                    <th className="px-4 py-3.5">{isBangla ? 'তারিখ' : 'Dates'}</th>
+                                    <th className="px-4 py-3.5">{t('exams.status', undefined, 'Status')}</th>
+                                    <th className="px-5 py-3.5 text-right">{t('common.actions', undefined, 'Actions')}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
@@ -294,9 +300,14 @@ export default function Index({ exams, sidebar }: Props) {
                                                 </div>
                                                 <div className="min-w-0">
                                                     <p className="truncate font-semibold text-slate-900 dark:text-slate-100">
-                                                        {exam.name_en}
+                                                        {bi(exam.name_en, exam.name_bn)}
                                                     </p>
-                                                    {exam.name_bn && (
+                                                    {isBangla && exam.name_en && (
+                                                        <p className="truncate text-xs text-slate-400">
+                                                            {exam.name_en}
+                                                        </p>
+                                                    )}
+                                                    {!isBangla && exam.name_bn && (
                                                         <p className="truncate text-xs text-slate-500 dark:text-slate-400">
                                                             {exam.name_bn}
                                                         </p>
@@ -325,20 +336,20 @@ export default function Index({ exams, sidebar }: Props) {
                                             {exam.start_date || exam.end_date ? (
                                                 <div className="space-y-0.5">
                                                     <div>
-                                                        <span className="text-slate-400 dark:text-slate-500">From: </span>
+                                                        <span className="text-slate-400 dark:text-slate-500">{isBangla ? 'শুরু: ' : 'From: '}</span>
                                                         <span className="font-medium text-slate-700 dark:text-slate-200">
                                                             {exam.start_date ?? '—'}
                                                         </span>
                                                     </div>
                                                     <div>
-                                                        <span className="text-slate-400 dark:text-slate-500">To: </span>
+                                                        <span className="text-slate-400 dark:text-slate-500">{isBangla ? 'শেষ: ' : 'To: '}</span>
                                                         <span className="font-medium text-slate-700 dark:text-slate-200">
                                                             {exam.end_date ?? '—'}
                                                         </span>
                                                     </div>
                                                 </div>
                                             ) : (
-                                                <span className="text-slate-400 dark:text-slate-500">Not set</span>
+                                                <span className="text-slate-400 dark:text-slate-500">{isBangla ? 'নির্ধারিত নয়' : 'Not set'}</span>
                                             )}
                                         </td>
 
@@ -358,7 +369,7 @@ export default function Index({ exams, sidebar }: Props) {
                                                             : 'bg-slate-400 dark:bg-slate-500'
                                                     }`}
                                                 />
-                                                {exam.is_published ? 'Published' : 'Draft'}
+                                                {exam.is_published ? (isBangla ? 'প্রকাশিত' : 'Published') : (isBangla ? 'খসড়া' : 'Draft')}
                                             </span>
                                         </td>
 
@@ -369,18 +380,18 @@ export default function Index({ exams, sidebar }: Props) {
                                                 <Link
                                                     href={`/admin/exams/${exam.id}/marks`}
                                                     className="inline-flex items-center gap-1.5 rounded-lg bg-accent-50 px-2.5 py-1.5 text-xs font-semibold text-accent-700 transition hover:bg-accent-100 focus:outline-none dark:bg-accent-950/60 dark:text-accent-300 dark:hover:bg-accent-900/60"
-                                                    title="Enter student marks"
+                                                    title={t('exams.marks_entry', undefined, 'Enter student marks')}
                                                 >
                                                     <AppIcon name="book-open" className="h-3.5 w-3.5" />
-                                                    <span>Marks</span>
+                                                    <span>{t('exams.marks_entry', undefined, 'Marks')}</span>
                                                 </Link>
 
                                                 {/* Edit Button */}
                                                 <Link
                                                     href={`/admin/exams/${exam.id}/edit`}
                                                     className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus:outline-none dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
-                                                    aria-label="Edit exam"
-                                                    title="Edit exam"
+                                                    aria-label={t('common.edit', undefined, 'Edit exam')}
+                                                    title={t('common.edit', undefined, 'Edit exam')}
                                                 >
                                                     <AppIcon name="pencil" className="h-4 w-4" />
                                                 </Link>
@@ -389,8 +400,8 @@ export default function Index({ exams, sidebar }: Props) {
                                                 <button
                                                     type="button"
                                                     className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-rose-50 hover:text-rose-600 focus:outline-none dark:text-slate-500 dark:hover:bg-rose-950/40 dark:hover:text-rose-400"
-                                                    aria-label="Delete exam"
-                                                    title="Delete exam"
+                                                    aria-label={t('common.delete', undefined, 'Delete exam')}
+                                                    title={t('common.delete', undefined, 'Delete exam')}
                                                     onClick={() => destroy(exam.id, exam.name_en)}
                                                 >
                                                     <AppIcon name="trash" className="h-4 w-4" />
@@ -410,12 +421,12 @@ export default function Index({ exams, sidebar }: Props) {
                                                 <AppIcon name="search" className="h-6 w-6" />
                                             </div>
                                             <h3 className="mt-3 font-semibold text-slate-900 dark:text-slate-100">
-                                                No exams found
+                                                {isBangla ? 'কোনো পরীক্ষা পাওয়া যায়নি' : 'No exams found'}
                                             </h3>
                                             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                                 {search || statusFilter !== 'all' || typeFilter !== 'all'
-                                                    ? 'Try adjusting your search criteria or clearing filters.'
-                                                    : 'Get started by creating your first exam.'}
+                                                    ? (isBangla ? 'অনুসন্ধান বা ফিল্টারের শর্তসমূহ পরিবর্তন করে দেখুন।' : 'Try adjusting your search criteria or clearing filters.')
+                                                    : (isBangla ? 'নতুন পরীক্ষা তৈরি করে শুরু করুন।' : 'Get started by creating your first exam.')}
                                             </p>
                                             {search || statusFilter !== 'all' || typeFilter !== 'all' ? (
                                                 <button
@@ -427,7 +438,7 @@ export default function Index({ exams, sidebar }: Props) {
                                                     }}
                                                     className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                                                 >
-                                                    Clear filters
+                                                    {isBangla ? 'ফিল্টার মুছুন' : 'Clear filters'}
                                                 </button>
                                             ) : (
                                                 <Link
@@ -435,7 +446,7 @@ export default function Index({ exams, sidebar }: Props) {
                                                     className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-accent-600 px-3.5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-accent-700"
                                                 >
                                                     <AppIcon name="plus" className="h-3.5 w-3.5" />
-                                                    Create exam
+                                                    {t('exams.add_exam', undefined, 'Create exam')}
                                                 </Link>
                                             )}
                                         </td>
@@ -449,8 +460,11 @@ export default function Index({ exams, sidebar }: Props) {
                     {exams.last_page > 1 && (
                         <div className="flex items-center justify-between border-t border-slate-200/80 px-4 py-3 sm:px-6 dark:border-slate-800">
                             <span className="text-xs text-slate-500 dark:text-slate-400">
-                                Page <strong className="text-slate-900 dark:text-slate-100">{exams.current_page}</strong> of{' '}
-                                <strong className="text-slate-900 dark:text-slate-100">{exams.last_page}</strong>
+                                {isBangla ? (
+                                    <>পৃষ্ঠা <strong className="text-slate-900 dark:text-slate-100">{formatNumber(exams.current_page)}</strong> / <strong className="text-slate-900 dark:text-slate-100">{formatNumber(exams.last_page)}</strong></>
+                                ) : (
+                                    <>Page <strong className="text-slate-900 dark:text-slate-100">{exams.current_page}</strong> of <strong className="text-slate-900 dark:text-slate-100">{exams.last_page}</strong></>
+                                )}
                             </span>
                             <div className="flex items-center gap-1">
                                 {exams.current_page > 1 && (
@@ -459,7 +473,7 @@ export default function Index({ exams, sidebar }: Props) {
                                         className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                                     >
                                         <AppIcon name="chevron-left" className="h-3.5 w-3.5" />
-                                        Previous
+                                        {t('common.previous', undefined, 'Previous')}
                                     </Link>
                                 )}
                                 {exams.current_page < exams.last_page && (
@@ -467,7 +481,7 @@ export default function Index({ exams, sidebar }: Props) {
                                         href={`/admin/exams?page=${exams.current_page + 1}`}
                                         className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                                     >
-                                        Next
+                                        {t('common.next', undefined, 'Next')}
                                         <AppIcon name="chevron-right" className="h-3.5 w-3.5" />
                                     </Link>
                                 )}

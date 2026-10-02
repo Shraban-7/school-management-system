@@ -6,6 +6,7 @@ import AppIcon from '@/components/AppIcon';
 import AppLogo from '@/components/AppLogo';
 import KpiCard from '@/components/KpiCard';
 import { useSidebarStack } from '@/composables/useNavStack';
+import { useI18n } from '@/composables/useI18n';
 import type { SidebarConfig } from '@/types/sidebar';
 import type {
     Stat,
@@ -61,21 +62,37 @@ export default function Dashboard({
     recentActivity,
 }: DashboardProps) {
     const sidebarStack = useSidebarStack();
+    const { t, bi, isBangla, formatNumber } = useI18n();
+
     useEffect(() => {
         if (sidebar) {
             sidebarStack.set(sidebar);
         }
     }, [sidebar]);
 
+    const schoolName =
+        bi(schoolInfo?.name, schoolInfo?.name_bn) ||
+        schoolInfo?.name ||
+        (isBangla ? 'বিদ্যালয় ব্যবস্থাপনা সিস্টেম' : 'School Management System');
 
     const todayDateFormatted = useMemo(() => {
-        return new Intl.DateTimeFormat('en-US', {
+        return new Intl.DateTimeFormat(isBangla ? 'bn-BD' : 'en-US', {
             weekday: 'short',
             month: 'short',
             day: 'numeric',
             year: 'numeric',
         }).format(new Date());
-    }, []);
+    }, [isBangla]);
+
+    function localizeStatLabel(label: string): string {
+        const map: Record<string, string> = {
+            'Total students': t('dashboard.kpi_students', {}, 'Total Students'),
+            'Teaching staff': t('dashboard.kpi_teachers', {}, 'Teaching Staff'),
+            'Attendance today': t('dashboard.kpi_attendance', {}, 'Attendance Today'),
+            'Classes & Sections': t('dashboard.kpi_classes', {}, 'Classes & Sections'),
+        };
+        return map[label] || label;
+    }
 
     const statusDot = (status: StatStatus): string =>
         status === 'ok' || status === 'good'
@@ -98,57 +115,57 @@ export default function Dashboard({
         if (role === 'admin' || role === 'headmaster') {
             return [
                 {
-                    label: 'Take Attendance',
-                    desc: 'Daily student roll call',
+                    label: t('dashboard.take_attendance', {}, 'Take Attendance'),
+                    desc: t('dashboard.take_attendance_desc', {}, 'Daily student roll call'),
                     href: '/admin/attendance',
                     icon: 'check-circle',
                     color: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/50 dark:text-emerald-400',
                 },
                 {
-                    label: 'Enroll Student',
-                    desc: 'Register new admission',
+                    label: t('dashboard.enroll_student', {}, 'Enroll Student'),
+                    desc: t('dashboard.enroll_student_desc', {}, 'Register new admission'),
                     href: '/admin/students/create',
                     icon: 'graduation-cap',
                     color: 'text-accent-600 bg-accent-50 dark:bg-accent-950/50 dark:text-accent-400',
                 },
                 {
-                    label: 'Faculty & Staff',
-                    desc: 'Manage teaching directory',
+                    label: t('dashboard.faculty_staff', {}, 'Faculty & Staff'),
+                    desc: t('dashboard.faculty_staff_desc', {}, 'Manage teaching directory'),
                     href: '/admin/teachers',
                     icon: 'briefcase',
                     color: 'text-indigo-600 bg-indigo-50 dark:bg-indigo-950/50 dark:text-indigo-400',
                 },
                 {
-                    label: 'Exams & Marks',
-                    desc: 'Gradebook & results',
+                    label: t('dashboard.exams_marks', {}, 'Exams & Marks'),
+                    desc: t('dashboard.exams_marks_desc', {}, 'Gradebook & results'),
                     href: '/admin/exams',
                     icon: 'award',
                     color: 'text-amber-600 bg-amber-50 dark:bg-amber-950/50 dark:text-amber-400',
                 },
                 {
-                    label: 'Fee Invoices',
-                    desc: 'Collect & track tuition',
+                    label: t('dashboard.fee_invoices', {}, 'Fee Invoices'),
+                    desc: t('dashboard.fee_invoices_desc', {}, 'Collect & track tuition'),
                     href: '/admin/fees/invoices',
                     icon: 'credit-card',
                     color: 'text-teal-600 bg-teal-50 dark:bg-teal-950/50 dark:text-teal-400',
                 },
                 {
-                    label: 'Send SMS & Mail',
-                    desc: 'Parent broadcasts',
+                    label: t('dashboard.send_sms_mail', {}, 'Send SMS & Mail'),
+                    desc: t('dashboard.send_sms_mail_desc', {}, 'Parent broadcasts'),
                     href: '/admin/communication/messages',
                     icon: 'send',
                     color: 'text-sky-600 bg-sky-50 dark:bg-sky-950/50 dark:text-sky-400',
                 },
                 {
-                    label: 'Biometric Sync',
-                    desc: 'ZKTeco device fleet',
+                    label: t('dashboard.biometric_sync', {}, 'Biometric Sync'),
+                    desc: t('dashboard.biometric_sync_desc', {}, 'ZKTeco device fleet'),
                     href: '/admin/settings/zkteco',
                     icon: 'server',
                     color: 'text-purple-600 bg-purple-50 dark:bg-purple-950/50 dark:text-purple-400',
                 },
                 {
-                    label: 'Notice Board',
-                    desc: 'Publish circulars',
+                    label: t('dashboard.notice_board', {}, 'Notice Board'),
+                    desc: t('dashboard.notice_board_desc', {}, 'Publish circulars'),
                     href: '/notices',
                     icon: 'megaphone',
                     color: 'text-rose-600 bg-rose-50 dark:bg-rose-950/50 dark:text-rose-400',
@@ -159,29 +176,29 @@ export default function Dashboard({
         if (role === 'teacher') {
             return [
                 {
-                    label: 'Mark Attendance',
-                    desc: 'Record section attendance',
+                    label: t('dashboard.enter_marks', {}, 'Mark Attendance'),
+                    desc: t('dashboard.take_attendance_desc', {}, 'Record section attendance'),
                     href: '/admin/attendance',
                     icon: 'check-circle',
                     color: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/50 dark:text-emerald-400',
                 },
                 {
-                    label: 'Enter Exam Marks',
-                    desc: 'Input student marks',
+                    label: t('dashboard.enter_marks', {}, 'Enter Exam Marks'),
+                    desc: t('dashboard.enter_marks_desc', {}, 'Input student marks'),
                     href: '/admin/exams',
                     icon: 'pencil',
                     color: 'text-accent-600 bg-accent-50 dark:bg-accent-950/50 dark:text-accent-400',
                 },
                 {
-                    label: 'Classes & Sections',
-                    desc: 'View rosters & schedules',
+                    label: t('dashboard.classes_rosters', {}, 'Classes & Sections'),
+                    desc: t('dashboard.classes_rosters_desc', {}, 'View rosters & schedules'),
                     href: '/admin/classes-and-sections',
                     icon: 'book-open',
                     color: 'text-indigo-600 bg-indigo-50 dark:bg-indigo-950/50 dark:text-indigo-400',
                 },
                 {
-                    label: 'Syllabus & Materials',
-                    desc: 'Academic guides',
+                    label: t('dashboard.syllabus_materials', {}, 'Syllabus & Materials'),
+                    desc: t('dashboard.syllabus_materials_desc', {}, 'Academic guides'),
                     href: '/admin/syllabus',
                     icon: 'file-text',
                     color: 'text-amber-600 bg-amber-50 dark:bg-amber-950/50 dark:text-amber-400',
@@ -192,29 +209,29 @@ export default function Dashboard({
         if (role === 'student' || role === 'parent') {
             return [
                 {
-                    label: 'Academic Results',
-                    desc: 'Exam report cards & GPA',
+                    label: t('dashboard.academic_results', {}, 'Academic Results'),
+                    desc: t('dashboard.academic_results_desc', {}, 'Exam report cards & GPA'),
                     href: role === 'parent' ? '/parent/dashboard' : '/student/dashboard',
                     icon: 'award',
                     color: 'text-accent-600 bg-accent-50 dark:bg-accent-950/50 dark:text-accent-400',
                 },
                 {
-                    label: 'School Notices',
-                    desc: 'Circulars & announcements',
+                    label: t('dashboard.school_notices', {}, 'School Notices'),
+                    desc: t('dashboard.school_notices_desc', {}, 'Circulars & announcements'),
                     href: '/notices',
                     icon: 'megaphone',
                     color: 'text-sky-600 bg-sky-50 dark:bg-sky-950/50 dark:text-sky-400',
                 },
                 {
-                    label: 'Fee Summary',
-                    desc: 'Tuition balances & payments',
+                    label: t('dashboard.fee_summary', {}, 'Fee Summary'),
+                    desc: t('dashboard.fee_summary_desc', {}, 'Tuition balances & payments'),
                     href: '/parent/fees',
                     icon: 'credit-card',
                     color: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/50 dark:text-emerald-400',
                 },
                 {
-                    label: 'Syllabus Download',
-                    desc: 'Curriculum outlines',
+                    label: t('dashboard.syllabus_download', {}, 'Syllabus Download'),
+                    desc: t('dashboard.syllabus_download_desc', {}, 'Curriculum outlines'),
                     href: '/syllabus',
                     icon: 'download',
                     color: 'text-purple-600 bg-purple-50 dark:bg-purple-950/50 dark:text-purple-400',
@@ -224,39 +241,39 @@ export default function Dashboard({
 
         return [
             {
-                label: 'Attendance Sheet',
-                desc: 'Daily attendance',
+                label: t('dashboard.attendance_sheet', {}, 'Attendance Sheet'),
+                desc: t('dashboard.attendance_sheet_desc', {}, 'Daily attendance'),
                 href: '/admin/attendance',
                 icon: 'check-circle',
                 color: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/50 dark:text-emerald-400',
             },
             {
-                label: 'Biometric Hardware',
-                desc: 'ZKTeco terminal monitor',
+                label: t('dashboard.biometric_hardware', {}, 'Biometric Hardware'),
+                desc: t('dashboard.biometric_hardware_desc', {}, 'ZKTeco terminal monitor'),
                 href: '/admin/settings/zkteco',
                 icon: 'server',
                 color: 'text-purple-600 bg-purple-50 dark:bg-purple-950/50 dark:text-purple-400',
             },
             {
-                label: 'Notice Board',
-                desc: 'Published notices',
+                label: t('dashboard.notice_board', {}, 'Notice Board'),
+                desc: t('dashboard.notice_board_desc', {}, 'Published notices'),
                 href: '/notices',
                 icon: 'megaphone',
                 color: 'text-sky-600 bg-sky-50 dark:bg-sky-950/50 dark:text-sky-400',
             },
             {
-                label: 'System Settings',
-                desc: 'School configuration',
+                label: t('dashboard.system_settings', {}, 'System Settings'),
+                desc: t('dashboard.system_settings_desc', {}, 'School configuration'),
                 href: '/admin/settings',
                 icon: 'settings',
                 color: 'text-slate-600 bg-slate-100 dark:bg-slate-800 dark:text-slate-300',
             },
         ];
-    }, [role]);
+    }, [role, t]);
 
     return (
         <DashboardLayout notificationCount={notificationCount}>
-            <Head title={`${title} | ${schoolInfo?.name ?? 'SMS App'}`} />
+            <Head title={`${title} | ${schoolName}`} />
 
             <DashboardShell
                 role={role}
@@ -270,7 +287,7 @@ export default function Dashboard({
                         <div className="flex items-start gap-4">
                             <AppLogo
                                 src={schoolInfo?.logo_url}
-                                name={schoolInfo?.name}
+                                name={schoolName}
                                 size="lg"
                                 className="shrink-0"
                             />
@@ -278,19 +295,19 @@ export default function Dashboard({
                                 <div className="flex flex-wrap items-center gap-2">
                                     <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-semibold text-emerald-300 backdrop-blur-xs">
                                         <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                                        Live Academic Session {schoolInfo?.session ?? '2026'}
+                                        {t('dashboard.active_session')}: {schoolInfo?.session ?? '2026'}
                                     </span>
                                     {schoolInfo?.eiin && (
                                         <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-xs font-medium text-slate-300">
-                                            EIIN: {schoolInfo.eiin}
+                                            {t('dashboard.eiin')}: {schoolInfo.eiin}
                                         </span>
                                     )}
                                 </div>
                                 <h2 className="mt-2 text-xl font-bold tracking-tight text-white md:text-2xl">
-                                    {schoolInfo?.name ?? 'School Management System'}
+                                    {schoolName}
                                 </h2>
                                 <p className="mt-1 text-xs text-slate-300 md:text-sm">
-                                    Institutional operations, attendance tracking, examination records, and fee collections.
+                                    {t('dashboard.subtitle')}
                                 </p>
                             </div>
                         </div>
@@ -306,7 +323,7 @@ export default function Dashboard({
                                     className="inline-flex items-center gap-1.5 rounded-xl bg-accent-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-accent-500 active:scale-95"
                                 >
                                     <AppIcon name="plus" className="h-4 w-4" />
-                                    Take Attendance
+                                    {t('dashboard.take_attendance')}
                                 </Link>
                             )}
                         </div>
@@ -323,8 +340,8 @@ export default function Dashboard({
                         {stats.map((stat, i) => (
                             <KpiCard
                                 key={stat.label || i}
-                                label={stat.label}
-                                value={stat.value}
+                                label={localizeStatLabel(stat.label)}
+                                value={typeof stat.value === 'number' ? formatNumber(stat.value) : stat.value}
                                 icon={stat.icon}
                                 trend={stat.trend}
                                 trendLabel={stat.trendLabel}
@@ -348,7 +365,7 @@ export default function Dashboard({
                                         </div>
                                         <div>
                                             <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                                                Today's Attendance Status
+                                                {t('dashboard.todays_attendance')}
                                             </h3>
                                             <p className="text-xs text-slate-500 dark:text-slate-400">
                                                 {attendanceSummary.date_formatted}
@@ -359,7 +376,7 @@ export default function Dashboard({
                                         href="/admin/attendance"
                                         className="inline-flex items-center gap-1 text-xs font-semibold text-accent-600 hover:text-accent-700 dark:text-accent-400"
                                     >
-                                        Open Attendance Register
+                                        {t('dashboard.view_attendance_sheet')}
                                         <AppIcon name="arrow-right" className="h-3 w-3" />
                                     </Link>
                                 </div>
@@ -368,11 +385,11 @@ export default function Dashboard({
                                     {/* Overall Attendance Rate */}
                                     <div className="flex flex-col justify-between rounded-xl border border-slate-100 bg-slate-50/80 p-3.5 sm:p-4 dark:border-slate-800/60 dark:bg-slate-800/40">
                                         <span className="text-xs font-medium text-slate-500 uppercase tracking-wider dark:text-slate-400">
-                                            Turnout Rate
+                                            {t('dashboard.rate')}
                                         </span>
                                         <div className="mt-2 flex items-baseline gap-1.5">
                                             <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">
-                                                {attendanceSummary.marked_today > 0 ? `${attendanceSummary.rate}%` : '—'}
+                                                {attendanceSummary.marked_today > 0 ? `${formatNumber(attendanceSummary.rate)}%` : '—'}
                                             </span>
                                         </div>
                                         <div className="mt-3">
@@ -386,10 +403,10 @@ export default function Dashboard({
                                                 }`}
                                             >
                                                 {attendanceSummary.marked_today === 0
-                                                    ? 'Pending Today'
+                                                    ? t('common.pending')
                                                     : attendanceSummary.rate >= 90
-                                                      ? 'High Turnout'
-                                                      : 'Moderate Turnout'}
+                                                      ? (isBangla ? 'উচ্চ উপস্থিতি' : 'High Turnout')
+                                                      : (isBangla ? 'সন্তোষজনক' : 'Moderate Turnout')}
                                             </span>
                                         </div>
                                     </div>
@@ -398,12 +415,12 @@ export default function Dashboard({
                                     <div className="flex flex-col justify-between rounded-xl border border-emerald-100/80 bg-emerald-50/40 p-3.5 sm:p-4 dark:border-emerald-950/50 dark:bg-emerald-950/20">
                                         <div className="flex items-center justify-between">
                                             <span className="text-xs font-semibold text-emerald-700 uppercase tracking-wider dark:text-emerald-300">
-                                                Present
+                                                {t('dashboard.present_students')}
                                             </span>
                                             <AppIcon name="check" className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                                         </div>
                                         <p className="mt-2 text-2xl font-bold text-emerald-700 dark:text-emerald-300">
-                                            {attendanceSummary.present}
+                                            {formatNumber(attendanceSummary.present)}
                                         </p>
                                         <span className="mt-2 text-xs text-emerald-600/80 dark:text-emerald-400/80">
                                             Marked present
@@ -414,15 +431,15 @@ export default function Dashboard({
                                     <div className="flex flex-col justify-between rounded-xl border border-rose-100/80 bg-rose-50/40 p-3.5 sm:p-4 dark:border-rose-950/50 dark:bg-rose-950/20">
                                         <div className="flex items-center justify-between">
                                             <span className="text-xs font-semibold text-rose-700 uppercase tracking-wider dark:text-rose-300">
-                                                Absent
+                                                {t('dashboard.absent_students')}
                                             </span>
                                             <AppIcon name="close" className="h-4 w-4 text-rose-600 dark:text-rose-400" />
                                         </div>
                                         <p className="mt-2 text-2xl font-bold text-rose-700 dark:text-rose-300">
-                                            {attendanceSummary.absent}
+                                            {formatNumber(attendanceSummary.absent)}
                                         </p>
                                         <span className="mt-2 text-xs text-rose-600/80 dark:text-rose-400/80">
-                                            Unexcused / notified
+                                            {isBangla ? 'অনুপস্থিতি বার্তা প্রেরিত' : 'Unexcused / notified'}
                                         </span>
                                     </div>
 
@@ -430,15 +447,15 @@ export default function Dashboard({
                                     <div className="flex flex-col justify-between rounded-xl border border-amber-100/80 bg-amber-50/40 p-3.5 sm:p-4 dark:border-amber-950/50 dark:bg-amber-950/20">
                                         <div className="flex items-center justify-between">
                                             <span className="text-xs font-semibold text-amber-700 uppercase tracking-wider dark:text-amber-300">
-                                                Late
+                                                {t('dashboard.late_students')}
                                             </span>
                                             <AppIcon name="clock" className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                                         </div>
                                         <p className="mt-2 text-2xl font-bold text-amber-700 dark:text-amber-300">
-                                            {attendanceSummary.late}
+                                            {formatNumber(attendanceSummary.late)}
                                         </p>
                                         <span className="mt-2 text-xs text-amber-600/80 dark:text-amber-400/80">
-                                            Delayed arrival
+                                            {isBangla ? 'দেরিতে আগমন' : 'Delayed arrival'}
                                         </span>
                                     </div>
                                 </div>
@@ -448,10 +465,12 @@ export default function Dashboard({
                                     <div className="mt-5 space-y-2">
                                         <div className="flex justify-between text-xs text-slate-600 dark:text-slate-400">
                                             <span>
-                                                Recorded {attendanceSummary.marked_today} of {attendanceSummary.total_students} enrolled students
+                                                {isBangla
+                                                    ? `মোট ${formatNumber(attendanceSummary.total_students)} জনের মধ্যে ${formatNumber(attendanceSummary.marked_today)} জন নিবন্ধিত`
+                                                    : `Recorded ${attendanceSummary.marked_today} of ${attendanceSummary.total_students} enrolled students`}
                                             </span>
                                             <span className="font-semibold text-slate-900 dark:text-slate-100">
-                                                {attendanceSummary.present} Present / {attendanceSummary.absent} Absent
+                                                {formatNumber(attendanceSummary.present)} {t('dashboard.present_students')} / {formatNumber(attendanceSummary.absent)} {t('dashboard.absent_students')}
                                             </span>
                                         </div>
                                         <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
@@ -482,13 +501,13 @@ export default function Dashboard({
                                     <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-3.5 text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-800/30 dark:text-slate-400">
                                         <div className="flex items-center gap-2">
                                             <AppIcon name="clock" className="h-4 w-4 text-amber-500" />
-                                            <span>No roll call attendance records submitted for today yet.</span>
+                                            <span>{t('dashboard.attendance_pending_note')}</span>
                                         </div>
                                         <Link
                                             href="/admin/attendance"
                                             className="font-semibold text-accent-600 hover:underline dark:text-accent-400"
                                         >
-                                            Take Attendance Now →
+                                            {t('dashboard.take_attendance')} →
                                         </Link>
                                     </div>
                                 )}
@@ -505,10 +524,10 @@ export default function Dashboard({
                                         </div>
                                         <div>
                                             <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                                                Fee Invoicing & Collections
+                                                {t('dashboard.financial_overview')}
                                             </h3>
                                             <p className="text-xs text-slate-500 dark:text-slate-400">
-                                                Financial overview and tuition collection rate
+                                                {t('dashboard.tuition_fee_collection')}
                                             </p>
                                         </div>
                                     </div>
@@ -516,7 +535,7 @@ export default function Dashboard({
                                         href="/admin/fees/invoices"
                                         className="inline-flex items-center gap-1 text-xs font-semibold text-accent-600 hover:text-accent-700 dark:text-accent-400"
                                     >
-                                        Manage Invoices
+                                        {t('dashboard.manage_fee_invoices')}
                                         <AppIcon name="arrow-right" className="h-3 w-3" />
                                     </Link>
                                 </div>
@@ -524,46 +543,46 @@ export default function Dashboard({
                                 <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
                                     <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3.5 sm:p-4 dark:border-slate-800/60 dark:bg-slate-800/40">
                                         <span className="text-xs font-medium text-slate-500 uppercase tracking-wider dark:text-slate-400">
-                                            Total Invoiced
+                                            {t('dashboard.total_billed')}
                                         </span>
                                         <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-50">
                                             {financeSummary.currency}
-                                            {financeSummary.total_invoiced.toLocaleString(undefined, {
+                                            {formatNumber(financeSummary.total_invoiced.toLocaleString(undefined, {
                                                 minimumFractionDigits: 0,
-                                            })}
+                                            }))}
                                         </p>
                                         <span className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                                            Cumulative fees
+                                            {isBangla ? 'সর্বমোট ধার্যকৃত ফি' : 'Cumulative fees'}
                                         </span>
                                     </div>
 
                                     <div className="rounded-xl border border-emerald-100/80 bg-emerald-50/30 p-3.5 sm:p-4 dark:border-emerald-950/40 dark:bg-emerald-950/20">
                                         <span className="text-xs font-semibold text-emerald-700 uppercase tracking-wider dark:text-emerald-300">
-                                            Total Collected
+                                            {t('dashboard.collected')}
                                         </span>
                                         <p className="mt-2 text-2xl font-bold text-emerald-700 dark:text-emerald-300">
                                             {financeSummary.currency}
-                                            {financeSummary.total_collected.toLocaleString(undefined, {
+                                            {formatNumber(financeSummary.total_collected.toLocaleString(undefined, {
                                                 minimumFractionDigits: 0,
-                                            })}
+                                            }))}
                                         </p>
                                         <div className="mt-1 flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-                                            <span>{financeSummary.collection_rate}% collected</span>
+                                            <span>{formatNumber(financeSummary.collection_rate)}% {t('dashboard.collected').toLowerCase()}</span>
                                         </div>
                                     </div>
 
                                     <div className="rounded-xl border border-amber-100/80 bg-amber-50/30 p-3.5 sm:p-4 dark:border-amber-950/40 dark:bg-amber-950/20">
                                         <span className="text-xs font-semibold text-amber-700 uppercase tracking-wider dark:text-amber-300">
-                                            Outstanding Due
+                                            {t('dashboard.pending_dues')}
                                         </span>
                                         <p className="mt-2 text-2xl font-bold text-amber-700 dark:text-amber-300">
                                             {financeSummary.currency}
-                                            {financeSummary.total_due.toLocaleString(undefined, {
+                                            {formatNumber(financeSummary.total_due.toLocaleString(undefined, {
                                                 minimumFractionDigits: 0,
-                                            })}
+                                            }))}
                                         </p>
                                         <span className="mt-1 text-xs text-amber-600/80 dark:text-amber-400/80">
-                                            Pending settlement
+                                            {isBangla ? 'বকেয়া আদায় প্রক্রিয়াধীন' : 'Pending settlement'}
                                         </span>
                                     </div>
                                 </div>
@@ -593,14 +612,14 @@ export default function Dashboard({
                                     <div className="flex items-center gap-2">
                                         <AppIcon name="megaphone" className="h-4 w-4 text-rose-600 dark:text-rose-400" />
                                         <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                                            Notice Bulletin
+                                            {t('dashboard.institutional_notices')}
                                         </h3>
                                     </div>
                                     <Link
                                         href="/notices"
                                         className="text-xs font-semibold text-accent-600 hover:text-accent-700 dark:text-accent-400"
                                     >
-                                        View Board
+                                        {t('dashboard.view_notice_board')}
                                     </Link>
                                 </div>
 
@@ -631,14 +650,14 @@ export default function Dashboard({
                                     <div className="flex items-center gap-2">
                                         <AppIcon name="activity" className="h-4 w-4 text-accent-600 dark:text-accent-400" />
                                         <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                                            Activity Feed
+                                            {t('dashboard.system_activity')}
                                         </h3>
                                     </div>
                                     <Link
                                         href="/admin/activity"
                                         className="text-xs font-semibold text-accent-600 hover:text-accent-700 dark:text-accent-400"
                                     >
-                                        Audit Logs
+                                        {t('dashboard.view_all_audit')}
                                     </Link>
                                 </div>
                                 <ol className="mt-4 space-y-3.5">
@@ -728,10 +747,10 @@ export default function Dashboard({
                         <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800/80 dark:bg-slate-900">
                             <div className="flex items-center justify-between border-b border-slate-100 pb-3.5 dark:border-slate-800">
                                 <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                                    Quick Actions
+                                    {t('dashboard.quick_actions', undefined, 'Quick Actions')}
                                 </h3>
                                 <span className="rounded-full bg-accent-50 px-2 py-0.5 text-xs font-semibold text-accent-700 dark:bg-accent-950/50 dark:text-accent-300">
-                                    Shortcuts
+                                    {isBangla ? 'শর্টকাট' : 'Shortcuts'}
                                 </span>
                             </div>
 
@@ -776,10 +795,10 @@ export default function Dashboard({
                                         </div>
                                         <div>
                                             <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                                                Examinations & Terms
+                                                {t('dashboard.upcoming_exams', undefined, 'Examinations & Terms')}
                                             </h3>
                                             <p className="text-xs text-slate-500 dark:text-slate-400">
-                                                Schedule, ongoing exams, and marks management
+                                                {isBangla ? 'পরীক্ষার সময়সূচি ও নম্বর ব্যবস্থাপনা' : 'Schedule, ongoing exams, and marks management'}
                                             </p>
                                         </div>
                                     </div>
@@ -787,7 +806,7 @@ export default function Dashboard({
                                         href="/admin/exams"
                                         className="inline-flex items-center gap-1 text-xs font-semibold text-accent-600 hover:text-accent-700 dark:text-accent-400"
                                     >
-                                        View All Exams
+                                        {t('dashboard.view_exam_schedules', undefined, 'View All Exams')}
                                         <AppIcon name="arrow-right" className="h-3 w-3" />
                                     </Link>
                                 </div>
@@ -813,20 +832,20 @@ export default function Dashboard({
                                                             {exam.status === 'Ongoing' && (
                                                                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                                             )}
-                                                            {exam.status}
+                                                            {exam.status === 'Ongoing' ? (isBangla ? 'চলমান' : 'Ongoing') : exam.status === 'Upcoming' ? (isBangla ? 'আসন্ন' : 'Upcoming') : exam.status}
                                                         </span>
                                                         <span className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
                                                             {exam.name}
                                                         </span>
                                                     </div>
                                                     <div className="mt-1 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                                                        <span>Session: {exam.session}</span>
+                                                        <span>{isBangla ? 'সেশন: ' : 'Session: '}{exam.session}</span>
                                                         {exam.start_date && (
                                                             <>
                                                                 <span>•</span>
                                                                 <span>
                                                                     {exam.start_date}
-                                                                    {exam.end_date ? ` to ${exam.end_date}` : ''}
+                                                                    {exam.end_date ? ` ${isBangla ? 'থেকে' : 'to'} ${exam.end_date}` : ''}
                                                                 </span>
                                                             </>
                                                         )}
@@ -840,14 +859,14 @@ export default function Dashboard({
                                                             className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-accent-400 hover:bg-accent-50/50 hover:text-accent-700 dark:border-slate-700 dark:text-slate-300 dark:hover:border-accent-600 dark:hover:bg-accent-950/30"
                                                         >
                                                             <AppIcon name="pencil" className="h-3.5 w-3.5" />
-                                                            Marks Entry
+                                                            {t('dashboard.enter_marks', undefined, 'Marks Entry')}
                                                         </Link>
                                                     )}
                                                     <Link
                                                         href={`/admin/results/${exam.id}`}
                                                         className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
                                                     >
-                                                        Tabulation
+                                                        {t('exams.tabulation', undefined, 'Tabulation')}
                                                     </Link>
                                                 </div>
                                             </div>
@@ -857,9 +876,9 @@ export default function Dashboard({
                                     <div className="mt-4 rounded-xl border border-dashed border-slate-200 p-6 text-center text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400">
                                         <AppIcon name="award" className="mx-auto h-8 w-8 text-slate-400" />
                                         <p className="mt-2 font-medium text-slate-700 dark:text-slate-300">
-                                            No examinations published yet
+                                            {isBangla ? 'কোনো পরীক্ষা প্রকাশিত হয়নি' : 'No examinations published yet'}
                                         </p>
-                                        <p className="text-xs">Schedule your first terminal or midterm exam.</p>
+                                        <p className="text-xs">{isBangla ? 'আপনার প্রথম প্রান্তিক বা অর্ধবার্ষিক পরীক্ষা নির্ধারণ করুন।' : 'Schedule your first terminal or midterm exam.'}</p>
                                     </div>
                                 )}
                             </section>
@@ -872,14 +891,14 @@ export default function Dashboard({
                                     <div className="flex items-center gap-2">
                                         <AppIcon name="server" className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                                         <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                                            ZKTeco Fleet
+                                            {isBangla ? 'বায়োমেট্রিক ডিভাইস (ZKTeco)' : 'ZKTeco Fleet'}
                                         </h3>
                                     </div>
                                     <Link
                                         href="/admin/settings/zkteco"
                                         className="text-xs font-semibold text-accent-600 hover:text-accent-700 dark:text-accent-400"
                                     >
-                                        Settings
+                                        {t('sidebar.settings', undefined, 'Settings')}
                                     </Link>
                                 </div>
 
@@ -891,14 +910,16 @@ export default function Dashboard({
                                             }`}
                                         />
                                         <span className="font-medium text-slate-700 dark:text-slate-300">
-                                            {zktecoSummary.online} of {zktecoSummary.total} Terminals Online
+                                            {isBangla 
+                                                ? `${formatNumber(zktecoSummary.online)} / ${formatNumber(zktecoSummary.total)} টার্মিনাল সচল` 
+                                                : `${zktecoSummary.online} of ${zktecoSummary.total} Terminals Online`}
                                         </span>
                                     </div>
                                     <Link
                                         href="/admin/settings/zkteco"
                                         className="font-medium text-purple-600 hover:underline dark:text-purple-400"
                                     >
-                                        Sync Now
+                                        {t('attendance.sync_now', undefined, 'Sync Now')}
                                     </Link>
                                 </div>
 
@@ -925,7 +946,7 @@ export default function Dashboard({
                                                                 : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
                                                         }`}
                                                     >
-                                                        {device.status === 'online' ? 'Online' : 'Offline'}
+                                                        {device.status === 'online' ? (isBangla ? 'অনলাইন' : 'Online') : (isBangla ? 'অফলাইন' : 'Offline')}
                                                     </span>
                                                 </div>
                                             </div>
@@ -933,12 +954,12 @@ export default function Dashboard({
                                     </div>
                                 ) : (
                                     <div className="mt-3 rounded-lg border border-dashed border-slate-200 p-3 text-center text-xs text-slate-500 dark:border-slate-800">
-                                        No biometric devices configured yet.{' '}
+                                        {isBangla ? 'এখনো কোনো বায়োমেট্রিক ডিভাইস যুক্ত করা হয়নি।' : 'No biometric devices configured yet.'}{' '}
                                         <Link
                                             href="/admin/settings/zkteco"
                                             className="font-semibold text-accent-600 hover:underline dark:text-accent-400"
                                         >
-                                            Add Device
+                                            {isBangla ? 'ডিভাইস যোগ করুন' : 'Add Device'}
                                         </Link>
                                     </div>
                                 )}
@@ -952,32 +973,32 @@ export default function Dashboard({
                                     <div className="flex items-center gap-2">
                                         <AppIcon name="send" className="h-4 w-4 text-sky-600 dark:text-sky-400" />
                                         <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                                            Communication
+                                            {t('communication.title', undefined, 'Communication')}
                                         </h3>
                                     </div>
                                     <Link
                                         href="/admin/communication/messages"
                                         className="text-xs font-semibold text-accent-600 hover:text-accent-700 dark:text-accent-400"
                                     >
-                                        Broadcast
+                                        {isBangla ? 'বার্তা সম্প্রচার' : 'Broadcast'}
                                     </Link>
                                 </div>
 
                                 <div className="mt-3.5 grid grid-cols-2 gap-2 text-center">
                                     <div className="rounded-xl border border-sky-100 bg-sky-50/50 p-3 dark:border-sky-950/40 dark:bg-sky-950/20">
                                         <span className="text-xs font-medium text-sky-700 dark:text-sky-300">
-                                            SMS Sent
+                                            {isBangla ? 'প্রেরিত এসএমএস' : 'SMS Sent'}
                                         </span>
                                         <p className="mt-1 text-xl font-bold text-sky-800 dark:text-sky-200">
-                                            {communicationSummary.sms_sent}
+                                            {formatNumber(communicationSummary.sms_sent)}
                                         </p>
                                     </div>
                                     <div className="rounded-xl border border-indigo-100 bg-indigo-50/50 p-3 dark:border-indigo-950/40 dark:bg-indigo-950/20">
                                         <span className="text-xs font-medium text-indigo-700 dark:text-indigo-300">
-                                            Emails Sent
+                                            {isBangla ? 'প্রেরিত ইমেইল' : 'Emails Sent'}
                                         </span>
                                         <p className="mt-1 text-xl font-bold text-indigo-800 dark:text-indigo-200">
-                                            {communicationSummary.email_sent}
+                                            {formatNumber(communicationSummary.email_sent)}
                                         </p>
                                     </div>
                                 </div>
@@ -988,7 +1009,7 @@ export default function Dashboard({
                                         className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-sky-50 py-2 text-xs font-semibold text-sky-700 transition hover:bg-sky-100 dark:bg-sky-950/40 dark:text-sky-300 dark:hover:bg-sky-950/60"
                                     >
                                         <AppIcon name="mail" className="h-3.5 w-3.5" />
-                                        Send Message Broadcast
+                                        {t('communication.send_message', undefined, 'Send Message Broadcast')}
                                     </Link>
                                 </div>
                             </section>

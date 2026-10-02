@@ -2,6 +2,7 @@ import { Head, router, usePage } from '@inertiajs/react';
 import { useEffect, useState, FormEvent } from 'react';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import { useSidebarStack } from '@/composables/useNavStack';
+import { useI18n } from '@/composables/useI18n';
 import type { SidebarConfig } from '@/types/sidebar';
 
 interface InvoiceRow {
@@ -46,6 +47,7 @@ export default function Index({
     collectionReport,
     sidebar,
 }: Props) {
+    const { t, isBangla, formatNumber } = useI18n();
     const sidebarStack = useSidebarStack();
     useEffect(() => {
         sidebarStack.set(sidebar);
@@ -119,14 +121,14 @@ export default function Index({
 
     return (
         <DashboardLayout>
-            <Head title="Fee Invoices" />
+            <Head title={t('fees.invoices', undefined, 'Fee Invoices')} />
             <div className="space-y-6">
                 <header>
                     <p className="text-xs font-semibold tracking-widest text-slate-500 uppercase">
-                        Fees
+                        {t('fees.title', undefined, 'Fees')}
                     </p>
                     <h1 className="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-50">
-                        Invoices &amp; collection
+                        {t('fees.invoices', undefined, 'Invoices & collection')}
                     </h1>
                 </header>
 
@@ -137,22 +139,20 @@ export default function Index({
                 )}
 
                 <div className="flex flex-wrap gap-2">
-                    {(
-                        [
-                            ['invoices', 'Invoices'],
-                            ['defaulters', 'Defaulters'],
-                            ['report', 'Collection report'],
-                        ] as const
-                    ).map(([val, label]) => (
+                    {[
+                        ['invoices', t('fees.invoices', undefined, 'Invoices')],
+                        ['defaulters', isBangla ? 'বকেয়া তালিকা' : 'Defaulters'],
+                        ['report', isBangla ? 'আদায় বিবরণী' : 'Collection report'],
+                    ].map(([val, label]) => (
                         <button
                             key={val}
                             type="button"
                             className={`rounded-md px-3 py-1.5 text-sm font-medium ${
                                 tab === val
                                     ? 'bg-accent-600 text-white'
-                                    : 'bg-slate-100 text-slate-600'
+                                    : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
                             }`}
-                            onClick={() => setTab(val)}
+                            onClick={() => setTab(val as any)}
                         >
                             {label}
                         </button>
@@ -166,30 +166,30 @@ export default function Index({
                             onSubmit={generateInvoices}
                         >
                             <label className="text-sm">
-                                Billing month
+                                {isBangla ? 'বিলিং মাস: ' : 'Billing month: '}
                                 <input
                                     value={billingPeriod}
                                     onChange={(e) => setBillingPeriod(e.target.value)}
                                     type="month"
-                                    className="ml-2 rounded-md border px-2 py-1"
+                                    className="ml-2 rounded-md border px-2 py-1 dark:bg-slate-950 dark:border-slate-700"
                                 />
                             </label>
                             <button
                                 type="submit"
                                 className="rounded-md bg-accent-600 px-3 py-1.5 text-sm font-semibold text-white"
                             >
-                                Generate monthly invoices
+                                {isBangla ? 'মাসিক ইনভয়েস তৈরি করুন' : 'Generate monthly invoices'}
                             </button>
                         </form>
                         <section className="overflow-x-auto rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
                             <table className="min-w-full text-sm">
-                                <thead className="bg-slate-50 text-left text-xs text-slate-500 uppercase">
+                                <thead className="bg-slate-50 text-left text-xs text-slate-500 uppercase dark:bg-slate-950/40 dark:text-slate-400">
                                     <tr>
-                                        <th className="px-4 py-3">Invoice</th>
-                                        <th className="px-4 py-3">Student</th>
-                                        <th className="px-4 py-3">Due</th>
-                                        <th className="px-4 py-3">Balance</th>
-                                        <th className="px-4 py-3">Status</th>
+                                        <th className="px-4 py-3">{t('fees.invoice_number', undefined, 'Invoice')}</th>
+                                        <th className="px-4 py-3">{t('fees.student', undefined, 'Student')}</th>
+                                        <th className="px-4 py-3">{t('fees.due_date', undefined, 'Due')}</th>
+                                        <th className="px-4 py-3">{isBangla ? 'বকেয়া' : 'Balance'}</th>
+                                        <th className="px-4 py-3">{t('fees.status', undefined, 'Status')}</th>
                                         <th className="px-4 py-3"></th>
                                     </tr>
                                 </thead>
@@ -209,13 +209,15 @@ export default function Index({
                                             </td>
                                             <td className="px-4 py-3">
                                                 {inv.student_name}{' '}
-                                                <span className="text-xs text-slate-500">
-                                                    ({inv.roll_number})
-                                                </span>
+                                                {inv.roll_number && (
+                                                    <span className="text-xs text-slate-500">
+                                                        ({isBangla ? formatNumber(inv.roll_number) : inv.roll_number})
+                                                    </span>
+                                                )}
                                             </td>
                                             <td className="px-4 py-3">{inv.due_date}</td>
                                             <td className="px-4 py-3 font-mono">
-                                                ৳{inv.balance.toLocaleString()}
+                                                ৳{formatNumber(inv.balance.toLocaleString())}
                                             </td>
                                             <td className="px-4 py-3">
                                                 <span
@@ -223,17 +225,17 @@ export default function Index({
                                                         inv.status,
                                                     )}`}
                                                 >
-                                                    {inv.status_label}
+                                                    {inv.status === 'paid' ? t('fees.paid', undefined, 'Paid') : inv.status === 'unpaid' ? t('fees.unpaid', undefined, 'Unpaid') : inv.status === 'partial' ? t('fees.partial', undefined, 'Partial') : inv.status === 'overdue' ? t('fees.overdue', undefined, 'Overdue') : inv.status_label}
                                                 </span>
                                             </td>
                                             <td className="px-4 py-3 text-right">
                                                 {inv.balance > 0 && (
                                                     <button
                                                         type="button"
-                                                        className="text-sm font-medium text-accent-600"
+                                                        className="text-sm font-medium text-accent-600 hover:underline"
                                                         onClick={() => openPayment(inv)}
                                                     >
-                                                        Record payment
+                                                        {isBangla ? 'টাকা গ্রহণ করুন' : 'Record payment'}
                                                     </button>
                                                 )}
                                             </td>
@@ -250,21 +252,21 @@ export default function Index({
                         <table className="min-w-full text-sm">
                             <thead className="bg-slate-50 text-xs text-slate-500 uppercase">
                                 <tr>
-                                    <th className="px-4 py-3">Student</th>
-                                    <th className="px-4 py-3">Class</th>
-                                    <th className="px-4 py-3">Overdue</th>
-                                    <th className="px-4 py-3">Invoices</th>
+                                    <th className="px-4 py-3">{t('fees.student', {}, 'Student')}</th>
+                                    <th className="px-4 py-3">{t('fees.class', {}, 'Class')}</th>
+                                    <th className="px-4 py-3">{t('fees.overdue', {}, 'Overdue')}</th>
+                                    <th className="px-4 py-3">{t('fees.overdue_invoices', {}, 'Invoices')}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {defaulters.map((d) => (
                                     <tr key={d.student_id} className="border-t">
-                                        <td className="px-4 py-3">{d.name_en}</td>
-                                        <td className="px-4 py-3">{d.class_label}</td>
-                                        <td className="px-4 py-3 font-mono text-rose-600">
-                                            ৳{d.overdue_amount.toLocaleString()}
+                                        <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-200">{d.name_en}</td>
+                                        <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{d.class_label}</td>
+                                        <td className="px-4 py-3 font-mono font-bold text-rose-600">
+                                            ৳{formatNumber(d.overdue_amount.toLocaleString())}
                                         </td>
-                                        <td className="px-4 py-3">{d.overdue_invoices}</td>
+                                        <td className="px-4 py-3 font-mono">{formatNumber(d.overdue_invoices)}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -274,16 +276,24 @@ export default function Index({
 
                 {tab === 'report' && (
                     <section className="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
-                        <p className="text-2xl font-bold">
-                            ৳{collectionReport.total_collected.toLocaleString()}
+                        <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                            {t('fees.total_collected', {}, 'Total Collected')}
                         </p>
-                        <p className="text-sm text-slate-500">
-                            {collectionReport.payment_count} payment(s) in selected period
+                        <p className="mt-1 text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">
+                            ৳{formatNumber(collectionReport.total_collected.toLocaleString())}
                         </p>
-                        <ul className="mt-4 space-y-1 text-sm">
+                        <p className="mt-2 text-sm text-slate-500">
+                            {t('fees.payments_in_period', { count: formatNumber(collectionReport.payment_count) }, `${formatNumber(collectionReport.payment_count)} payment(s) in selected period`)}
+                        </p>
+                        <ul className="mt-4 space-y-1.5 text-sm">
                             {Object.entries(collectionReport.by_method).map(([method, amt]) => (
-                                <li key={method}>
-                                    {method}: ৳{amt.toLocaleString()}
+                                <li key={method} className="flex justify-between border-b border-slate-100 py-1.5 dark:border-slate-800">
+                                    <span className="text-slate-600 dark:text-slate-400">
+                                        {t(`fees.methods.${method}`, {}, method)}
+                                    </span>
+                                    <span className="font-mono font-semibold text-slate-900 dark:text-white">
+                                        ৳{formatNumber(amt.toLocaleString())}
+                                    </span>
                                 </li>
                             ))}
                         </ul>
@@ -294,24 +304,26 @@ export default function Index({
             {showPayment && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
                     <form
-                        className="w-full max-w-md space-y-3 rounded-xl bg-white p-6 dark:bg-slate-900"
+                        className="w-full max-w-md space-y-3 rounded-xl bg-white p-6 shadow-xl dark:bg-slate-900"
                         onSubmit={submitPayment}
                     >
-                        <h2 className="text-lg font-semibold">Record payment</h2>
-                        <label className="block text-sm">
-                            Student ID
+                        <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                            {t('fees.record_payment', {}, 'Record payment')}
+                        </h2>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                            {t('fees.student_id', {}, 'Student ID')}
                             <input
                                 value={paymentForm.student_id}
                                 onChange={(e) =>
                                     setPaymentForm({ ...paymentForm, student_id: e.target.value })
                                 }
                                 type="number"
-                                className="mt-1 w-full rounded-md border px-3 py-2"
+                                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                                 required
                             />
                         </label>
-                        <label className="block text-sm">
-                            Invoice ID
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                            {t('fees.invoice_id', {}, 'Invoice ID')}
                             <input
                                 value={paymentForm.fee_invoice_id ?? ''}
                                 onChange={(e) =>
@@ -321,11 +333,11 @@ export default function Index({
                                     })
                                 }
                                 type="number"
-                                className="mt-1 w-full rounded-md border px-3 py-2"
+                                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                             />
                         </label>
-                        <label className="block text-sm">
-                            Amount
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                            {t('fees.amount', {}, 'Amount')} (৳)
                             <input
                                 value={paymentForm.amount}
                                 onChange={(e) =>
@@ -333,12 +345,12 @@ export default function Index({
                                 }
                                 type="number"
                                 step="0.01"
-                                className="mt-1 w-full rounded-md border px-3 py-2"
+                                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                                 required
                             />
                         </label>
-                        <label className="block text-sm">
-                            Method
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                            {t('fees.payment_method', {}, 'Method')}
                             <select
                                 value={paymentForm.payment_method}
                                 onChange={(e) =>
@@ -347,18 +359,18 @@ export default function Index({
                                         payment_method: e.target.value,
                                     })
                                 }
-                                className="mt-1 w-full rounded-md border px-3 py-2"
+                                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                             >
-                                <option value="cash">Cash</option>
-                                <option value="bkash">bKash</option>
-                                <option value="nagad">Nagad</option>
-                                <option value="rocket">Rocket</option>
-                                <option value="bank_transfer">Bank transfer</option>
+                                <option value="cash">{t('fees.methods.cash', {}, 'Cash')}</option>
+                                <option value="bkash">{t('fees.methods.bkash', {}, 'bKash')}</option>
+                                <option value="nagad">{t('fees.methods.nagad', {}, 'Nagad')}</option>
+                                <option value="rocket">{t('fees.methods.rocket', {}, 'Rocket')}</option>
+                                <option value="bank_transfer">{t('fees.methods.bank_transfer', {}, 'Bank transfer')}</option>
                             </select>
                         </label>
                         {paymentForm.payment_method !== 'cash' && (
-                            <label className="block text-sm">
-                                Reference no.
+                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                {t('fees.reference_no', {}, 'Reference no.')}
                                 <input
                                     value={paymentForm.reference_number}
                                     onChange={(e) =>
@@ -368,36 +380,36 @@ export default function Index({
                                        })
                                     }
                                     type="text"
-                                    className="mt-1 w-full rounded-md border px-3 py-2"
+                                    className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                                     required
                                 />
                             </label>
                         )}
-                        <label className="block text-sm">
-                            Paid on
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                            {t('fees.paid_on', {}, 'Paid on')}
                             <input
                                 value={paymentForm.paid_at}
                                 onChange={(e) =>
                                     setPaymentForm({ ...paymentForm, paid_at: e.target.value })
                                 }
                                 type="date"
-                                className="mt-1 w-full rounded-md border px-3 py-2"
+                                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                                 required
                             />
                         </label>
-                        <div className="flex gap-2 pt-2">
-                            <button
-                                type="submit"
-                                className="rounded-md bg-accent-600 px-4 py-2 text-sm font-semibold text-white"
-                            >
-                                Save
-                            </button>
+                        <div className="flex justify-end gap-2 pt-3">
                             <button
                                 type="button"
-                                className="rounded-md border px-4 py-2 text-sm"
+                                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                                 onClick={() => setShowPayment(false)}
                             >
-                                Cancel
+                                {t('common.cancel', {}, 'Cancel')}
+                            </button>
+                            <button
+                                type="submit"
+                                className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
+                            >
+                                {t('common.save', {}, 'Save')}
                             </button>
                         </div>
                     </form>

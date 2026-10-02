@@ -3,17 +3,19 @@ import { Head, Link } from '@inertiajs/react';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import AppIcon from '@/components/AppIcon';
 import { useSidebarStack } from '@/composables/useNavStack';
+import { useI18n } from '@/composables/useI18n';
 import type { SidebarConfig } from '@/types/sidebar';
 
 interface ExamRow {
     id: number;
     name_en: string;
+    name_bn?: string | null;
     exam_type: string;
     session_name: string | null;
 }
 
 interface ParentResultsChildProps {
-    student: { id: number; name_en: string; roll_number: string | null };
+    student: { id: number; name_en: string; name_bn?: string | null; roll_number: string | null };
     exams: ExamRow[];
     sidebar: SidebarConfig;
 }
@@ -23,6 +25,7 @@ export default function ParentResultsChild({
     exams,
     sidebar,
 }: ParentResultsChildProps) {
+    const { t, bi } = useI18n();
     const sidebarStack = useSidebarStack();
     useEffect(() => {
         if (sidebar) {
@@ -32,22 +35,23 @@ export default function ParentResultsChild({
 
     return (
         <DashboardLayout>
-            <Head title={`Results - ${student.name_en}`} />
+            <Head title={`${t('results.title')} - ${bi(student.name_en, student.name_bn)}`} />
 
             <div className="space-y-6">
                 <header className="flex items-center gap-4">
                     <Link
                         href="/parent/results"
                         className="inline-flex h-9 w-9 items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+                        title={t('common.back')}
                     >
                         <AppIcon name="arrow-left" className="h-5 w-5" />
                     </Link>
                     <div>
                         <p className="text-xs font-semibold tracking-widest text-slate-500 uppercase dark:text-slate-400">
-                            Results
+                            {t('results.title')}
                         </p>
                         <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
-                            {student.name_en}
+                            {bi(student.name_en, student.name_bn)}
                         </h1>
                     </div>
                 </header>
@@ -63,7 +67,7 @@ export default function ParentResultsChild({
                                 <AppIcon name="graduation-cap" className="h-5 w-5" />
                             </div>
                             <h2 className="mt-4 font-semibold text-slate-900 dark:text-slate-100">
-                                {exam.name_en}
+                                {bi(exam.name_en, exam.name_bn)}
                             </h2>
                             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                 {exam.exam_type}
@@ -76,7 +80,7 @@ export default function ParentResultsChild({
 
                     {exams.length === 0 && (
                         <div className="col-span-full rounded-xl border border-dashed border-slate-300 py-16 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
-                            No published results yet.
+                            {t('results.no_results')}
                         </div>
                     )}
                 </section>

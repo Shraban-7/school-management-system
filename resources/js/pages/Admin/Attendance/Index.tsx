@@ -4,6 +4,7 @@ import DashboardLayout from '@/layouts/DashboardLayout';
 import AppIcon from '@/components/AppIcon';
 import ZktecoModal, { type ZktecoConfig, type ZktecoTestResult } from '@/components/attendance/ZktecoModal';
 import { useSidebarStack } from '@/composables/useNavStack';
+import { useI18n } from '@/composables/useI18n';
 import type { SidebarConfig } from '@/types/sidebar';
 
 interface AttendanceRow {
@@ -33,11 +34,12 @@ function getStudentId(row: AttendanceRow): number {
     return row.student_id ?? row.id;
 }
 
-function getStudentName(row: AttendanceRow): string {
+function getStudentName(row: AttendanceRow, isBangla = false): string {
+    if (isBangla && row.name_bn) return row.name_bn;
     return row.student_name || row.name_en || row.name_bn || `Student #${row.roll_number ?? row.id}`;
 }
 
-function formatDateDisplay(dateStr: string): {
+function formatDateDisplay(dateStr: string, isBangla = false): {
     formatted: string;
     isToday: boolean;
     isYesterday: boolean;
@@ -65,8 +67,8 @@ function formatDateDisplay(dateStr: string): {
             month: 'long',
             day: 'numeric',
         };
-        const formatted = target.toLocaleDateString('en-US', options);
-        const dayName = target.toLocaleDateString('en-US', { weekday: 'short' });
+        const formatted = target.toLocaleDateString(isBangla ? 'bn-BD' : 'en-US', options);
+        const dayName = target.toLocaleDateString(isBangla ? 'bn-BD' : 'en-US', { weekday: 'short' });
 
         return { formatted, isToday, isYesterday, dayName };
     } catch {
@@ -101,6 +103,7 @@ export default function AttendanceIndex({
     zkteco_test_result,
     sidebar,
 }: Props) {
+    const { t, bi, isBangla, formatNumber, formatDate } = useI18n();
     const sidebarStack = useSidebarStack();
     useEffect(() => {
         sidebarStack.set(sidebar);
@@ -211,7 +214,7 @@ export default function AttendanceIndex({
     function save() {
         const activeClass = selectedClass || (class_id ? String(class_id) : '');
         if (!activeClass) {
-            alert('Please select a class before saving attendance.');
+            alert(isBangla ? 'উপস্থিতি সংরক্ষণের পূর্বে একটি শ্রেণি নির্বাচন করুন।' : 'Please select a class before saving attendance.');
             return;
         }
 
@@ -256,8 +259,8 @@ export default function AttendanceIndex({
         return { total: attendance.length, present, absent, late };
     }, [attendance, formData]);
 
-    const selectedDateInfo = React.useMemo(() => formatDateDisplay(selectedDate), [selectedDate]);
-    const activeDateInfo = React.useMemo(() => formatDateDisplay(date), [date]);
+    const selectedDateInfo = React.useMemo(() => formatDateDisplay(selectedDate, isBangla), [selectedDate, isBangla]);
+    const activeDateInfo = React.useMemo(() => formatDateDisplay(date, isBangla), [date, isBangla]);
     const activeClassObj = React.useMemo(
         () => classes.find((c) => String(c.id) === String(selectedClass)),
         [classes, selectedClass],
@@ -265,19 +268,19 @@ export default function AttendanceIndex({
 
     return (
         <DashboardLayout>
-            <Head title="Attendance" />
+            <Head title={t('attendance.title', undefined, 'Attendance')} />
 
             <div className="space-y-6">
                 <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                         <p className="text-xs font-semibold tracking-widest text-slate-500 uppercase dark:text-slate-400">
-                            Management
+                            {isBangla ? 'ব্যবস্থাপনা' : 'Management'}
                         </p>
                         <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-50">
-                            Daily Attendance
+                            {t('attendance.daily_attendance', undefined, 'Daily Attendance')}
                         </h1>
                         <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                            Record, track, and manage student attendance by class and section.
+                            {isBangla ? 'শ্রেণি ও শাখা অনুযায়ী শিক্ষার্থীদের দৈনিক উপস্থিতি রেকর্ড ও পরিচালনা করুন।' : 'Record, track, and manage student attendance by class and section.'}
                         </p>
                     </div>
 
@@ -296,14 +299,14 @@ export default function AttendanceIndex({
                                 }`}
                             />
                             <AppIcon name="server" className="h-4 w-4 text-slate-500" />
-                            <span>ZKTeco Device</span>
+                            <span>{isBangla ? 'বায়োমেট্রিক ডিভাইস' : 'ZKTeco Device'}</span>
                             {zkteco?.is_enabled ? (
                                 <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 uppercase dark:bg-emerald-950/60 dark:text-emerald-300">
-                                    Ready
+                                    {isBangla ? 'প্রস্তুত' : 'Ready'}
                                 </span>
                             ) : (
                                 <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500 uppercase dark:bg-slate-800 dark:text-slate-400">
-                                    Optional
+                                    {isBangla ? 'ঐচ্ছিক' : 'Optional'}
                                 </span>
                             )}
                         </button>
@@ -311,10 +314,10 @@ export default function AttendanceIndex({
                         <Link
                             href={`/admin/communication/messages?audience=absent_today&class_id=${selectedClass || class_id || ''}&date=${selectedDate}`}
                             className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800 shadow-sm transition hover:bg-amber-100 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-200"
-                            title="Send automated SMS / Email alert to absent students' guardians"
+                            title={isBangla ? "অনুপস্থিত শিক্ষার্থীদের অভিভাবকদের স্বয়ংক্রিয় SMS / ইমেইল সতর্কতা পাঠান" : "Send automated SMS / Email alert to absent students' guardians"}
                         >
                             <AppIcon name="megaphone" className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                            <span>Notify Absentees (SMS/Email)</span>
+                            <span>{isBangla ? 'অনুপস্থিতদের সতর্কতা (SMS/ইমেইল)' : 'Notify Absentees (SMS/Email)'}</span>
                         </Link>
 
                         {attendance.length > 0 && (
@@ -325,7 +328,7 @@ export default function AttendanceIndex({
                                 onClick={save}
                             >
                                 <AppIcon name="check" className="h-4 w-4" />
-                                {isSaving ? 'Saving…' : 'Save Attendance'}
+                                {isSaving ? (isBangla ? 'সংরক্ষণ হচ্ছে…' : 'Saving…') : t('attendance.save_attendance', undefined, 'Save Attendance')}
                             </button>
                         )}
                     </div>
@@ -350,17 +353,17 @@ export default function AttendanceIndex({
                                     <span className="flex h-5 w-5 items-center justify-center rounded-md bg-accent-600 text-white shadow-sm">
                                         <AppIcon name="calendar" className="h-3.5 w-3.5" />
                                     </span>
-                                    <span>Attendance Date</span>
+                                    <span>{t('attendance.attendance_date', undefined, 'Attendance Date')}</span>
                                 </label>
                                 <div className="flex items-center gap-1.5">
                                     {selectedDateInfo.isToday && (
                                         <span className="inline-flex items-center rounded-full bg-emerald-600 px-2 py-0.5 text-[11px] font-bold text-white uppercase tracking-wider shadow-sm">
-                                            Today
+                                            {t('attendance.today', undefined, 'Today')}
                                         </span>
                                     )}
                                     {selectedDateInfo.isYesterday && (
                                         <span className="inline-flex items-center rounded-full bg-slate-200 px-2 py-0.5 text-[11px] font-semibold text-slate-700 uppercase tracking-wider dark:bg-slate-800 dark:text-slate-300">
-                                            Yesterday
+                                            {t('attendance.yesterday', undefined, 'Yesterday')}
                                         </span>
                                     )}
                                 </div>
@@ -369,7 +372,7 @@ export default function AttendanceIndex({
                             <div className="mt-2.5 flex items-center gap-2">
                                 <button
                                     type="button"
-                                    title="Previous Day"
+                                    title={isBangla ? 'পূর্ববর্তী দিন' : 'Previous Day'}
                                     onClick={() => handleNavigateDate(shiftDate(selectedDate, -1))}
                                     className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-100 focus:ring-2 focus:ring-accent-500/20 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
                                 >
@@ -388,7 +391,7 @@ export default function AttendanceIndex({
 
                                 <button
                                     type="button"
-                                    title="Next Day"
+                                    title={isBangla ? 'পরবর্তী দিন' : 'Next Day'}
                                     onClick={() => handleNavigateDate(shiftDate(selectedDate, 1))}
                                     className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-100 focus:ring-2 focus:ring-accent-500/20 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
                                 >
@@ -404,7 +407,7 @@ export default function AttendanceIndex({
                                             : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800'
                                     }`}
                                 >
-                                    Today
+                                    {t('attendance.today', undefined, 'Today')}
                                 </button>
                             </div>
 
@@ -413,7 +416,7 @@ export default function AttendanceIndex({
                                     {selectedDateInfo.formatted || selectedDate}
                                 </span>
                                 <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                                    Use arrows to switch days
+                                    {isBangla ? 'দিন পরিবর্তন করতে তীর চিহ্ন ব্যবহার করুন' : 'Use arrows to switch days'}
                                 </span>
                             </div>
                         </div>
@@ -424,7 +427,7 @@ export default function AttendanceIndex({
                                 htmlFor="attendance-class"
                                 className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
                             >
-                                Class &amp; Section
+                                {t('classes.title', undefined, 'Class & Section')}
                             </label>
                             <select
                                 id="attendance-class"
@@ -433,7 +436,7 @@ export default function AttendanceIndex({
                                 className="mt-2 block h-11 w-full rounded-lg border border-slate-200 bg-white px-3.5 text-sm font-medium text-slate-900 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
                             >
                                 <option value="" disabled>
-                                    Select class
+                                    {t('attendance.select_class', undefined, 'Select class')}
                                 </option>
                                 {classes.map((c) => (
                                     <option key={c.id} value={c.id}>
@@ -451,7 +454,7 @@ export default function AttendanceIndex({
                                 onClick={() => load(selectedDate, selectedClass)}
                             >
                                 <AppIcon name="search" className="h-4 w-4" />
-                                <span>Load Students</span>
+                                <span>{t('attendance.load_students', undefined, 'Load Students')}</span>
                             </button>
                         </div>
                     </div>
@@ -463,46 +466,46 @@ export default function AttendanceIndex({
                         <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between dark:border-slate-800 dark:bg-slate-900">
                             <div className="flex flex-wrap items-center gap-2">
                                 <span className="text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400">
-                                    Summary:
+                                    {isBangla ? 'সারসংক্ষেপ:' : 'Summary:'}
                                 </span>
                                 <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                                    Total: {stats.total}
+                                    {t('attendance.total', undefined, 'Total')}: {formatNumber(stats.total)}
                                 </span>
                                 <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
-                                    Present: {stats.present}
+                                    {t('attendance.present', undefined, 'Present')}: {formatNumber(stats.present)}
                                 </span>
                                 <span className="inline-flex items-center rounded-full bg-rose-50 px-2.5 py-0.5 text-xs font-medium text-rose-700 dark:bg-rose-950/40 dark:text-rose-300">
-                                    Absent: {stats.absent}
+                                    {t('attendance.absent', undefined, 'Absent')}: {formatNumber(stats.absent)}
                                 </span>
                                 <span className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
-                                    Late: {stats.late}
+                                    {t('attendance.late', undefined, 'Late')}: {formatNumber(stats.late)}
                                 </span>
                             </div>
 
                             <div className="flex flex-wrap items-center gap-1.5">
                                 <span className="text-xs text-slate-500 mr-1 dark:text-slate-400">
-                                    Set all:
+                                    {isBangla ? 'একসাথে দিন:' : 'Set all:'}
                                 </span>
                                 <button
                                     type="button"
                                     onClick={() => markAll('present')}
                                     className="rounded border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 transition hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 dark:hover:bg-emerald-900/50"
                                 >
-                                    All Present
+                                    {t('attendance.mark_all_present', undefined, 'All Present')}
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => markAll('absent')}
                                     className="rounded border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs font-medium text-rose-700 transition hover:bg-rose-100 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-300 dark:hover:bg-rose-900/50"
                                 >
-                                    All Absent
+                                    {t('attendance.mark_all_absent', undefined, 'All Absent')}
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => markAll('late')}
                                     className="rounded border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 transition hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300 dark:hover:bg-amber-900/50"
                                 >
-                                    All Late
+                                    {isBangla ? 'সব বিলম্বিত' : 'All Late'}
                                 </button>
                             </div>
                         </div>
@@ -522,34 +525,34 @@ export default function AttendanceIndex({
                                             </span>
                                             {activeDateInfo.isToday && (
                                                 <span className="rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider">
-                                                    Today
+                                                    {t('attendance.today', undefined, 'Today')}
                                                 </span>
                                             )}
                                         </div>
                                         <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                                            {activeClassObj ? activeClassObj.label : 'Attendance Sheet'}
+                                            {activeClassObj ? activeClassObj.label : (isBangla ? 'উপস্থিতি তালিকা' : 'Attendance Sheet')}
                                         </p>
                                     </div>
                                 </div>
 
                                 <div className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                                    Showing {attendance.length} enrolled student{attendance.length !== 1 ? 's' : ''}
+                                    {isBangla ? `${formatNumber(attendance.length)} জন শিক্ষার্থী প্রদর্শিত` : `Showing ${attendance.length} enrolled student${attendance.length !== 1 ? 's' : ''}`}
                                 </div>
                             </div>
                             <div className="overflow-x-auto">
                                 <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
                                     <thead className="bg-slate-50 text-left text-xs font-semibold tracking-wider text-slate-500 uppercase dark:bg-slate-950/40 dark:text-slate-400">
                                         <tr>
-                                            <th className="w-20 px-4 py-3">Roll</th>
-                                            <th className="px-4 py-3">Student Name</th>
-                                            <th className="px-4 py-3">Attendance Status</th>
-                                            <th className="px-4 py-3">Remarks / Note</th>
+                                            <th className="w-20 px-4 py-3">{t('attendance.roll', undefined, 'Roll')}</th>
+                                            <th className="px-4 py-3">{t('attendance.student_name', undefined, 'Student Name')}</th>
+                                            <th className="px-4 py-3">{t('attendance.status', undefined, 'Attendance Status')}</th>
+                                            <th className="px-4 py-3">{t('attendance.remarks', undefined, 'Remarks / Note')}</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                                         {attendance.map((row) => {
                                             const sid = getStudentId(row);
-                                            const sName = getStudentName(row);
+                                            const sName = getStudentName(row, isBangla);
                                             const currentStatus =
                                                 formData[String(sid)]?.status ?? 'present';
                                             const currentRemarks =
@@ -561,11 +564,16 @@ export default function AttendanceIndex({
                                                     className="text-slate-700 hover:bg-slate-50/60 dark:text-slate-200 dark:hover:bg-slate-800/40"
                                                 >
                                                     <td className="px-4 py-3 font-mono text-xs font-semibold text-slate-900 dark:text-slate-100">
-                                                        {row.roll_number ?? '—'}
+                                                        {row.roll_number ? formatNumber(row.roll_number) : '—'}
                                                     </td>
                                                     <td className="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">
                                                         <div>{sName}</div>
-                                                        {row.name_bn && row.name_bn !== sName && (
+                                                        {isBangla && row.name_en && (
+                                                            <div className="text-xs text-slate-400">
+                                                                {row.name_en}
+                                                            </div>
+                                                        )}
+                                                        {!isBangla && row.name_bn && row.name_bn !== sName && (
                                                             <div className="text-xs text-slate-400">
                                                                 {row.name_bn}
                                                             </div>
@@ -590,7 +598,7 @@ export default function AttendanceIndex({
                                                                     }
                                                                     className="h-3.5 w-3.5 border-slate-300 text-emerald-600 focus:ring-emerald-500 dark:border-slate-600"
                                                                 />
-                                                                Present
+                                                                {t('attendance.present', undefined, 'Present')}
                                                             </label>
 
                                                             <label
@@ -610,7 +618,7 @@ export default function AttendanceIndex({
                                                                     }
                                                                     className="h-3.5 w-3.5 border-slate-300 text-rose-600 focus:ring-rose-500 dark:border-slate-600"
                                                                 />
-                                                                Absent
+                                                                {t('attendance.absent', undefined, 'Absent')}
                                                             </label>
 
                                                             <label
@@ -630,7 +638,7 @@ export default function AttendanceIndex({
                                                                     }
                                                                     className="h-3.5 w-3.5 border-slate-300 text-amber-600 focus:ring-amber-500 dark:border-slate-600"
                                                                 />
-                                                                Late
+                                                                {t('attendance.late', undefined, 'Late')}
                                                             </label>
                                                         </div>
                                                     </td>
@@ -642,7 +650,7 @@ export default function AttendanceIndex({
                                                                     className="inline-flex shrink-0 items-center gap-1 rounded bg-purple-50 px-2 py-0.5 text-[10px] font-semibold text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 ring-1 ring-purple-500/20"
                                                                 >
                                                                     <AppIcon name="server" className="h-3 w-3" />
-                                                                    <span>Biometric</span>
+                                                                    <span>{isBangla ? 'বায়োমেট্রিক' : 'Biometric'}</span>
                                                                 </span>
                                                             )}
                                                             <input
@@ -651,7 +659,7 @@ export default function AttendanceIndex({
                                                                     updateRowRemarks(sid, e.target.value)
                                                                 }
                                                                 type="text"
-                                                                placeholder="Optional note…"
+                                                                placeholder={isBangla ? 'ঐচ্ছিক মন্তব্য…' : 'Optional note…'}
                                                                 className="h-8 w-full max-w-xs rounded-md border border-slate-200 bg-white px-2.5 text-xs text-slate-900 placeholder-slate-400 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
                                                             />
                                                         </div>
@@ -665,7 +673,7 @@ export default function AttendanceIndex({
 
                             <div className="flex items-center justify-between border-t border-slate-200 px-4 py-3 dark:border-slate-800">
                                 <span className="text-xs text-slate-500 dark:text-slate-400">
-                                    {attendance.length} student{attendance.length !== 1 ? 's' : ''} in this list
+                                    {isBangla ? `মোট ${formatNumber(attendance.length)} জন শিক্ষার্থী তালিকায় রয়েছে` : `${attendance.length} student${attendance.length !== 1 ? 's' : ''} in this list`}
                                 </span>
                                 <button
                                     type="button"
@@ -674,7 +682,7 @@ export default function AttendanceIndex({
                                     onClick={save}
                                 >
                                     <AppIcon name="check" className="h-4 w-4" />
-                                    {isSaving ? 'Saving…' : 'Save Attendance'}
+                                    {isSaving ? (isBangla ? 'সংরক্ষণ হচ্ছে…' : 'Saving…') : t('attendance.save_attendance', undefined, 'Save Attendance')}
                                 </button>
                             </div>
                         </section>
@@ -685,10 +693,12 @@ export default function AttendanceIndex({
                     <section className="rounded-xl border border-slate-200 bg-white p-12 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
                         <AppIcon name="users" className="mx-auto h-8 w-8 text-slate-400" />
                         <h3 className="mt-2 text-sm font-semibold text-slate-900 dark:text-slate-100">
-                            No students found
+                            {isBangla ? 'কোনো শিক্ষার্থী পাওয়া যায়নি' : 'No students found'}
                         </h3>
                         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                            Select a class and section and click &ldquo;Load Students&rdquo; to view or record attendance.
+                            {isBangla 
+                                ? 'উপস্থিতি দেখতে বা রেকর্ড করতে শ্রেণি ও শাখা নির্বাচন করে "শিক্ষার্থী লোড করুন" বাটনে ক্লিক করুন।' 
+                                : 'Select a class and section and click "Load Students" to view or record attendance.'}
                         </p>
                     </section>
                 )}

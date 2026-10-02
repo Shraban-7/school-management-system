@@ -4,6 +4,7 @@ import DashboardLayout from '@/layouts/DashboardLayout';
 import AppIcon from '@/components/AppIcon';
 import { useSidebarStack } from '@/composables/useNavStack';
 import { useDragScroll } from '@/composables/useDragScroll';
+import { useI18n } from '@/composables/useI18n';
 import type { SidebarConfig } from '@/types/sidebar';
 
 interface SubjectCell {
@@ -18,6 +19,7 @@ interface Row {
     student_id: number;
     roll_number: string | null;
     name_en: string;
+    name_bn?: string | null;
     class_label: string | null;
     subjects: Record<number, SubjectCell>;
     gpa: number | null;
@@ -33,6 +35,7 @@ interface Props {
     exam: {
         id: number;
         name_en: string;
+        name_bn?: string | null;
         exam_type: string;
         session_name: string | null;
         institution_name: string | null;
@@ -40,7 +43,7 @@ interface Props {
     };
     classes: { value: number; label: string }[];
     selectedClassId: number | null;
-    columns: { id: number; name_en: string | null }[];
+    columns: { id: number; name_en: string | null; name_bn?: string | null }[];
     rows: Row[];
     sidebar: SidebarConfig;
 }
@@ -53,6 +56,7 @@ export default function Show({
     rows,
     sidebar,
 }: Props) {
+    const { t, bi, formatNumber } = useI18n();
     const sidebarStack = useSidebarStack();
     useEffect(() => {
         sidebarStack.set(sidebar);
@@ -102,7 +106,7 @@ export default function Show({
 
     return (
         <DashboardLayout>
-            <Head title={`Results & Tabulation - ${exam.name_en}`} />
+            <Head title={`${t('results.title')} - ${bi(exam.name_en, exam.name_bn)}`} />
 
             <div className="w-full max-w-full space-y-6">
                 {/* Header */}
@@ -111,14 +115,14 @@ export default function Show({
                         <Link
                             href="/admin/results"
                             className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-xs transition hover:bg-slate-50 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100"
-                            title="Back to results"
+                            title={t('common.back')}
                         >
                             <AppIcon name="arrow-left" className="h-5 w-5" />
                         </Link>
                         <div>
                             <div className="flex items-center gap-2">
                                 <span className="inline-flex items-center rounded-md bg-accent-500/10 px-2 py-0.5 text-xs font-semibold tracking-wider text-accent-700 uppercase dark:bg-accent-500/20 dark:text-accent-300">
-                                    Results & Tabulation
+                                    {t('results.tabulation_sheet')}
                                 </span>
                                 <span className="text-xs text-slate-400 dark:text-slate-500">/</span>
                                 <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
@@ -126,10 +130,10 @@ export default function Show({
                                 </span>
                             </div>
                             <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-50">
-                                {exam.name_en}
+                                {bi(exam.name_en, exam.name_bn)}
                             </h1>
                             <p className="mt-0.5 text-xs text-slate-500 sm:text-sm dark:text-slate-400">
-                                <span>{exam.session_name || 'Academic Session'}</span>
+                                <span>{exam.session_name || t('sidebar.academic_sessions')}</span>
                                 {exam.institution_name && (
                                     <>
                                         <span className="mx-2">&middot;</span>
@@ -146,7 +150,7 @@ export default function Show({
                             className="inline-flex items-center gap-2 rounded-xl bg-accent-50 px-4 py-2 text-xs font-semibold text-accent-700 shadow-2xs transition hover:bg-accent-100 dark:bg-accent-950/60 dark:text-accent-300 dark:hover:bg-accent-900/60"
                         >
                             <AppIcon name="book-open" className="h-4 w-4" />
-                            <span>Edit Marks</span>
+                            <span>{t('results.edit_marks')}</span>
                         </Link>
                     </div>
                 </header>
@@ -165,7 +169,7 @@ export default function Show({
                                 }`}
                                 onClick={() => setView('tabulation')}
                             >
-                                Tabulation Sheet
+                                {t('results.tabulation_sheet')}
                             </button>
                             <button
                                 type="button"
@@ -176,7 +180,7 @@ export default function Show({
                                 }`}
                                 onClick={() => setView('merit')}
                             >
-                                Merit List
+                                {t('results.merit_list')}
                             </button>
                         </div>
 
@@ -190,7 +194,7 @@ export default function Show({
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 type="search"
-                                placeholder="Filter students…"
+                                placeholder={t('results.filter_students')}
                                 className="h-8.5 w-full rounded-lg border border-slate-200 bg-slate-50/50 pr-3 pl-8 text-xs text-slate-900 placeholder-slate-400 transition focus:border-accent-500 focus:bg-white focus:ring-2 focus:ring-accent-500/20 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:bg-slate-900"
                             />
                         </label>
@@ -199,7 +203,7 @@ export default function Show({
                     {/* Class Selector & Quick Scroll Buttons */}
                     <div className="flex flex-wrap items-center gap-3">
                         <div className="flex items-center gap-2">
-                            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Class:</span>
+                            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">{t('common.class')}:</span>
                             <select
                                 value={classId ?? ''}
                                 onChange={(e) =>
@@ -207,7 +211,7 @@ export default function Show({
                                 }
                                 className="h-8.5 rounded-lg border border-slate-200 bg-slate-50/50 px-3 text-xs font-medium text-slate-700 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300 [&>option]:bg-white dark:[&>option]:bg-slate-900"
                             >
-                                <option value="">All classes</option>
+                                <option value="">{t('common.all_classes')}</option>
                                 {classes.map((c) => (
                                     <option key={c.value} value={c.value}>
                                         {c.label}
@@ -215,22 +219,22 @@ export default function Show({
                                 ))}
                             </select>
                             <span className="text-xs text-slate-400 dark:text-slate-500">
-                                ({filteredRows.length} students)
+                                ({formatNumber(filteredRows.length)} {t('common.students')})
                             </span>
                         </div>
 
                         {view === 'tabulation' && (
                             <div className="flex items-center gap-1 sm:border-l sm:border-slate-200 sm:pl-3 dark:sm:border-slate-800">
                                 <span className="hidden lg:inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 dark:text-slate-500 mr-1 select-none">
-                                    <span>Drag table or</span>
+                                    <span>{t('results.drag_table')}</span>
                                 </span>
                                 <button
                                     type="button"
                                     onClick={scrollToLeft}
                                     disabled={!canScrollLeft}
                                     className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-2xs transition hover:bg-slate-50 hover:text-slate-900 disabled:opacity-30 disabled:cursor-not-allowed dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-                                    title="Scroll table left"
-                                    aria-label="Scroll left"
+                                    title={t('results.scroll_left')}
+                                    aria-label={t('results.scroll_left')}
                                 >
                                     <AppIcon name="chevron-left" className="h-3.5 w-3.5" />
                                 </button>
@@ -239,8 +243,8 @@ export default function Show({
                                     onClick={scrollToRight}
                                     disabled={!canScrollRight}
                                     className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-2xs transition hover:bg-slate-50 hover:text-slate-900 disabled:opacity-30 disabled:cursor-not-allowed dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-                                    title="Scroll table right"
-                                    aria-label="Scroll right"
+                                    title={t('results.scroll_right')}
+                                    aria-label={t('results.scroll_right')}
                                 >
                                     <AppIcon name="chevron-right" className="h-3.5 w-3.5" />
                                 </button>
@@ -273,11 +277,11 @@ export default function Show({
                                     <tr>
                                         {/* Pinned Roll */}
                                         <th className="sticky left-0 top-0 z-40 w-16 min-w-[4.25rem] bg-slate-100 dark:bg-slate-900 px-3 py-3.5 text-center border-b-2 border-r border-slate-300 dark:border-slate-700">
-                                            Roll
+                                            {t('results.roll')}
                                         </th>
                                         {/* Pinned Student Name */}
                                         <th className="sticky left-[4.25rem] top-0 z-40 w-48 min-w-[12rem] bg-slate-100 dark:bg-slate-900 px-4 py-3.5 border-b-2 border-r-2 border-slate-300 dark:border-slate-700 shadow-[4px_0_10px_-2px_rgba(0,0,0,0.06)] dark:shadow-[4px_0_10px_-2px_rgba(0,0,0,0.4)]">
-                                            Student
+                                            {t('results.student')}
                                         </th>
                                         {/* Subject Columns */}
                                         {columns.map((col) => (
@@ -285,22 +289,22 @@ export default function Show({
                                                 key={col.id}
                                                 className="w-24 min-w-[6rem] px-3 py-3.5 text-center border-b-2 border-r border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60"
                                             >
-                                                <div className="truncate" title={col.name_en ?? ''}>
-                                                    {col.name_en}
+                                                <div className="truncate" title={bi(col.name_en, col.name_bn) ?? ''}>
+                                                    {bi(col.name_en, col.name_bn)}
                                                 </div>
                                             </th>
                                         ))}
                                         <th className="w-20 min-w-[5rem] px-3 py-3.5 text-center border-b-2 border-r border-slate-200 dark:border-slate-800">
-                                            Total
+                                            {t('results.total_marks')}
                                         </th>
                                         <th className="w-18 min-w-[4.5rem] px-3 py-3.5 text-center border-b-2 border-r border-slate-200 dark:border-slate-800">
-                                            GPA
+                                            {t('results.gpa')}
                                         </th>
                                         <th className="w-20 min-w-[5rem] px-3 py-3.5 text-center border-b-2 border-r border-slate-200 dark:border-slate-800">
-                                            Result
+                                            {t('fees.payment_status')}
                                         </th>
                                         <th className="w-16 min-w-[4rem] px-3 py-3.5 text-right border-b-2 border-slate-300 dark:border-slate-700">
-                                            Sheet
+                                            {t('results.sheet')}
                                         </th>
                                     </tr>
                                 </thead>
@@ -312,14 +316,14 @@ export default function Show({
                                         >
                                             {/* Pinned Roll */}
                                             <td className="sticky left-0 z-20 w-16 min-w-[4.25rem] bg-white dark:bg-slate-900 px-3 py-3 text-center font-mono text-xs font-semibold text-slate-700 dark:text-slate-200 border-r border-b border-slate-200 dark:border-slate-800 transition-colors duration-150 group-hover:bg-slate-50 dark:group-hover:bg-slate-800">
-                                                {row.roll_number || '—'}
+                                                {row.roll_number ? formatNumber(row.roll_number) : '—'}
                                             </td>
 
                                             {/* Pinned Student Name */}
                                             <td className="sticky left-[4.25rem] z-20 w-48 min-w-[12rem] bg-white dark:bg-slate-900 px-4 py-3 border-r-2 border-b border-slate-300 dark:border-slate-700 shadow-[4px_0_10px_-2px_rgba(0,0,0,0.06)] dark:shadow-[4px_0_10px_-2px_rgba(0,0,0,0.4)] transition-colors duration-150 group-hover:bg-slate-50 dark:group-hover:bg-slate-800">
                                                 <div className="min-w-0">
                                                     <p className="truncate font-semibold text-slate-900 dark:text-slate-100 text-xs sm:text-sm">
-                                                        {row.name_en}
+                                                        {bi(row.name_en, row.name_bn)}
                                                     </p>
                                                     {row.class_label && (
                                                         <p className="truncate text-[11px] text-slate-500 dark:text-slate-400">
@@ -341,9 +345,9 @@ export default function Show({
                                                             <div className="inline-flex flex-col items-center">
                                                                 <span className="font-mono text-xs font-bold text-slate-800 dark:text-slate-100">
                                                                     {sub.is_absent ? (
-                                                                        <span className="text-rose-500 dark:text-rose-400">ABS</span>
+                                                                        <span className="text-rose-500 dark:text-rose-400">{t('results.absent')}</span>
                                                                     ) : sub.total !== null ? (
-                                                                        sub.total
+                                                                        formatNumber(sub.total)
                                                                     ) : (
                                                                         '—'
                                                                     )}
@@ -371,12 +375,12 @@ export default function Show({
 
                                             {/* Total */}
                                             <td className="px-3 py-3 text-center font-mono text-xs font-bold text-slate-900 dark:text-slate-100 border-r border-b border-slate-200 dark:border-slate-800">
-                                                {row.has_marks ? Math.round(row.total * 10) / 10 : <span className="text-slate-300">—</span>}
+                                                {row.has_marks ? formatNumber(Math.round(row.total * 10) / 10) : <span className="text-slate-300">—</span>}
                                             </td>
 
                                             {/* GPA */}
                                             <td className="px-3 py-3 text-center font-mono text-xs font-semibold text-slate-800 dark:text-slate-200 border-r border-b border-slate-200 dark:border-slate-800">
-                                                {row.gpa === null ? '—' : row.gpa.toFixed(2)}
+                                                {row.gpa === null ? '—' : formatNumber(row.gpa.toFixed(2))}
                                             </td>
 
                                             {/* Result Badge */}
@@ -389,7 +393,7 @@ export default function Show({
                                                                 : 'bg-rose-100 text-rose-800 dark:bg-rose-950/80 dark:text-rose-300 border-rose-300 dark:border-rose-800'
                                                         }`}
                                                     >
-                                                        {row.passed ? 'Pass' : 'Fail'}
+                                                        {row.passed ? t('results.passed') : t('results.failed')}
                                                     </span>
                                                 ) : (
                                                     <span className="text-slate-300 dark:text-slate-600">—</span>
@@ -401,8 +405,8 @@ export default function Show({
                                                 <Link
                                                     href={`/admin/results/${exam.id}/students/${row.student_id}`}
                                                     className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
-                                                    aria-label="View gradesheet"
-                                                    title="View student gradesheet"
+                                                    aria-label={t('results.view_gradesheet')}
+                                                    title={t('results.view_gradesheet')}
                                                 >
                                                     <AppIcon name="eye" className="h-4 w-4" />
                                                 </Link>
@@ -416,7 +420,7 @@ export default function Show({
                                                 colSpan={columns.length + 6}
                                                 className="px-6 py-12 text-center text-sm text-slate-500 dark:text-slate-400"
                                             >
-                                                No students or marks found for this criteria.
+                                                {t('results.no_marks_recorded')}
                                             </td>
                                         </tr>
                                     )}
@@ -427,15 +431,15 @@ export default function Show({
                             <table className="w-full text-left text-sm divide-y divide-slate-200 dark:divide-slate-800">
                                 <thead className="bg-slate-100 dark:bg-slate-900 text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">
                                     <tr>
-                                        <th className="px-4 py-3.5">Position</th>
-                                        <th className="px-4 py-3.5">Roll</th>
-                                        <th className="px-4 py-3.5">Student</th>
-                                        <th className="px-4 py-3.5">Class</th>
-                                        <th className="px-3 py-3.5 text-center">Total</th>
-                                        <th className="px-3 py-3.5 text-center">GPA</th>
-                                        <th className="px-3 py-3.5 text-center">Grade</th>
-                                        <th className="px-3 py-3.5 text-center">Result</th>
-                                        <th className="px-3 py-3.5 text-right">Sheet</th>
+                                        <th className="px-4 py-3.5">{t('results.position')}</th>
+                                        <th className="px-4 py-3.5">{t('results.roll')}</th>
+                                        <th className="px-4 py-3.5">{t('results.student')}</th>
+                                        <th className="px-4 py-3.5">{t('common.class')}</th>
+                                        <th className="px-3 py-3.5 text-center">{t('results.total_marks')}</th>
+                                        <th className="px-3 py-3.5 text-center">{t('results.gpa')}</th>
+                                        <th className="px-3 py-3.5 text-center">{t('results.grade')}</th>
+                                        <th className="px-3 py-3.5 text-center">{t('fees.payment_status')}</th>
+                                        <th className="px-3 py-3.5 text-right">{t('results.sheet')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
@@ -447,26 +451,26 @@ export default function Show({
                                             <td className="px-4 py-3.5 font-bold">
                                                 {row.position ? (
                                                     <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-accent-100 text-accent-800 dark:bg-accent-900/60 dark:text-accent-300 text-xs">
-                                                        {row.position}
+                                                        {formatNumber(row.position)}
                                                     </span>
                                                 ) : (
                                                     <span className="text-slate-300">—</span>
                                                 )}
                                             </td>
                                             <td className="px-4 py-3.5 font-mono text-xs font-semibold text-slate-700 dark:text-slate-200">
-                                                {row.roll_number || '—'}
+                                                {row.roll_number ? formatNumber(row.roll_number) : '—'}
                                             </td>
                                             <td className="px-4 py-3.5 font-semibold text-slate-900 dark:text-slate-100">
-                                                {row.name_en}
+                                                {bi(row.name_en, row.name_bn)}
                                             </td>
                                             <td className="px-4 py-3.5 text-xs text-slate-600 dark:text-slate-300">
                                                 {row.class_label ?? '—'}
                                             </td>
                                             <td className="px-3 py-3.5 text-center font-mono text-xs font-bold text-slate-900 dark:text-slate-100">
-                                                {Math.round(row.total * 10) / 10}
+                                                {formatNumber(Math.round(row.total * 10) / 10)}
                                             </td>
                                             <td className="px-3 py-3.5 text-center font-mono text-xs font-semibold text-slate-800 dark:text-slate-200">
-                                                {row.gpa === null ? '—' : row.gpa.toFixed(2)}
+                                                {row.gpa === null ? '—' : formatNumber(row.gpa.toFixed(2))}
                                             </td>
                                             <td className="px-3 py-3.5 text-center">
                                                 <span className="inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-800 dark:bg-slate-800 dark:text-slate-200">
@@ -482,7 +486,7 @@ export default function Show({
                                                                 : 'bg-rose-100 text-rose-800 dark:bg-rose-950/80 dark:text-rose-300 border-rose-300 dark:border-rose-800'
                                                         }`}
                                                     >
-                                                        {row.passed ? 'Pass' : 'Fail'}
+                                                        {row.passed ? t('results.passed') : t('results.failed')}
                                                     </span>
                                                 ) : (
                                                     <span className="text-slate-300">—</span>
@@ -492,8 +496,8 @@ export default function Show({
                                                 <Link
                                                     href={`/admin/results/${exam.id}/students/${row.student_id}`}
                                                     className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
-                                                    aria-label="View gradesheet"
-                                                    title="View student gradesheet"
+                                                    aria-label={t('results.view_gradesheet')}
+                                                    title={t('results.view_gradesheet')}
                                                 >
                                                     <AppIcon name="eye" className="h-4 w-4" />
                                                 </Link>
@@ -506,7 +510,7 @@ export default function Show({
                                                 colSpan={9}
                                                 className="px-4 py-12 text-center text-sm text-slate-500 dark:text-slate-400"
                                             >
-                                                No students or marks found.
+                                                {t('results.no_marks_recorded')}
                                             </td>
                                         </tr>
                                     )}

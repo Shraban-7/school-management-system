@@ -3,6 +3,7 @@ import { Head } from '@inertiajs/react';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import AppIcon from '@/components/AppIcon';
 import { useSidebarStack } from '@/composables/useNavStack';
+import { useI18n } from '@/composables/useI18n';
 import type { SidebarConfig } from '@/types/sidebar';
 
 type Level = 'info' | 'success' | 'warning' | 'danger';
@@ -25,6 +26,7 @@ export default function AdminNotifications({
     items,
     sidebar,
 }: AdminNotificationsProps) {
+    const { t, formatNumber } = useI18n();
     const sidebarStack = useSidebarStack();
     useEffect(() => {
         if (sidebar) {
@@ -68,36 +70,44 @@ export default function AdminNotifications({
 
     return (
         <DashboardLayout>
-            <Head title="Notifications" />
+            <Head title={t('notifications.title', {}, 'Notifications')} />
 
             <div className="space-y-6">
                 <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                         <p className="text-xs font-semibold tracking-widest text-slate-500 uppercase dark:text-slate-400">
-                            System
+                            {t('sidebar.system', {}, 'System')}
                         </p>
                         <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-50">
-                            Notifications
+                            {t('notifications.title', {}, 'Notifications')}
                         </h1>
                         <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                            {unreadCount} unread of {items.length} total
+                            {t('notifications.unread_count', { unread: formatNumber(unreadCount), total: formatNumber(items.length) }, `${formatNumber(unreadCount)} unread of ${formatNumber(items.length)} total`)}
                         </p>
                     </div>
                     <div className="inline-flex rounded-md border border-slate-200 bg-white p-0.5 dark:border-slate-700 dark:bg-slate-900">
-                        {(['all', 'unread'] as const).map((opt) => (
-                            <button
-                                key={opt}
-                                type="button"
-                                className={`rounded-md px-3 py-1.5 text-xs font-semibold capitalize transition ${
-                                    filter === opt
-                                        ? 'bg-accent-600 text-white shadow-sm'
-                                        : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100'
-                                }`}
-                                onClick={() => setFilter(opt)}
-                            >
-                                {opt}
-                            </button>
-                        ))}
+                        <button
+                            type="button"
+                            className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+                                filter === 'all'
+                                    ? 'bg-accent-600 text-white shadow-sm'
+                                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100'
+                            }`}
+                            onClick={() => setFilter('all')}
+                        >
+                            {t('common.all', {}, 'All')}
+                        </button>
+                        <button
+                            type="button"
+                            className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+                                filter === 'unread'
+                                    ? 'bg-accent-600 text-white shadow-sm'
+                                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100'
+                            }`}
+                            onClick={() => setFilter('unread')}
+                        >
+                            {t('notifications.unread', {}, 'Unread')}
+                        </button>
                     </div>
                 </header>
 
@@ -138,14 +148,14 @@ export default function AdminNotifications({
                                         type="button"
                                         className="inline-flex h-7 items-center rounded-md border border-slate-200 px-2 text-xs font-medium text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                                     >
-                                        Mark read
+                                        {t('notifications.mark_read', {}, 'Mark read')}
                                     </button>
                                 )}
                             </li>
                         ))}
                         {filtered.length === 0 && (
                             <li className="px-5 py-12 text-center text-sm text-slate-500 dark:text-slate-400">
-                                No notifications to show.
+                                {t('notifications.no_notifications', {}, 'No notifications to show.')}
                             </li>
                         )}
                     </ul>

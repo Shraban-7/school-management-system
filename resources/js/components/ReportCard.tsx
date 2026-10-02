@@ -1,10 +1,12 @@
 import React from 'react';
 import { Link } from '@inertiajs/react';
 import AppIcon from '@/components/AppIcon';
+import { useI18n } from '@/composables/useI18n';
 
 interface SubjectRow {
     subject_id: number;
     subject_en: string | null;
+    subject_bn?: string | null;
     full_marks: number;
     pass_marks: number;
     written_marks: number | null;
@@ -59,12 +61,14 @@ interface ReportCardProps {
     pdfHref: string;
 }
 
-function fmt(value: number | null): string {
-    if (value === null || value === undefined) return '—';
-    return String(Math.round(value * 10) / 10);
-}
-
 export default function ReportCard({ report, backHref, pdfHref }: ReportCardProps) {
+    const { t, bi, formatNumber } = useI18n();
+
+    function fmt(value: number | null): string {
+        if (value === null || value === undefined) return '—';
+        return formatNumber(Math.round(value * 10) / 10);
+    }
+
     return (
         <div className="space-y-6">
             <header className="flex items-center justify-between gap-4">
@@ -72,18 +76,19 @@ export default function ReportCard({ report, backHref, pdfHref }: ReportCardProp
                     <Link
                         href={backHref}
                         className="inline-flex h-9 w-9 items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+                        title={t('common.back')}
                     >
                         <AppIcon name="arrow-left" className="h-5 w-5" />
                     </Link>
                     <div>
                         <p className="text-xs font-semibold tracking-widest text-slate-500 uppercase dark:text-slate-400">
-                            Gradesheet
+                            {t('results.sheet')}
                         </p>
                         <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
-                            {report.student.name_en}
+                            {bi(report.student.name_en, report.student.name_bn)}
                         </h1>
                         <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                            {report.exam.name_en}
+                            {bi(report.exam.name_en, report.exam.name_bn)}
                         </p>
                     </div>
                 </div>
@@ -92,14 +97,14 @@ export default function ReportCard({ report, backHref, pdfHref }: ReportCardProp
                     className="inline-flex items-center gap-1.5 rounded-md bg-accent-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-accent-700"
                 >
                     <AppIcon name="download" className="h-4 w-4" />
-                    Download PDF
+                    {t('results.download_pdf')}
                 </a>
             </header>
 
             <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
                 <div className="border-b border-slate-200 p-6 text-center dark:border-slate-800">
                     <h2 className="text-xl font-bold text-slate-900 dark:text-slate-50">
-                        {report.institution.name_en}
+                        {bi(report.institution.name_en, report.institution.name_bn)}
                     </h2>
                     {report.institution.name_bn && (
                         <p className="text-sm text-slate-600 dark:text-slate-400">
@@ -108,38 +113,38 @@ export default function ReportCard({ report, backHref, pdfHref }: ReportCardProp
                     )}
                     <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                         {report.institution.eiin_number && (
-                            <span>EIIN: {report.institution.eiin_number}</span>
+                            <span>{t('settings.eiin')}: {formatNumber(report.institution.eiin_number)}</span>
                         )}
                         {report.institution.board_affiliation && (
-                            <span> · Board: {report.institution.board_affiliation}</span>
+                            <span> · {t('settings.board')}: {report.institution.board_affiliation}</span>
                         )}
                     </p>
                     <p className="mt-3 text-sm font-semibold tracking-wide text-slate-700 uppercase dark:text-slate-200">
-                        Academic Transcript
+                        {t('results.academic_transcript')}
                     </p>
                 </div>
 
                 <dl className="grid grid-cols-2 gap-x-6 gap-y-2 p-6 text-sm sm:grid-cols-4">
                     <div>
-                        <dt className="text-xs text-slate-500 dark:text-slate-400">Roll</dt>
+                        <dt className="text-xs text-slate-500 dark:text-slate-400">{t('results.roll')}</dt>
                         <dd className="font-medium text-slate-900 dark:text-slate-100">
-                            {report.student.roll_number ?? '—'}
+                            {report.student.roll_number ? formatNumber(report.student.roll_number) : '—'}
                         </dd>
                     </div>
                     <div>
-                        <dt className="text-xs text-slate-500 dark:text-slate-400">Class</dt>
+                        <dt className="text-xs text-slate-500 dark:text-slate-400">{t('common.class')}</dt>
                         <dd className="font-medium text-slate-900 dark:text-slate-100">
                             {report.student.class_label ?? '—'}
                         </dd>
                     </div>
                     <div>
-                        <dt className="text-xs text-slate-500 dark:text-slate-400">Session</dt>
+                        <dt className="text-xs text-slate-500 dark:text-slate-400">{t('sidebar.academic_sessions')}</dt>
                         <dd className="font-medium text-slate-900 dark:text-slate-100">
                             {report.exam.session_name ?? '—'}
                         </dd>
                     </div>
                     <div>
-                        <dt className="text-xs text-slate-500 dark:text-slate-400">Exam type</dt>
+                        <dt className="text-xs text-slate-500 dark:text-slate-400">{t('exams.exam_type')}</dt>
                         <dd className="font-medium text-slate-900 dark:text-slate-100">
                             {report.exam.exam_type}
                         </dd>
@@ -149,7 +154,7 @@ export default function ReportCard({ report, backHref, pdfHref }: ReportCardProp
                 {!report.summary.has_marks ? (
                     <div className="px-6 pb-8">
                         <p className="rounded-lg border border-dashed border-slate-300 py-10 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
-                            No marks have been recorded for this student in this exam.
+                            {t('results.no_marks_recorded')}
                         </p>
                     </div>
                 ) : (
@@ -158,14 +163,14 @@ export default function ReportCard({ report, backHref, pdfHref }: ReportCardProp
                             <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
                                 <thead className="text-left text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400">
                                     <tr>
-                                        <th className="py-3 pr-4">Subject</th>
-                                        <th className="px-3 py-3 text-center">Written</th>
-                                        <th className="px-3 py-3 text-center">MCQ</th>
-                                        <th className="px-3 py-3 text-center">Practical</th>
-                                        <th className="px-3 py-3 text-center">Total</th>
-                                        <th className="px-3 py-3 text-center">Full</th>
-                                        <th className="px-3 py-3 text-center">Grade</th>
-                                        <th className="px-3 py-3 text-center">Point</th>
+                                        <th className="py-3 pr-4">{t('subjects.subject_name')}</th>
+                                        <th className="px-3 py-3 text-center">{t('results.written')}</th>
+                                        <th className="px-3 py-3 text-center">{t('results.mcq')}</th>
+                                        <th className="px-3 py-3 text-center">{t('results.practical')}</th>
+                                        <th className="px-3 py-3 text-center">{t('results.total_marks')}</th>
+                                        <th className="px-3 py-3 text-center">{t('results.full')}</th>
+                                        <th className="px-3 py-3 text-center">{t('results.grade')}</th>
+                                        <th className="px-3 py-3 text-center">{t('results.point')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -175,7 +180,7 @@ export default function ReportCard({ report, backHref, pdfHref }: ReportCardProp
                                             className="text-slate-700 dark:text-slate-200"
                                         >
                                             <td className="py-3 pr-4 font-medium text-slate-900 dark:text-slate-100">
-                                                {s.subject_en}
+                                                {bi(s.subject_en, s.subject_bn)}
                                             </td>
                                             <td className="px-3 py-3 text-center font-mono text-xs">
                                                 {s.is_absent ? '—' : fmt(s.written_marks)}
@@ -187,7 +192,7 @@ export default function ReportCard({ report, backHref, pdfHref }: ReportCardProp
                                                 {s.is_absent ? '—' : fmt(s.practical_marks)}
                                             </td>
                                             <td className="px-3 py-3 text-center font-mono text-xs font-semibold">
-                                                {s.is_absent ? 'Abs' : fmt(s.total)}
+                                                {s.is_absent ? t('results.absent') : fmt(s.total)}
                                             </td>
                                             <td className="px-3 py-3 text-center font-mono text-xs">
                                                 {fmt(s.full_marks)}
@@ -204,7 +209,7 @@ export default function ReportCard({ report, backHref, pdfHref }: ReportCardProp
                                                 </span>
                                             </td>
                                             <td className="px-3 py-3 text-center font-mono text-xs">
-                                                {s.point.toFixed(2)}
+                                                {formatNumber(s.point.toFixed(2))}
                                             </td>
                                         </tr>
                                     ))}
@@ -215,28 +220,28 @@ export default function ReportCard({ report, backHref, pdfHref }: ReportCardProp
                         <div className="m-6 grid grid-cols-2 gap-4 rounded-lg bg-slate-50 p-5 sm:grid-cols-4 dark:bg-slate-950/40">
                             <div>
                                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                                    Total marks
+                                    {t('results.total_marks')}
                                 </p>
                                 <p className="text-lg font-bold text-slate-900 dark:text-slate-100">
                                     {fmt(report.summary.total)} / {fmt(report.summary.full_total)}
                                 </p>
                             </div>
                             <div>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">GPA</p>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">{t('results.gpa')}</p>
                                 <p className="text-lg font-bold text-slate-900 dark:text-slate-100">
                                     {report.summary.gpa === null
                                         ? '—'
-                                        : report.summary.gpa.toFixed(2)}
+                                        : formatNumber(report.summary.gpa.toFixed(2))}
                                 </p>
                             </div>
                             <div>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">Letter grade</p>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">{t('results.grade')}</p>
                                 <p className="text-lg font-bold text-slate-900 dark:text-slate-100">
                                     {report.summary.grade}
                                 </p>
                             </div>
                             <div>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">Result</p>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">{t('fees.payment_status')}</p>
                                 <p
                                     className={`text-lg font-bold ${
                                         report.summary.passed
@@ -244,7 +249,7 @@ export default function ReportCard({ report, backHref, pdfHref }: ReportCardProp
                                             : 'text-rose-600 dark:text-rose-400'
                                     }`}
                                 >
-                                    {report.summary.passed ? 'PASSED' : 'FAILED'}
+                                    {report.summary.passed ? t('results.passed') : t('results.failed')}
                                 </p>
                             </div>
                         </div>

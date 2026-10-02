@@ -3,12 +3,14 @@ import { Head, Link } from '@inertiajs/react';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import AppIcon from '@/components/AppIcon';
 import { useSidebarStack } from '@/composables/useNavStack';
+import { useI18n } from '@/composables/useI18n';
 import type { SidebarConfig } from '@/types/sidebar';
 
 interface Invoice {
     id: number;
     invoice_number: string;
     title_en: string;
+    title_bn?: string | null;
     amount: number;
     paid_amount: number;
     balance: number;
@@ -18,7 +20,7 @@ interface Invoice {
 }
 
 interface ParentFeesChildProps {
-    student: { id: number; name_en: string; roll_number: string | null };
+    student: { id: number; name_en: string; name_bn?: string | null; roll_number: string | null };
     summary: {
         total_due: number;
         invoice_count: number;
@@ -34,6 +36,7 @@ export default function ParentFeesChild({
     invoices,
     sidebar,
 }: ParentFeesChildProps) {
+    const { t, bi, formatNumber } = useI18n();
     const sidebarStack = useSidebarStack();
     useEffect(() => {
         if (sidebar) {
@@ -43,21 +46,22 @@ export default function ParentFeesChild({
 
     return (
         <DashboardLayout>
-            <Head title={`Fees - ${student.name_en}`} />
+            <Head title={`${t('fees.invoices')} - ${bi(student.name_en, student.name_bn)}`} />
             <div className="space-y-6">
                 <header className="flex items-center gap-4">
                     <Link
                         href="/parent/fees"
                         className="inline-flex h-9 w-9 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100"
+                        title={t('common.back')}
                     >
                         <AppIcon name="arrow-left" className="h-5 w-5" />
                     </Link>
                     <div>
                         <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-50">
-                            {student.name_en}
+                            {bi(student.name_en, student.name_bn)}
                         </h1>
                         <p className="text-sm text-slate-500">
-                            Total due: ৳{summary.total_due.toLocaleString()}
+                            {t('results.total_due', { amount: formatNumber(summary.total_due.toLocaleString()) })}
                         </p>
                     </div>
                 </header>
@@ -65,23 +69,23 @@ export default function ParentFeesChild({
                     <table className="min-w-full text-sm">
                         <thead className="bg-slate-50 text-xs text-slate-500 uppercase">
                             <tr>
-                                <th className="px-4 py-3">Invoice</th>
-                                <th className="px-4 py-3">Due date</th>
-                                <th className="px-4 py-3">Amount</th>
-                                <th className="px-4 py-3">Balance</th>
-                                <th className="px-4 py-3">Status</th>
+                                <th className="px-4 py-3">{t('results.invoice')}</th>
+                                <th className="px-4 py-3">{t('fees.due_date')}</th>
+                                <th className="px-4 py-3">{t('fees.amount')}</th>
+                                <th className="px-4 py-3">{t('results.balance')}</th>
+                                <th className="px-4 py-3">{t('fees.payment_status')}</th>
                             </tr>
                         </thead>
                         <tbody>
                             {invoices.map((inv) => (
                                 <tr key={inv.id} className="border-t">
-                                    <td className="px-4 py-3">{inv.title_en}</td>
+                                    <td className="px-4 py-3">{bi(inv.title_en, inv.title_bn)}</td>
                                     <td className="px-4 py-3">{inv.due_date}</td>
                                     <td className="px-4 py-3 font-mono">
-                                        ৳{inv.amount.toLocaleString()}
+                                        ৳{formatNumber(inv.amount.toLocaleString())}
                                     </td>
                                     <td className="px-4 py-3 font-mono">
-                                        ৳{inv.balance.toLocaleString()}
+                                        ৳{formatNumber(inv.balance.toLocaleString())}
                                     </td>
                                     <td className="px-4 py-3">{inv.status_label}</td>
                                 </tr>
@@ -90,8 +94,7 @@ export default function ParentFeesChild({
                     </table>
                 </section>
                 <p className="text-xs text-slate-500">
-                    Pay at the school office or via bKash/Nagad and share the
-                    reference number with the accounts section.
+                    {t('results.parent_fee_notice')}
                 </p>
             </div>
         </DashboardLayout>

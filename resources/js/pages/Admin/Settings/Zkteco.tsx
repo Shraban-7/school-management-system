@@ -3,6 +3,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import AppIcon from '@/components/AppIcon';
 import { useSidebarStack } from '@/composables/useNavStack';
+import { useI18n } from '@/composables/useI18n';
 import type { SidebarConfig } from '@/types/sidebar';
 
 interface ZktecoConfig {
@@ -39,6 +40,7 @@ export default function ZktecoSettingsPage({
     zkteco_test_result,
     sidebar,
 }: Props) {
+    const { t, formatNumber } = useI18n();
     const sidebarStack = useSidebarStack();
     useEffect(() => {
         if (sidebar) {
@@ -178,7 +180,7 @@ export default function ZktecoSettingsPage({
 
     return (
         <DashboardLayout>
-            <Head title="ZKTeco Biometrics &amp; RFID Settings" />
+            <Head title={`${t('settings.zkteco_breadcrumb')} - ${t('settings.title')}`} />
 
             <div className="space-y-6">
                 {/* Header */}
@@ -186,16 +188,16 @@ export default function ZktecoSettingsPage({
                     <div>
                         <div className="flex items-center gap-2 text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400">
                             <Link href="/admin/settings" className="hover:underline">
-                                Settings
+                                {t('sidebar.settings')}
                             </Link>
                             <span>/</span>
-                            <span className="text-accent-600 dark:text-accent-400">ZKTeco Biometrics</span>
+                            <span className="text-accent-600 dark:text-accent-400">{t('settings.zkteco_breadcrumb')}</span>
                         </div>
                         <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-50">
-                            ZKTeco Hardware &amp; Biometrics
+                            {t('settings.zkteco_title')}
                         </h1>
                         <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                            Plug &amp; play configuration for biometric fingerprint scanners, RFID readers, and facial recognition terminals.
+                            {t('settings.zkteco_subtitle')}
                         </p>
                     </div>
 
@@ -205,7 +207,7 @@ export default function ZktecoSettingsPage({
                             className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
                         >
                             <AppIcon name="calendar" className="h-4 w-4 text-slate-500" />
-                            <span>Go to Attendance</span>
+                            <span>{t('settings.go_to_attendance')}</span>
                         </Link>
                     </div>
                 </header>
@@ -227,7 +229,7 @@ export default function ZktecoSettingsPage({
                     <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                         <div className="flex items-center justify-between">
                             <span className="text-xs font-semibold text-slate-500 uppercase dark:text-slate-400">
-                                Terminal Status
+                                {t('settings.terminal_status')}
                             </span>
                             <span
                                 className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
@@ -236,54 +238,54 @@ export default function ZktecoSettingsPage({
                                         : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
                                 }`}
                             >
-                                {form.is_enabled ? 'Active / Enabled' : 'Optional (Off)'}
+                                {form.is_enabled ? t('settings.active_enabled') : t('settings.optional_off')}
                             </span>
                         </div>
                         <p className="mt-2 text-lg font-bold text-slate-900 dark:text-slate-100 truncate">
                             {form.name}
                         </p>
                         <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                            {form.is_enabled ? 'Ready for automatic syncing' : 'Disabled — manual attendance only'}
+                            {form.is_enabled ? t('settings.auto_sync_ready') : t('settings.manual_only')}
                         </p>
                     </div>
 
                     <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                         <span className="text-xs font-semibold text-slate-500 uppercase dark:text-slate-400">
-                            Network Address
+                            {t('settings.network_address')}
                         </span>
                         <p className="mt-2 font-mono text-lg font-bold text-slate-900 dark:text-slate-100">
                             {form.ip_address}:{form.port}
                         </p>
                         <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                            Protocol: {form.protocol.toUpperCase()} • Key: {form.comm_key}
+                            {t('settings.protocol')}: {form.protocol.toUpperCase()} • {t('settings.comm_key')}: {formatNumber(form.comm_key)}
                         </p>
                     </div>
 
                     <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                         <span className="text-xs font-semibold text-slate-500 uppercase dark:text-slate-400">
-                            Student Matching
+                            {t('settings.student_matching')}
                         </span>
                         <p className="mt-2 text-lg font-bold text-slate-900 dark:text-slate-100 capitalize">
                             {form.mapping_field === 'roll_number'
-                                ? 'Roll Number'
+                                ? t('settings.roll_number')
                                 : form.mapping_field === 'id'
-                                  ? 'Student ID'
-                                  : 'RFID Card ID'}
+                                  ? t('settings.student_id')
+                                  : t('settings.biometric_id')}
                         </p>
                         <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                            Maps terminal User ID to student
+                            {t('settings.matching_desc')}
                         </p>
                     </div>
 
                     <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                         <span className="text-xs font-semibold text-slate-500 uppercase dark:text-slate-400">
-                            Late Cutoff
+                            {t('settings.late_cutoff')}
                         </span>
                         <p className="mt-2 font-mono text-lg font-bold text-slate-900 dark:text-slate-100">
                             {form.late_threshold} AM
                         </p>
                         <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                            Punches after this time marked Late
+                            {t('settings.late_cutoff_desc')}
                         </p>
                     </div>
                 </div>
@@ -299,10 +301,10 @@ export default function ZktecoSettingsPage({
                                 </div>
                                 <div>
                                     <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                                        Terminal Hardware Configuration
+                                        {t('settings.terminal_config')}
                                     </h2>
                                     <p className="text-xs text-slate-500 dark:text-slate-400">
-                                        Define connection parameters and biometric rules for your terminal.
+                                        {t('settings.terminal_config_desc')}
                                     </p>
                                 </div>
                             </div>
@@ -315,10 +317,10 @@ export default function ZktecoSettingsPage({
                                             htmlFor="page-zkteco-toggle"
                                             className="text-sm font-bold text-slate-900 dark:text-slate-100 cursor-pointer"
                                         >
-                                            Enable ZKTeco Device Integration
+                                            {t('settings.enable_zkteco')}
                                         </label>
                                         <p className="text-xs text-slate-500 dark:text-slate-400">
-                                            Turn on to allow direct sync and USB file imports. Turn off if not in use.
+                                            {t('settings.enable_zkteco_desc')}
                                         </p>
                                     </div>
                                     <label className="relative inline-flex items-center cursor-pointer">
@@ -336,13 +338,13 @@ export default function ZktecoSettingsPage({
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="sm:col-span-2">
                                         <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                                            Terminal Name
+                                            {t('settings.terminal_name')}
                                         </label>
                                         <input
                                             type="text"
                                             value={form.name}
                                             onChange={(e) => setForm({ ...form, name: e.target.value })}
-                                            placeholder="e.g. Main Gate Terminal"
+                                            placeholder={t('settings.terminal_name_placeholder')}
                                             className="mt-1.5 h-10 block w-full rounded-lg border border-slate-200 bg-white px-3.5 text-sm text-slate-900 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
                                             required
                                         />
@@ -350,7 +352,7 @@ export default function ZktecoSettingsPage({
 
                                     <div>
                                         <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                                            Terminal IP Address
+                                            {t('settings.terminal_ip')}
                                         </label>
                                         <input
                                             type="text"
@@ -364,7 +366,7 @@ export default function ZktecoSettingsPage({
 
                                     <div>
                                         <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                                            Communication Port
+                                            {t('settings.comm_port')}
                                         </label>
                                         <input
                                             type="number"
@@ -377,7 +379,7 @@ export default function ZktecoSettingsPage({
 
                                     <div>
                                         <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                                            Comm Key / Password
+                                            {t('settings.comm_password')}
                                         </label>
                                         <input
                                             type="number"
@@ -386,27 +388,27 @@ export default function ZktecoSettingsPage({
                                             className="mt-1.5 h-10 block w-full rounded-lg border border-slate-200 bg-white px-3.5 font-mono text-sm text-slate-900 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
                                         />
                                         <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                                            Default is 0 (no password).
+                                            {t('settings.comm_password_hint')}
                                         </span>
                                     </div>
 
                                     <div>
                                         <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                                            Protocol
+                                            {t('settings.protocol')}
                                         </label>
                                         <select
                                             value={form.protocol}
                                             onChange={(e) => setForm({ ...form, protocol: e.target.value as 'udp' | 'tcp' })}
                                             className="mt-1.5 h-10 block w-full rounded-lg border border-slate-200 bg-white px-3.5 text-sm text-slate-900 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
                                         >
-                                            <option value="udp">UDP (Standard ZKTeco Protocol)</option>
-                                            <option value="tcp">TCP Protocol</option>
+                                            <option value="udp">{t('settings.udp_protocol')}</option>
+                                            <option value="tcp">{t('settings.tcp_protocol')}</option>
                                         </select>
                                     </div>
 
                                     <div>
                                         <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                                            Student Identifier Mapping
+                                            {t('settings.student_matching')}
                                         </label>
                                         <select
                                             value={form.mapping_field}
@@ -421,15 +423,15 @@ export default function ZktecoSettingsPage({
                                             }
                                             className="mt-1.5 h-10 block w-full rounded-lg border border-slate-200 bg-white px-3.5 text-sm text-slate-900 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
                                         >
-                                            <option value="roll_number">Class Roll Number (Recommended)</option>
-                                            <option value="id">Database Student ID</option>
-                                            <option value="biometric_id">RFID Card / Biometric ID</option>
+                                            <option value="roll_number">{t('settings.roll_number_rec')}</option>
+                                            <option value="id">{t('settings.student_id')}</option>
+                                            <option value="biometric_id">{t('settings.biometric_id')}</option>
                                         </select>
                                     </div>
 
                                     <div>
                                         <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                                            Late Arrival Cutoff Time
+                                            {t('settings.late_cutoff')}
                                         </label>
                                         <input
                                             type="time"
@@ -448,7 +450,7 @@ export default function ZktecoSettingsPage({
                                         className="inline-flex items-center gap-2 rounded-lg bg-accent-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-accent-700 disabled:opacity-50"
                                     >
                                         <AppIcon name="check" className="h-4 w-4" />
-                                        <span>{isSaving ? 'Saving…' : 'Save Configuration'}</span>
+                                        <span>{isSaving ? t('common.saving') : t('settings.save_settings')}</span>
                                     </button>
                                 </div>
                             </form>
@@ -463,7 +465,7 @@ export default function ZktecoSettingsPage({
                                 <div className="flex items-center gap-2">
                                     <AppIcon name="activity" className="h-4 w-4 text-accent-600 dark:text-accent-400" />
                                     <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                                        Connection Diagnostic Test
+                                        {t('settings.diag_test')}
                                     </h3>
                                 </div>
                                 <button
@@ -473,12 +475,12 @@ export default function ZktecoSettingsPage({
                                     className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                                 >
                                     <AppIcon name="activity" className="h-3.5 w-3.5" />
-                                    <span>{isTesting ? 'Testing…' : 'Ping Device'}</span>
+                                    <span>{isTesting ? t('settings.testing') : t('settings.ping_device')}</span>
                                 </button>
                             </div>
 
                             <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                                Verifies network communication with {form.ip_address}:{form.port} ({form.protocol.toUpperCase()}).
+                                {t('settings.diag_desc')} ({form.ip_address}:{form.port}, {form.protocol.toUpperCase()})
                             </p>
 
                             {testResult && (
@@ -497,7 +499,7 @@ export default function ZktecoSettingsPage({
                                         <p className="font-semibold">{testResult.message}</p>
                                         {testResult.latency_ms && (
                                             <p className="mt-1 font-mono text-[11px] opacity-90">
-                                                Latency: {testResult.latency_ms} ms
+                                                {t('settings.latency')}: {formatNumber(testResult.latency_ms)} ms
                                             </p>
                                         )}
                                     </div>
@@ -510,17 +512,17 @@ export default function ZktecoSettingsPage({
                             <div className="flex items-center gap-2">
                                 <AppIcon name="download" className="h-4 w-4 text-accent-600 dark:text-accent-400" />
                                 <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                                    Direct Device Sync
+                                    {t('settings.direct_sync')}
                                 </h3>
                             </div>
                             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                                Pull punch logs directly from the terminal for a specific date.
+                                {t('settings.direct_sync_desc')}
                             </p>
 
                             <div className="mt-4 space-y-3">
                                 <div>
                                     <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                                        Sync Date
+                                        {t('settings.sync_date')}
                                     </label>
                                     <input
                                         type="date"
@@ -532,14 +534,14 @@ export default function ZktecoSettingsPage({
 
                                 <div>
                                     <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                                        Target Class (Optional)
+                                        {t('settings.target_class')}
                                     </label>
                                     <select
                                         value={syncClass}
                                         onChange={(e) => setSyncClass(e.target.value)}
                                         className="mt-1 h-9 block w-full rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-900 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
                                     >
-                                        <option value="">All Enrolled Classes</option>
+                                        <option value="">{t('settings.all_classes')}</option>
                                         {classes.map((c) => (
                                             <option key={c.id} value={c.id}>
                                                 {c.label}
@@ -555,7 +557,7 @@ export default function ZktecoSettingsPage({
                                     className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-accent-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-accent-700 disabled:opacity-50"
                                 >
                                     <AppIcon name="download" className="h-4 w-4" />
-                                    <span>{isSyncing ? 'Pulling Logs from Terminal…' : 'Pull Logs from Terminal'}</span>
+                                    <span>{isSyncing ? t('settings.pulling_logs') : t('settings.pull_logs')}</span>
                                 </button>
                             </div>
                         </section>
@@ -565,11 +567,11 @@ export default function ZktecoSettingsPage({
                             <div className="flex items-center gap-2">
                                 <AppIcon name="database" className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                                 <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                                    USB Log File Import (.dat / .txt / .csv)
+                                    {t('settings.usb_import')}
                                 </h3>
                             </div>
                             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                                Plug a USB flash drive into your terminal, export logs (generates <code className="rounded bg-slate-100 px-1 py-0.5 font-mono dark:bg-slate-800">1_attlog.dat</code>), and upload here.
+                                {t('settings.usb_import_desc')}
                             </p>
 
                             <form onSubmit={handleImportFile} className="mt-3 space-y-3">
@@ -586,7 +588,7 @@ export default function ZktecoSettingsPage({
                                     className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-emerald-700 disabled:opacity-50"
                                 >
                                     <AppIcon name="check" className="h-4 w-4" />
-                                    <span>{isImporting ? 'Processing File…' : 'Process USB Log'}</span>
+                                    <span>{isImporting ? t('settings.processing_usb') : t('settings.process_usb')}</span>
                                 </button>
                             </form>
                         </section>
@@ -596,11 +598,11 @@ export default function ZktecoSettingsPage({
                             <div className="flex items-center gap-2">
                                 <AppIcon name="sparkles" className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                                 <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                                    Real-time Cloud Push (ADMS)
+                                    {t('settings.adms_title')}
                                 </h3>
                             </div>
                             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                                Terminal automatically pushes punches in real-time as users swipe. Enter this server address in the device's <strong>Cloud Server / ADMS</strong> menu:
+                                {t('settings.adms_desc')}
                             </p>
 
                             <div className="mt-3 flex items-center gap-2">
@@ -615,7 +617,7 @@ export default function ZktecoSettingsPage({
                                     onClick={copyWebhookUrl}
                                     className="h-8 px-2.5 rounded-md border border-slate-200 bg-white font-medium text-slate-700 hover:bg-slate-50 text-[11px] transition dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
                                 >
-                                    {copiedWebhook ? 'Copied!' : 'Copy'}
+                                    {copiedWebhook ? t('settings.copied') : t('settings.copy')}
                                 </button>
                             </div>
                         </section>

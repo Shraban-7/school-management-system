@@ -205,14 +205,14 @@ export default function DashboardLayout({
                         >
                             <AppIcon name="panel-left" className="h-5 w-5" />
                         </button>
-                        <SearchBar placeholder="Search…" className="hidden sm:flex" />
+                        <SearchBar placeholder={t('common.search')} className="hidden sm:flex" />
                     </div>
 
                     <div className="flex items-center gap-1 sm:gap-2">
                         <button
                             type="button"
                             className="inline-flex h-9 w-9 items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 lg:hidden dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
-                            aria-label="Search"
+                            aria-label={t('common.search')}
                         >
                             <AppIcon name="search" className="h-5 w-5" />
                         </button>

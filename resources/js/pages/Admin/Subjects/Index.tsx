@@ -3,6 +3,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import AppIcon from '@/components/AppIcon';
 import { useSidebarStack } from '@/composables/useNavStack';
+import { useI18n } from '@/composables/useI18n';
 import type { SidebarConfig } from '@/types/sidebar';
 
 interface SubjectRow {
@@ -33,6 +34,7 @@ interface Props {
 }
 
 export default function SubjectsIndex({ subjects, sidebar }: Props) {
+    const { t, bi, formatNumber } = useI18n();
     const sidebarStack = useSidebarStack();
     useEffect(() => {
         sidebarStack.set(sidebar);
@@ -47,31 +49,32 @@ export default function SubjectsIndex({ subjects, sidebar }: Props) {
         : subjects.data.filter(
               (s) =>
                   s.name_en.toLowerCase().includes(search.toLowerCase()) ||
+                  (s.name_bn && s.name_bn.toLowerCase().includes(search.toLowerCase())) ||
                   s.code.toLowerCase().includes(search.toLowerCase()) ||
                   s.class_level.toLowerCase().includes(search.toLowerCase()),
           );
 
     function destroy(id: number) {
-        if (confirm('Are you sure you want to delete this subject?')) {
+        if (confirm(t('subjects.confirm_delete', {}, 'Are you sure you want to delete this subject?'))) {
             router.delete(`/admin/subjects/${id}`);
         }
     }
 
     return (
         <DashboardLayout>
-            <Head title="Subjects" />
+            <Head title={t('subjects.title', {}, 'Subjects')} />
 
             <div className="space-y-6">
                 <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                         <p className="text-xs font-semibold tracking-widest text-slate-500 uppercase dark:text-slate-400">
-                            Management
+                            {t('common.management', {}, 'Management')}
                         </p>
                         <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-50">
-                            Subjects
+                            {t('subjects.title', {}, 'Subjects')}
                         </h1>
                         <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                            Manage all subjects in the system.
+                            {t('subjects.subtitle', {}, 'Manage all subjects in the system.')}
                         </p>
                     </div>
                     <Link
@@ -79,7 +82,7 @@ export default function SubjectsIndex({ subjects, sidebar }: Props) {
                         className="inline-flex items-center gap-1.5 self-start rounded-md bg-accent-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-accent-700 sm:self-auto"
                     >
                         <AppIcon name="plus" className="h-4 w-4" />
-                        Add subject
+                        {t('subjects.add_subject', {}, 'Add subject')}
                     </Link>
                 </header>
 
@@ -100,12 +103,12 @@ export default function SubjectsIndex({ subjects, sidebar }: Props) {
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 type="search"
-                                placeholder="Search subjects…"
+                                placeholder={t('subjects.search_placeholder', {}, 'Search subjects…')}
                                 className="h-9 w-full rounded-md border border-slate-200 bg-white pr-3 pl-9 text-sm text-slate-900 placeholder-slate-400 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder-slate-500"
                             />
                         </label>
                         <span className="text-xs text-slate-500 dark:text-slate-400">
-                            {filtered.length} of {subjects.total} subjects
+                            {formatNumber(filtered.length)} / {formatNumber(subjects.total)} {t('subjects.title', {}, 'subjects')}
                         </span>
                     </div>
 
@@ -113,14 +116,14 @@ export default function SubjectsIndex({ subjects, sidebar }: Props) {
                         <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
                             <thead className="bg-slate-50 text-left text-xs font-semibold tracking-wider text-slate-500 uppercase dark:bg-slate-950/40 dark:text-slate-400">
                                 <tr>
-                                    <th className="px-4 py-3">Name (EN)</th>
-                                    <th className="px-4 py-3">Code</th>
-                                    <th className="px-4 py-3">Class</th>
-                                    <th className="px-4 py-3">Group</th>
-                                    <th className="px-4 py-3">Type</th>
-                                    <th className="px-4 py-3">Marks (Full/Pass)</th>
-                                    <th className="px-4 py-3">Status</th>
-                                    <th className="px-4 py-3 text-right">Actions</th>
+                                    <th className="px-4 py-3">{t('subjects.subject_name', {}, 'Name')}</th>
+                                    <th className="px-4 py-3">{t('subjects.subject_code', {}, 'Code')}</th>
+                                    <th className="px-4 py-3">{t('subjects.class_level', {}, 'Class')}</th>
+                                    <th className="px-4 py-3">{t('classes.group_stream', {}, 'Group')}</th>
+                                    <th className="px-4 py-3">{t('subjects.subject_type', {}, 'Type')}</th>
+                                    <th className="px-4 py-3">{t('subjects.marks_full_pass', {}, 'Marks (Full/Pass)')}</th>
+                                    <th className="px-4 py-3">{t('common.status', {}, 'Status')}</th>
+                                    <th className="px-4 py-3 text-right">{t('common.actions', {}, 'Actions')}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -130,7 +133,7 @@ export default function SubjectsIndex({ subjects, sidebar }: Props) {
                                         className="text-slate-700 hover:bg-slate-50/60 dark:text-slate-200 dark:hover:bg-slate-800/40"
                                     >
                                         <td className="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">
-                                            {sub.name_en}
+                                            {bi(sub.name_en, sub.name_bn)}
                                         </td>
                                         <td className="px-4 py-3 font-mono text-xs">{sub.code}</td>
                                         <td className="px-4 py-3">{sub.class_level}</td>
@@ -140,8 +143,8 @@ export default function SubjectsIndex({ subjects, sidebar }: Props) {
                                                 {sub.subject_type}
                                             </span>
                                         </td>
-                                        <td className="px-4 py-3 whitespace-nowrap">
-                                            {sub.full_marks} / {sub.pass_marks}
+                                        <td className="px-4 py-3 whitespace-nowrap font-mono">
+                                            {formatNumber(sub.full_marks)} / {formatNumber(sub.pass_marks)}
                                         </td>
                                         <td className="px-4 py-3">
                                             <span
@@ -158,7 +161,7 @@ export default function SubjectsIndex({ subjects, sidebar }: Props) {
                                                             : 'bg-slate-400'
                                                     }`}
                                                 />
-                                                {sub.is_active ? 'Active' : 'Inactive'}
+                                                {sub.is_active ? t('common.active', {}, 'Active') : t('common.inactive', {}, 'Inactive')}
                                             </span>
                                         </td>
                                         <td className="px-4 py-3 text-right">
@@ -166,14 +169,14 @@ export default function SubjectsIndex({ subjects, sidebar }: Props) {
                                                 <Link
                                                     href={`/admin/subjects/${sub.id}/edit`}
                                                     className="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
-                                                    aria-label="Edit subject"
+                                                    aria-label={t('common.edit', {}, 'Edit')}
                                                 >
                                                     <AppIcon name="pencil" className="h-4 w-4" />
                                                 </Link>
                                                 <button
                                                     type="button"
                                                     className="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-500 hover:bg-rose-50 hover:text-rose-600 dark:text-slate-400 dark:hover:bg-rose-950/30 dark:hover:text-rose-400"
-                                                    aria-label="Delete subject"
+                                                    aria-label={t('common.delete', {}, 'Delete')}
                                                     onClick={() => destroy(sub.id)}
                                                 >
                                                     <AppIcon name="trash" className="h-4 w-4" />
@@ -188,7 +191,7 @@ export default function SubjectsIndex({ subjects, sidebar }: Props) {
                                             colSpan={8}
                                             className="px-4 py-12 text-center text-sm text-slate-500 dark:text-slate-400"
                                         >
-                                            No subjects found.
+                                            {t('subjects.no_subjects', {}, 'No subjects found.')}
                                         </td>
                                     </tr>
                                 )}

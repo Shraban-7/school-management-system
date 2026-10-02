@@ -3,6 +3,7 @@ import { Head } from '@inertiajs/react';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import ReportCard, { type Report } from '@/components/ReportCard';
 import { useSidebarStack } from '@/composables/useNavStack';
+import { useI18n } from '@/composables/useI18n';
 import type { SidebarConfig } from '@/types/sidebar';
 
 interface ParentResultsShowProps {
@@ -18,6 +19,7 @@ export default function ParentResultsShow({
     pdfHref,
     sidebar,
 }: ParentResultsShowProps) {
+    const { t, bi } = useI18n();
     const sidebarStack = useSidebarStack();
     useEffect(() => {
         if (sidebar) {
@@ -27,7 +29,7 @@ export default function ParentResultsShow({
 
     return (
         <DashboardLayout>
-            <Head title={`Result - ${report.student.name_en}`} />
+            <Head title={`${t('results.sheet')} - ${bi(report.student.name_en, report.student.name_bn)}`} />
             <ReportCard
                 report={report}
                 backHref={backHref}
