@@ -91,3 +91,46 @@ it('shows logo url and eiin on the portal login page', function () {
             ->whereNot('school.eiin_number', null)
         );
 });
+
+it('renders the admin settings page with mandatory institution management data', function () {
+    makeInstitution([
+        'name_en' => 'Dhaka Muslim High School',
+        'eiin_number' => 108201,
+    ]);
+
+    $this->actingAs(schoolAdmin())
+        ->get('/admin/settings')
+        ->assertSuccessful()
+        ->assertInertia(fn ($page) => $page
+            ->component('Admin/Settings')
+            ->has('school')
+            ->where('school.name_en', 'Dhaka Muslim High School')
+            ->where('school.eiin_number', 108201)
+        );
+});
+
+it('updates the institution settings directly from /admin/settings', function () {
+    makeInstitution();
+
+    $this->actingAs(schoolAdmin())
+        ->put('/admin/settings', schoolPayload([
+            'name_en' => 'Renamed Central Academy',
+            'eiin_number' => 999888,
+            'board_affiliation' => 'Rajshahi',
+        ]))
+        ->assertRedirect()
+        ->assertSessionHasNoErrors();
+
+    $updated = Institution::current();
+    expect($updated->name_en)->toBe('Renamed Central Academy')
+        ->and($updated->eiin_number)->toBe(999888)
+        ->and($updated->board_affiliation)->toBe('Rajshahi');
+});
+
+it('redirects old /admin/settings/school to /admin/settings', function () {
+    makeInstitution();
+
+    $this->actingAs(schoolAdmin())
+        ->get('/admin/settings/school')
+        ->assertRedirect(route('admin.settings'));
+});

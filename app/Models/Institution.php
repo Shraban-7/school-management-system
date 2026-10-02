@@ -207,7 +207,7 @@ class Institution extends Model
     }
 
     /**
-     * Full payload for public pages + shared Inertia props (includes admin editors).
+     * Payload for shared Inertia props and management views.
      *
      * @return array<string, mixed>
      */
@@ -226,30 +226,11 @@ class Institution extends Model
             'website' => $this->website,
             'established_year' => $this->established_year,
             'logo_url' => $this->logoUrl(),
-            'about_en' => $this->about_en,
-            'about_bn' => $this->about_bn,
-            'headmaster_name_en' => $this->headmaster_name_en,
-            'headmaster_name_bn' => $this->headmaster_name_bn,
-            'headmaster_photo_url' => $this->headmasterPhotoUrl(),
-            'headmaster_speech' => $this->headmaster_speech,
-            'admission_info' => $this->admission_info,
-            'admission_guidelines' => $this->admission_guidelines,
-            'lab_facilities' => $this->lab_facilities,
-            'school_facilities' => $this->school_facilities,
-            'fee_notes' => $this->fee_notes,
-            'office_hours' => $this->office_hours,
-            'contact_intro' => $this->contact_intro,
-            'footer_tagline' => $this->footer_tagline,
-            'hero_tagline' => $this->hero_tagline,
-            'nav_menu' => $this->resolvedNavMenu(),
-            'home_ctas' => $this->resolvedHomeCtas(),
-            'home_sections' => $this->resolvedHomeSections(),
-            'facility_items' => $this->resolvedFacilityItems(),
         ];
     }
 
     /**
-     * Payload for the admin school-profile editor (raw JSON + paths).
+     * Payload for administrative settings.
      *
      * @return array<string, mixed>
      */
@@ -258,17 +239,6 @@ class Institution extends Model
         return [
             ...$this->toPublicArray(),
             'logo_path' => $this->logo_path,
-            'headmaster_photo_path' => $this->headmaster_photo_path,
-            'nav_menu_raw' => is_array($this->nav_menu) && $this->nav_menu !== []
-                ? $this->nav_menu
-                : self::defaultNavMenu(),
-            'home_ctas_raw' => is_array($this->home_ctas) && $this->home_ctas !== []
-                ? $this->home_ctas
-                : self::defaultHomeCtas(),
-            'home_sections_raw' => $this->resolvedHomeSections(),
-            'facility_items_raw' => is_array($this->facility_items) && $this->facility_items !== []
-                ? $this->facility_items
-                : $this->resolvedFacilityItems(),
         ];
     }
 }

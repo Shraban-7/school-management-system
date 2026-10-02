@@ -6,17 +6,12 @@ use App\Http\Requests\UpdateSchoolProfileRequest;
 use App\Models\Institution;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
-use Inertia\Inertia;
-use Inertia\Response;
 
 class SchoolProfileController extends Controller
 {
-    public function edit(): Response
+    public function edit(): RedirectResponse
     {
-        return Inertia::render('Admin/Settings/SchoolProfile', [
-            'sidebar' => app(DashboardController::class)->adminSidebar(),
-            'school' => Institution::current()->toAdminArray(),
-        ]);
+        return redirect()->route('admin.settings');
     }
 
     public function update(UpdateSchoolProfileRequest $request): RedirectResponse
@@ -24,7 +19,7 @@ class SchoolProfileController extends Controller
         $school = Institution::current();
         $validated = $request->validated();
 
-        unset($validated['logo'], $validated['headmaster_photo'], $validated['remove_logo'], $validated['remove_headmaster_photo']);
+        unset($validated['logo'], $validated['remove_logo']);
 
         if ($request->boolean('remove_logo') && $school->logo_path) {
             Storage::disk('public')->delete($school->logo_path);
@@ -38,24 +33,12 @@ class SchoolProfileController extends Controller
             $validated['logo_path'] = $request->file('logo')->store('school', 'public');
         }
 
-        if ($request->boolean('remove_headmaster_photo') && $school->headmaster_photo_path) {
-            Storage::disk('public')->delete($school->headmaster_photo_path);
-            $validated['headmaster_photo_path'] = null;
-        }
-
-        if ($request->hasFile('headmaster_photo')) {
-            if ($school->headmaster_photo_path) {
-                Storage::disk('public')->delete($school->headmaster_photo_path);
-            }
-            $validated['headmaster_photo_path'] = $request->file('headmaster_photo')->store('school', 'public');
-        }
-
         $validated['mpo_status'] = $request->boolean('mpo_status');
 
         $school->forceFill($validated)->save();
         Institution::forgetCurrentCache();
 
-        return to_route('admin.settings.school.edit')
-            ->with('flash.message', 'School profile updated successfully.');
+        return redirect()->route('admin.settings')
+            ->with('flash.message', 'Institution settings updated successfully.');
     }
 }

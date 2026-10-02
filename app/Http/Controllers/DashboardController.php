@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use App\Enums\PostType;
 use App\Models\AttendanceRecord;
 use App\Models\Exam;
+use App\Models\Institution;
 use App\Models\Post;
 use App\Models\Student;
 use App\Models\User;
@@ -82,6 +83,7 @@ class DashboardController extends Controller
 
         return Inertia::render('Admin/Settings', [
             'sidebar' => $this->adminSidebar(),
+            'school' => Institution::current()->toAdminArray(),
             'groups' => [
                 [
                     'title' => 'General',
@@ -387,7 +389,6 @@ class DashboardController extends Controller
             [
                 'title' => __('ui.sidebar.school'),
                 'items' => [
-                    ['label' => __('ui.sidebar.school_profile'), 'href' => '/admin/settings/school', 'match' => 'admin/settings/school', 'icon' => 'globe'],
                     ['label' => __('ui.sidebar.academic_sessions'), 'href' => '/admin/academic-sessions', 'match' => 'admin/academic-sessions', 'icon' => 'calendar'],
                     ['label' => __('ui.sidebar.classes_sections'), 'href' => '/admin/classes-and-sections', 'match' => 'admin/classes-and-sections', 'icon' => 'grid'],
                 ],

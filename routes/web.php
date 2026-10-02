@@ -58,6 +58,7 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/admin/users', [DashboardController::class, 'users'])->name('admin.users');
         Route::get('/admin/activity', [DashboardController::class, 'activity'])->name('admin.activity');
         Route::get('/admin/settings', [DashboardController::class, 'settings'])->name('admin.settings');
+        Route::put('/admin/settings', [SchoolProfileController::class, 'update'])->name('admin.settings.update');
         Route::get('/admin/notifications', [DashboardController::class, 'notifications'])->name('admin.notifications');
 
         Route::get('/admin/settings/school', [SchoolProfileController::class, 'edit'])->name('admin.settings.school.edit');
