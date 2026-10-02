@@ -67,7 +67,7 @@ function destroy(id: number) {
                     <p
                         class="text-xs font-semibold tracking-widest text-slate-500 uppercase dark:text-slate-400"
                     >
-                        Website
+                        Academic
                     </p>
                     <h1
                         class="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-50"
@@ -75,7 +75,7 @@ function destroy(id: number) {
                         Syllabus
                     </h1>
                     <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                        Manage class syllabuses published on the website.
+                        Manage class syllabuses and curriculum documents.
                     </p>
                 </div>
                 <Link

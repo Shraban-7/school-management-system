@@ -49,7 +49,9 @@ useSidebarStack().set(props.sidebar);
                 </div>
             </header>
 
-            <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <section
+                class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+            >
                 <Link
                     v-for="exam in exams"
                     :key="exam.id"

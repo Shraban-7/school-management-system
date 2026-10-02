@@ -76,17 +76,17 @@ it('updates the eiin number from the settings form', function () {
     expect(Institution::current()->eiin_number)->toBe(654321);
 });
 
-it('shows logo url and eiin on the public home page', function () {
+it('shows logo url and eiin on the portal login page', function () {
     makeInstitution();
 
     $school = Institution::current();
     $school->forceFill(['logo_path' => 'school/logo.png'])->save();
     Institution::forgetCurrentCache();
 
-    $this->get('/')
+    $this->get('/login')
         ->assertSuccessful()
         ->assertInertia(fn ($page) => $page
-            ->component('Site/Home')
+            ->component('Auth/Login')
             ->where('school.logo_url', asset('storage/school/logo.png'))
             ->whereNot('school.eiin_number', null)
         );

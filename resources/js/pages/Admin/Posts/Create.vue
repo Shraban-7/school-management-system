@@ -87,7 +87,7 @@ const errorClass = 'mt-1 text-xs text-rose-500';
                     <p
                         class="text-xs font-semibold tracking-widest text-slate-500 uppercase dark:text-slate-400"
                     >
-                        Website
+                        Communication
                     </p>
                     <h1
                         class="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-50"
@@ -222,8 +222,11 @@ const errorClass = 'mt-1 text-xs text-rose-500';
                                 class="mt-2 block w-full text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-slate-700 hover:file:bg-slate-200 dark:text-slate-400 dark:file:bg-slate-800 dark:file:text-slate-300 dark:hover:file:bg-slate-700"
                                 @change="onAttachmentChange"
                             />
-                            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                                Optional. Students and guardians can download this from the public notice page.
+                            <p
+                                class="mt-1 text-xs text-slate-500 dark:text-slate-400"
+                            >
+                                Optional. Students and guardians can download
+                                this from the public notice page.
                             </p>
                             <p v-if="errors.attachment" :class="errorClass">
                                 {{ errors.attachment }}

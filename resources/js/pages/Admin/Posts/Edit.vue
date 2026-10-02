@@ -112,7 +112,7 @@ const errorClass = 'mt-1 text-xs text-rose-500';
                     <p
                         class="text-xs font-semibold tracking-widest text-slate-500 uppercase dark:text-slate-400"
                     >
-                        Website
+                        Communication
                     </p>
                     <h1
                         class="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-50"
@@ -288,7 +288,9 @@ const errorClass = 'mt-1 text-xs text-rose-500';
                                     >
                                         {{ post.attachment_name }}
                                     </a>
-                                    <span v-else>{{ post.attachment_name }}</span>
+                                    <span v-else>{{
+                                        post.attachment_name
+                                    }}</span>
                                 </p>
                                 <input
                                     id="attachment"

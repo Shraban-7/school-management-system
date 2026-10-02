@@ -4,25 +4,26 @@ use App\Enums\UserRole;
 use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
 
-it('shows the public school homepage at the root route for guests', function () {
+it('redirects guests to the login page at the root route', function () {
     makeInstitution();
 
     $this->get('/')
-        ->assertSuccessful()
-        ->assertInertia(fn (Assert $page) => $page->component('Site/Home'));
+        ->assertRedirect(route('login'));
 });
 
-it('keeps authenticated users on the public homepage at the root route', function (string $role) {
+it('redirects authenticated users to their dashboard at the root route', function (string $role) {
     makeInstitution();
     $user = User::factory()->create(['role' => $role]);
 
     $this->actingAs($user)
         ->get('/')
-        ->assertSuccessful()
-        ->assertInertia(fn (Assert $page) => $page->component('Site/Home'));
+        ->assertRedirect(route("{$role}.dashboard"));
 })->with([
     'admin',
+    'headmaster',
     'teacher',
+    'student',
+    'staff',
     'parent',
 ]);
 

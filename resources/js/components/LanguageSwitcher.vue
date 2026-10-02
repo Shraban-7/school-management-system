@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { useI18n } from '@/composables/useI18n'
+import { useI18n } from '@/composables/useI18n';
 
 withDefaults(
     defineProps<{
-        variant?: 'public' | 'dashboard'
+        variant?: 'public' | 'dashboard';
     }>(),
     {
         variant: 'public',
     },
-)
+);
 
-const { locale, t, setLocale } = useI18n()
+const { locale, t, setLocale } = useI18n();
 </script>
 
 <template>

@@ -1,80 +1,84 @@
 <script setup lang="ts">
-import { Link, router, usePage } from '@inertiajs/vue3'
-import { computed, onMounted, ref, watch } from 'vue'
-import AppIcon from '@/components/AppIcon.vue'
-import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
-import NotificationBell from '@/components/NotificationBell.vue'
-import SearchBar from '@/components/SearchBar.vue'
-import SidebarGroup from '@/components/SidebarGroup.vue'
-import ThemeToggle from '@/components/ThemeToggle.vue'
-import UserMenu from '@/components/UserMenu.vue'
-import { useI18n } from '@/composables/useI18n'
-import { useStacks } from '@/lib/stacks'
-import type { SidebarConfig } from '@/types/sidebar'
-import { cn } from '@/lib/utils'
+import { Link, router, usePage } from '@inertiajs/vue3';
+import { computed, onMounted, ref, watch } from 'vue';
+import AppIcon from '@/components/AppIcon.vue';
+import LanguageSwitcher from '@/components/LanguageSwitcher.vue';
+import NotificationBell from '@/components/NotificationBell.vue';
+import SearchBar from '@/components/SearchBar.vue';
+import SidebarGroup from '@/components/SidebarGroup.vue';
+import ThemeToggle from '@/components/ThemeToggle.vue';
+import UserMenu from '@/components/UserMenu.vue';
+import { useI18n } from '@/composables/useI18n';
+import { useStacks } from '@/lib/stacks';
+import type { SidebarConfig } from '@/types/sidebar';
+import { cn } from '@/lib/utils';
 
 const props = withDefaults(
     defineProps<{
-        brand?: string
-        brandLogo?: string
-        notificationCount?: number
+        brand?: string;
+        brandLogo?: string;
+        notificationCount?: number;
     }>(),
     {
         brand: 'SMS App',
         brandLogo: '',
         notificationCount: 0,
     },
-)
+);
 
-const page = usePage()
-const stacks = useStacks()
-const { t, bi } = useI18n()
-const currentUrl = computed(() => page.url)
+const page = usePage();
+const stacks = useStacks();
+const { t, bi } = useI18n();
+const currentUrl = computed(() => page.url);
 
 interface SchoolBrand {
-    name_en?: string | null
-    name_bn?: string | null
-    logo_url?: string | null
+    name_en?: string | null;
+    name_bn?: string | null;
+    logo_url?: string | null;
 }
 
 const school = computed<SchoolBrand>(
     () => ((page.props as Record<string, unknown>).school as SchoolBrand) ?? {},
-)
+);
 
-const brandName = computed(() => bi(school.value.name_en, school.value.name_bn) || props.brand)
-const brandLogoUrl = computed(() => school.value.logo_url || props.brandLogo)
+const brandName = computed(
+    () => bi(school.value.name_en, school.value.name_bn) || props.brand,
+);
+const brandLogoUrl = computed(() => school.value.logo_url || props.brandLogo);
 
-const COLLAPSE_KEY = 'sidebar-collapsed'
-const collapsed = ref(false)
-const mobileOpen = ref(false)
+const COLLAPSE_KEY = 'sidebar-collapsed';
+const collapsed = ref(false);
+const mobileOpen = ref(false);
 
 onMounted(() => {
-    collapsed.value = localStorage.getItem(COLLAPSE_KEY) === 'true'
-})
+    collapsed.value = localStorage.getItem(COLLAPSE_KEY) === 'true';
+});
 
 watch(collapsed, (value) => {
-    localStorage.setItem(COLLAPSE_KEY, String(value))
-})
+    localStorage.setItem(COLLAPSE_KEY, String(value));
+});
 
-const brandInitial = computed(() => brandName.value.trim().charAt(0).toUpperCase() || 'S')
+const brandInitial = computed(
+    () => brandName.value.trim().charAt(0).toUpperCase() || 'S',
+);
 
-const flashError = computed(() => page.props.flash?.error ?? null)
-const showErrorModal = ref(false)
-const errorMessage = ref('')
+const flashError = computed(() => page.props.flash?.error ?? null);
+const showErrorModal = ref(false);
+const errorMessage = ref('');
 
 watch(
     flashError,
     (value) => {
         if (value) {
-            errorMessage.value = value
-            showErrorModal.value = true
+            errorMessage.value = value;
+            showErrorModal.value = true;
         }
     },
     { immediate: true },
-)
+);
 
 function dismissError() {
-    showErrorModal.value = false
+    showErrorModal.value = false;
 }
 
 const defaultSidebar: SidebarConfig = [
@@ -85,29 +89,33 @@ const defaultSidebar: SidebarConfig = [
             { label: 'Settings', href: '#', icon: 'cog' },
         ],
     },
-]
+];
 
 const sidebar = computed<SidebarConfig>(() => {
     // Globally shared sidebar (HandleInertiaRequests) wins so the menu
     // never disappears when a page forgets to set the sidebar stack.
-    const shared = (page.props as Record<string, unknown>).sidebar as SidebarConfig | undefined
+    const shared = (page.props as Record<string, unknown>).sidebar as
+        | SidebarConfig
+        | undefined;
     if (Array.isArray(shared) && shared.length > 0) {
-        return shared
+        return shared;
     }
 
-    const groups = stacks.get<SidebarConfig>('dashboard.sidebar')
-    return groups.length > 0 ? (groups as unknown as SidebarConfig) : defaultSidebar
-})
+    const groups = stacks.get<SidebarConfig>('dashboard.sidebar');
+    return groups.length > 0
+        ? (groups as unknown as SidebarConfig)
+        : defaultSidebar;
+});
 
-const sidebarWidth = computed(() => (collapsed.value ? 'lg:w-16' : 'lg:w-64'))
-const mainOffset = computed(() => (collapsed.value ? 'lg:pl-16' : 'lg:pl-64'))
+const sidebarWidth = computed(() => (collapsed.value ? 'lg:w-16' : 'lg:w-64'));
+const mainOffset = computed(() => (collapsed.value ? 'lg:pl-16' : 'lg:pl-64'));
 
 function onLogout() {
-    router.post('/logout')
+    router.post('/logout');
 }
 
 function closeMobile() {
-    mobileOpen.value = false
+    mobileOpen.value = false;
 }
 
 const linkClass = (active: boolean) =>
@@ -116,15 +124,17 @@ const linkClass = (active: boolean) =>
         active
             ? 'bg-accent-600 text-white shadow-sm'
             : 'text-slate-300 hover:bg-white/5 hover:text-white',
-    )
+    );
 </script>
 
 <template>
-    <div class="flex min-h-screen bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <div
+        class="flex min-h-screen bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100"
+    >
         <!-- Desktop sidebar -->
         <aside
             :class="[
-                'hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 bg-slate-900 text-slate-100 transition-[width] duration-200 ease-out',
+                'hidden bg-slate-900 text-slate-100 transition-[width] duration-200 ease-out lg:fixed lg:inset-y-0 lg:flex lg:flex-col',
                 sidebarWidth,
             ]"
         >
@@ -134,7 +144,11 @@ const linkClass = (active: boolean) =>
                     collapsed ? 'justify-center gap-2 px-2' : 'gap-3 px-3',
                 ]"
             >
-                <Link href="/" class="flex min-w-0 shrink items-center gap-3" :title="brandName">
+                <Link
+                    href="/"
+                    class="flex min-w-0 shrink items-center gap-3"
+                    :title="brandName"
+                >
                     <span
                         v-if="!brandLogoUrl"
                         class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-accent-500 to-accent-700 text-sm font-bold text-white shadow-lg shadow-accent-900/30"
@@ -174,7 +188,10 @@ const linkClass = (active: boolean) =>
                 role="dialog"
                 aria-modal="true"
             >
-                <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="closeMobile" />
+                <div
+                    class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+                    @click="closeMobile"
+                />
                 <Transition
                     appear
                     enter-active-class="transition-transform duration-200 ease-out"
@@ -187,7 +204,9 @@ const linkClass = (active: boolean) =>
                     <aside
                         class="absolute inset-y-0 left-0 flex w-72 flex-col bg-slate-900 text-slate-100 shadow-xl"
                     >
-                        <div class="flex h-16 items-center justify-between border-b border-slate-800 px-6">
+                        <div
+                            class="flex h-16 items-center justify-between border-b border-slate-800 px-6"
+                        >
                             <Link
                                 href="/"
                                 class="flex min-w-0 items-center gap-2.5 font-semibold tracking-tight text-white"
@@ -217,7 +236,12 @@ const linkClass = (active: boolean) =>
         </Transition>
 
         <!-- Main column -->
-        <div :class="['flex flex-1 flex-col transition-[padding] duration-200 ease-out', mainOffset]">
+        <div
+            :class="[
+                'flex flex-1 flex-col transition-[padding] duration-200 ease-out',
+                mainOffset,
+            ]"
+        >
             <!-- Topbar -->
             <header
                 class="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-slate-200 bg-white/80 px-4 backdrop-blur sm:px-6 dark:border-slate-800 dark:bg-slate-900/80"
@@ -234,8 +258,12 @@ const linkClass = (active: boolean) =>
                     <button
                         type="button"
                         class="hidden h-9 w-9 items-center justify-center rounded-md text-slate-600 transition hover:bg-slate-100 lg:inline-flex dark:text-slate-300 dark:hover:bg-slate-800"
-                        :aria-label="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
-                        :title="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+                        :aria-label="
+                            collapsed ? 'Expand sidebar' : 'Collapse sidebar'
+                        "
+                        :title="
+                            collapsed ? 'Expand sidebar' : 'Collapse sidebar'
+                        "
                         @click="collapsed = !collapsed"
                     >
                         <AppIcon name="panel-left" class="h-5 w-5" />
@@ -252,27 +280,11 @@ const linkClass = (active: boolean) =>
                         <AppIcon name="search" class="h-5 w-5" />
                     </button>
                     <LanguageSwitcher variant="dashboard" />
-                    <a
-                        href="/"
-                        target="_blank"
-                        rel="noopener"
-                        class="hidden items-center gap-1.5 rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 sm:inline-flex dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100"
-                    >
-                        <AppIcon name="globe" class="h-4 w-4" />
-                        {{ t('nav.go_to_website') }}
-                    </a>
-                    <a
-                        href="/"
-                        target="_blank"
-                        rel="noopener"
-                        class="inline-flex h-9 w-9 items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 sm:hidden dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
-                        :aria-label="t('nav.go_to_website')"
-                    >
-                        <AppIcon name="globe" class="h-5 w-5" />
-                    </a>
                     <NotificationBell :count="notificationCount" />
                     <ThemeToggle />
-                    <span class="mx-1 hidden h-6 w-px bg-slate-200 sm:block dark:bg-slate-700" />
+                    <span
+                        class="mx-1 hidden h-6 w-px bg-slate-200 sm:block dark:bg-slate-700"
+                    />
                     <UserMenu />
                 </div>
             </header>
@@ -319,7 +331,9 @@ const linkClass = (active: boolean) =>
                             >
                                 {{ t('profile.not_authorized') }}
                             </h2>
-                            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                            <p
+                                class="mt-1 text-sm text-slate-600 dark:text-slate-400"
+                            >
                                 {{ errorMessage }}
                             </p>
                         </div>

@@ -81,11 +81,14 @@ function submitPassword() {
     });
 }
 
-const initial = computed(() => props.profile.name.trim().charAt(0).toUpperCase() || '?');
+const initial = computed(
+    () => props.profile.name.trim().charAt(0).toUpperCase() || '?',
+);
 
 const inputClass =
     'mt-1 block w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100';
-const labelClass = 'block text-sm font-medium text-slate-700 dark:text-slate-300';
+const labelClass =
+    'block text-sm font-medium text-slate-700 dark:text-slate-300';
 const errorClass = 'mt-1 text-xs text-rose-500';
 const sectionClass =
     'rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900';
@@ -104,13 +107,22 @@ const sectionClass =
                     {{ initial }}
                 </span>
                 <div>
-                    <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-50">
+                    <h1
+                        class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-50"
+                    >
                         {{ profile.name }}
                     </h1>
-                    <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
+                    <p
+                        class="mt-0.5 text-sm text-slate-500 dark:text-slate-400"
+                    >
                         {{ profile.role_title }}
                         <template v-if="profile.created_at">
-                            · {{ t('profile.member_since', { date: profile.created_at }) }}
+                            ·
+                            {{
+                                t('profile.member_since', {
+                                    date: profile.created_at,
+                                })
+                            }}
                         </template>
                     </p>
                 </div>
@@ -125,43 +137,70 @@ const sectionClass =
 
             <!-- Profile information -->
             <form :class="sectionClass" @submit.prevent="submitInfo">
-                <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">{{ t('profile.info_title') }}</h2>
+                <h2
+                    class="text-lg font-semibold text-slate-900 dark:text-slate-100"
+                >
+                    {{ t('profile.info_title') }}
+                </h2>
                 <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                     {{ t('profile.info_help') }}
                 </p>
 
                 <div class="mt-6 grid gap-6 sm:grid-cols-2">
                     <div class="sm:col-span-2">
-                        <label for="name" :class="labelClass">{{ t('profile.name') }} <span class="text-rose-500">*</span></label>
+                        <label for="name" :class="labelClass"
+                            >{{ t('profile.name') }}
+                            <span class="text-rose-500">*</span></label
+                        >
                         <input
                             id="name"
                             v-model="infoForm.name"
                             type="text"
-                            :class="[inputClass, { 'border-rose-500': infoErrors.name }]"
+                            :class="[
+                                inputClass,
+                                { 'border-rose-500': infoErrors.name },
+                            ]"
                         />
-                        <p v-if="infoErrors.name" :class="errorClass">{{ infoErrors.name }}</p>
+                        <p v-if="infoErrors.name" :class="errorClass">
+                            {{ infoErrors.name }}
+                        </p>
                     </div>
 
                     <div>
-                        <label for="phone" :class="labelClass">{{ t('profile.phone') }} <span class="text-rose-500">*</span></label>
+                        <label for="phone" :class="labelClass"
+                            >{{ t('profile.phone') }}
+                            <span class="text-rose-500">*</span></label
+                        >
                         <input
                             id="phone"
                             v-model="infoForm.phone"
                             type="tel"
-                            :class="[inputClass, { 'border-rose-500': infoErrors.phone }]"
+                            :class="[
+                                inputClass,
+                                { 'border-rose-500': infoErrors.phone },
+                            ]"
                         />
-                        <p v-if="infoErrors.phone" :class="errorClass">{{ infoErrors.phone }}</p>
+                        <p v-if="infoErrors.phone" :class="errorClass">
+                            {{ infoErrors.phone }}
+                        </p>
                     </div>
 
                     <div>
-                        <label for="email" :class="labelClass">{{ t('profile.email') }}</label>
+                        <label for="email" :class="labelClass">{{
+                            t('profile.email')
+                        }}</label>
                         <input
                             id="email"
                             v-model="infoForm.email"
                             type="email"
-                            :class="[inputClass, { 'border-rose-500': infoErrors.email }]"
+                            :class="[
+                                inputClass,
+                                { 'border-rose-500': infoErrors.email },
+                            ]"
                         />
-                        <p v-if="infoErrors.email" :class="errorClass">{{ infoErrors.email }}</p>
+                        <p v-if="infoErrors.email" :class="errorClass">
+                            {{ infoErrors.email }}
+                        </p>
                     </div>
                 </div>
 
@@ -172,14 +211,20 @@ const sectionClass =
                         class="inline-flex items-center gap-1.5 rounded-md bg-accent-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-accent-700 disabled:opacity-60"
                     >
                         <AppIcon name="check" class="h-4 w-4" />
-                        {{ infoSaving ? t('profile.saving') : t('profile.save') }}
+                        {{
+                            infoSaving ? t('profile.saving') : t('profile.save')
+                        }}
                     </button>
                 </div>
             </form>
 
             <!-- Change password -->
             <form :class="sectionClass" @submit.prevent="submitPassword">
-                <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">{{ t('profile.password_title') }}</h2>
+                <h2
+                    class="text-lg font-semibold text-slate-900 dark:text-slate-100"
+                >
+                    {{ t('profile.password_title') }}
+                </h2>
                 <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                     {{ t('profile.password_help') }}
                 </p>
@@ -187,37 +232,54 @@ const sectionClass =
                 <div class="mt-6 grid gap-6 sm:grid-cols-2">
                     <div class="sm:col-span-2">
                         <label for="current_password" :class="labelClass">
-                            {{ t('profile.current_password') }} <span class="text-rose-500">*</span>
+                            {{ t('profile.current_password') }}
+                            <span class="text-rose-500">*</span>
                         </label>
                         <input
                             id="current_password"
                             v-model="passwordForm.current_password"
                             type="password"
                             autocomplete="current-password"
-                            :class="[inputClass, { 'border-rose-500': passwordErrors.current_password }]"
+                            :class="[
+                                inputClass,
+                                {
+                                    'border-rose-500':
+                                        passwordErrors.current_password,
+                                },
+                            ]"
                         />
-                        <p v-if="passwordErrors.current_password" :class="errorClass">
+                        <p
+                            v-if="passwordErrors.current_password"
+                            :class="errorClass"
+                        >
                             {{ passwordErrors.current_password }}
                         </p>
                     </div>
 
                     <div>
                         <label for="password" :class="labelClass">
-                            {{ t('profile.new_password') }} <span class="text-rose-500">*</span>
+                            {{ t('profile.new_password') }}
+                            <span class="text-rose-500">*</span>
                         </label>
                         <input
                             id="password"
                             v-model="passwordForm.password"
                             type="password"
                             autocomplete="new-password"
-                            :class="[inputClass, { 'border-rose-500': passwordErrors.password }]"
+                            :class="[
+                                inputClass,
+                                { 'border-rose-500': passwordErrors.password },
+                            ]"
                         />
-                        <p v-if="passwordErrors.password" :class="errorClass">{{ passwordErrors.password }}</p>
+                        <p v-if="passwordErrors.password" :class="errorClass">
+                            {{ passwordErrors.password }}
+                        </p>
                     </div>
 
                     <div>
                         <label for="password_confirmation" :class="labelClass">
-                            {{ t('profile.confirm_password') }} <span class="text-rose-500">*</span>
+                            {{ t('profile.confirm_password') }}
+                            <span class="text-rose-500">*</span>
                         </label>
                         <input
                             id="password_confirmation"
@@ -236,7 +298,11 @@ const sectionClass =
                         class="inline-flex items-center gap-1.5 rounded-md bg-accent-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-accent-700 disabled:opacity-60"
                     >
                         <AppIcon name="key" class="h-4 w-4" />
-                        {{ passwordSaving ? t('profile.updating') : t('profile.update_password') }}
+                        {{
+                            passwordSaving
+                                ? t('profile.updating')
+                                : t('profile.update_password')
+                        }}
                     </button>
                 </div>
             </form>

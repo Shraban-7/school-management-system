@@ -10,35 +10,25 @@ use App\Http\Controllers\FeeInvoiceController;
 use App\Http\Controllers\FeePaymentController;
 use App\Http\Controllers\FeeStructureController;
 use App\Http\Controllers\LocaleController;
+use App\Http\Controllers\NoticeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ResultController;
 use App\Http\Controllers\SchoolProfileController;
-use App\Http\Controllers\SiteController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\SyllabusController;
 use App\Http\Controllers\TeacherController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [SiteController::class, 'home'])->name('home');
-Route::get('/about', [SiteController::class, 'about'])->name('about');
-Route::get('/headmaster', [SiteController::class, 'headmasterSpeech'])->name('headmaster');
-Route::get('/admission', [SiteController::class, 'admission'])->name('admission');
-Route::get('/facilities', [SiteController::class, 'facilities'])->name('facilities');
-Route::get('/fees', [SiteController::class, 'fees'])->name('fees');
-Route::get('/syllabus', [SiteController::class, 'syllabus'])->name('syllabus');
-Route::get('/syllabus/{syllabus}/download', [SiteController::class, 'downloadSyllabus'])->name('syllabus.download');
-Route::get('/notices', [SiteController::class, 'notices'])->name('notices');
-Route::get('/notices/{slug}/download', [SiteController::class, 'downloadNoticeAttachment'])->name('notices.download');
-Route::get('/notices/{slug}', [SiteController::class, 'noticeShow'])->name('notices.show');
-Route::get('/blog', [SiteController::class, 'blog'])->name('blog');
-Route::get('/blog/{slug}', [SiteController::class, 'blogShow'])->name('blog.show');
-Route::get('/activities', [SiteController::class, 'activities'])->name('activities');
-Route::get('/activities/{slug}', [SiteController::class, 'activityShow'])->name('activities.show');
-Route::get('/teachers', [SiteController::class, 'teachers'])->name('teachers');
-Route::get('/staff', [SiteController::class, 'staff'])->name('staff');
-Route::get('/contact', [SiteController::class, 'contact'])->name('contact');
+Route::get('/', function (Request $request) {
+    if ($user = $request->user()) {
+        return redirect($user->dashboardRoute());
+    }
+
+    return redirect()->route('login');
+})->name('home');
 
 Route::post('/locale', [LocaleController::class, 'update'])->name('locale.update');
 
@@ -53,6 +43,15 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+
+    // Institutional Notice Board
+    Route::get('/notices', [NoticeController::class, 'index'])->name('notices');
+    Route::get('/notices/{slug}', [NoticeController::class, 'show'])->name('notices.show');
+    Route::get('/notices/{slug}/download', [NoticeController::class, 'downloadNoticeAttachment'])->name('notices.download');
+
+    // Academic Syllabuses
+    Route::get('/syllabus', [SyllabusController::class, 'portalIndex'])->name('syllabus');
+    Route::get('/syllabus/{syllabus}/download', [SyllabusController::class, 'download'])->name('syllabus.download');
 
     Route::middleware('role:admin')->group(function (): void {
         Route::get('/admin/dashboard', [DashboardController::class, 'show'])->name('admin.dashboard');

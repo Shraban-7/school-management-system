@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import AppIcon from '@/components/AppIcon.vue'
+import { ref } from 'vue';
+import AppIcon from '@/components/AppIcon.vue';
 
 defineProps<{
-    count?: number
-}>()
+    count?: number;
+}>();
 
-const open = ref(false)
+const open = ref(false);
 
 function toggle() {
-    open.value = !open.value
+    open.value = !open.value;
 }
 
 function close() {
-    open.value = false
+    open.value = false;
 }
 </script>
 
@@ -28,7 +28,7 @@ function close() {
             <AppIcon name="bell" class="h-5 w-5" />
             <span
                 v-if="count && count > 0"
-                class="absolute right-1.5 top-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-accent-600 px-1 text-[10px] font-semibold leading-none text-white"
+                class="absolute top-1.5 right-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-accent-600 px-1 text-[10px] leading-none font-semibold text-white"
             >
                 {{ count > 9 ? '9+' : count }}
             </span>
@@ -46,8 +46,14 @@ function close() {
                 v-if="open"
                 class="absolute right-0 z-40 mt-2 w-80 origin-top-right overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900"
             >
-                <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-slate-700">
-                    <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Notifications</h3>
+                <div
+                    class="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-slate-700"
+                >
+                    <h3
+                        class="text-sm font-semibold text-slate-900 dark:text-slate-100"
+                    >
+                        Notifications
+                    </h3>
                     <button
                         type="button"
                         class="text-xs font-medium text-accent-600 hover:text-accent-700 dark:text-accent-400"
@@ -56,8 +62,13 @@ function close() {
                     </button>
                 </div>
                 <div class="max-h-80 overflow-y-auto">
-                    <div class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
-                        <AppIcon name="bell" class="mx-auto mb-2 h-8 w-8 text-slate-300 dark:text-slate-600" />
+                    <div
+                        class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400"
+                    >
+                        <AppIcon
+                            name="bell"
+                            class="mx-auto mb-2 h-8 w-8 text-slate-300 dark:text-slate-600"
+                        />
                         You're all caught up
                     </div>
                 </div>

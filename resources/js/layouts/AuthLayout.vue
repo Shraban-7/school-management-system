@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { Link, usePage } from '@inertiajs/vue3'
-import { computed } from 'vue'
+import { Link, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
 const props = withDefaults(
     defineProps<{
-        brand?: string
-        brandLogo?: string
-        title?: string
-        subtitle?: string
+        brand?: string;
+        brandLogo?: string;
+        title?: string;
+        subtitle?: string;
     }>(),
     {
         brand: 'SMS App',
@@ -15,18 +15,23 @@ const props = withDefaults(
         title: '',
         subtitle: '',
     },
-)
+);
 
-const page = usePage()
-const flash = computed(() => page.props.flash?.message ?? null)
+const page = usePage();
+const flash = computed(() => page.props.flash?.message ?? null);
 
-const hasHeaderSlot = computed(() => props.title !== '' || props.subtitle !== '')
+const hasHeaderSlot = computed(
+    () => props.title !== '' || props.subtitle !== '',
+);
 </script>
 
 <template>
     <div class="flex min-h-screen flex-col bg-slate-50 text-slate-900">
         <header class="px-6 pt-8 sm:px-10 sm:pt-12">
-            <Link href="/" class="inline-flex items-center gap-2 font-semibold tracking-tight">
+            <Link
+                href="/"
+                class="inline-flex items-center gap-2 font-semibold tracking-tight"
+            >
                 <img
                     v-if="brandLogo"
                     :src="brandLogo"
@@ -37,7 +42,9 @@ const hasHeaderSlot = computed(() => props.title !== '' || props.subtitle !== ''
             </Link>
         </header>
 
-        <div class="flex flex-1 items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+        <div
+            class="flex flex-1 items-center justify-center px-4 py-12 sm:px-6 lg:px-8"
+        >
             <div class="w-full max-w-md space-y-6">
                 <div v-if="hasHeaderSlot || $slots.header" class="text-center">
                     <slot name="header">
@@ -64,8 +71,11 @@ const hasHeaderSlot = computed(() => props.title !== '' || props.subtitle !== ''
             </div>
         </div>
 
-        <footer class="px-6 pb-6 text-center text-xs text-slate-500 sm:px-10 sm:pb-8">
-            &copy; {{ new Date().getFullYear() }} {{ brand }}. All rights reserved.
+        <footer
+            class="px-6 pb-6 text-center text-xs text-slate-500 sm:px-10 sm:pb-8"
+        >
+            &copy; {{ new Date().getFullYear() }} {{ brand }}. All rights
+            reserved.
         </footer>
     </div>
 </template>

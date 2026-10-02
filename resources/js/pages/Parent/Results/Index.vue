@@ -44,7 +44,9 @@ useSidebarStack().set(props.sidebar);
                 </p>
             </header>
 
-            <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <section
+                class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+            >
                 <Link
                     v-for="child in children"
                     :key="child.id"

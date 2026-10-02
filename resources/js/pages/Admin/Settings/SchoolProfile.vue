@@ -88,13 +88,15 @@ const form = reactive({
     remove_headmaster_photo: false,
     nav_menu: (props.school.nav_menu_raw ?? []).map((i) => ({ ...i })),
     home_ctas: (props.school.home_ctas_raw ?? []).map((i) => ({ ...i })),
-    home_sections: { ...(props.school.home_sections_raw ?? {
-        stats: true,
-        speech: true,
-        notices: true,
-        activities: true,
-        blog: true,
-    }) },
+    home_sections: {
+        ...(props.school.home_sections_raw ?? {
+            stats: true,
+            speech: true,
+            notices: true,
+            activities: true,
+            blog: true,
+        }),
+    },
     facility_items: (props.school.facility_items_raw ?? []).map((i) => ({
         title: i.title,
         body: i.body ?? '',
@@ -222,8 +224,8 @@ const errorClass = 'mt-1 text-xs text-rose-500';
                     School profile
                 </h1>
                 <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                    Manage the school's public information shown on the
-                    website.
+                    Manage institutional identity, EIIN, board affiliation, and
+                    administrative contact details.
                 </p>
             </header>
 
@@ -648,266 +650,36 @@ const errorClass = 'mt-1 text-xs text-rose-500';
                     </div>
                 </section>
 
-                <!-- Admission -->
+                <!-- Campus & Operations -->
                 <section :class="sectionClass">
-                    <h2 :class="sectionTitleClass">Admission</h2>
-
+                    <h2 :class="sectionTitleClass">
+                        Campus &amp; Office Hours
+                    </h2>
                     <div class="space-y-4">
                         <div>
-                            <label for="admission_info" :class="labelClass">
-                                Admission overview
-                            </label>
-                            <RichTextEditor
-                                v-model="form.admission_info"
-                                :invalid="Boolean(errors.admission_info)"
-                            />
-                            <p v-if="errors.admission_info" :class="errorClass">
-                                {{ errors.admission_info }}
-                            </p>
-                        </div>
-                        <div>
-                            <label for="admission_guidelines" :class="labelClass">
-                                Admission guidelines &amp; process
-                            </label>
-                            <RichTextEditor
-                                v-model="form.admission_guidelines"
-                                :invalid="Boolean(errors.admission_guidelines)"
-                            />
-                            <p
-                                v-if="errors.admission_guidelines"
-                                :class="errorClass"
+                            <label for="office_hours" :class="labelClass"
+                                >Office hours</label
                             >
-                                {{ errors.admission_guidelines }}
-                            </p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Facilities -->
-                <section :class="sectionClass">
-                    <h2 :class="sectionTitleClass">Facilities</h2>
-
-                    <div class="space-y-4">
-                        <div>
-                            <label for="lab_facilities" :class="labelClass">
-                                Lab facilities
-                            </label>
-                            <RichTextEditor
-                                v-model="form.lab_facilities"
-                                :invalid="Boolean(errors.lab_facilities)"
-                            />
-                            <p v-if="errors.lab_facilities" :class="errorClass">
-                                {{ errors.lab_facilities }}
-                            </p>
-                        </div>
-                        <div>
-                            <label for="school_facilities" :class="labelClass">
-                                School facilities
-                            </label>
-                            <RichTextEditor
-                                v-model="form.school_facilities"
-                                :invalid="Boolean(errors.school_facilities)"
-                            />
-                            <p
-                                v-if="errors.school_facilities"
-                                :class="errorClass"
-                            >
-                                {{ errors.school_facilities }}
-                            </p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Public fee notes -->
-                <section :class="sectionClass">
-                    <h2 :class="sectionTitleClass">Public fee notes</h2>
-                    <p class="mb-4 text-sm text-slate-500 dark:text-slate-400">
-                        Shown on the public Fees page. Actual amounts come from
-                        Fee structures (admission, monthly tuition, session,
-                        exam).
-                    </p>
-                    <div>
-                        <label for="fee_notes" :class="labelClass">
-                            Fee notes / payment instructions
-                        </label>
-                        <RichTextEditor
-                            v-model="form.fee_notes"
-                            :invalid="Boolean(errors.fee_notes)"
-                        />
-                        <p v-if="errors.fee_notes" :class="errorClass">
-                            {{ errors.fee_notes }}
-                        </p>
-                    </div>
-                </section>
-
-                <!-- Contact & office -->
-                <section :class="sectionClass">
-                    <h2 :class="sectionTitleClass">Contact page</h2>
-                    <div class="space-y-4">
-                        <div>
-                            <label for="contact_intro" :class="labelClass">Contact intro</label>
-                            <textarea
-                                id="contact_intro"
-                                v-model="form.contact_intro"
-                                rows="3"
-                                :class="inputClass"
-                            />
-                        </div>
-                        <div>
-                            <label for="office_hours" :class="labelClass">Office hours</label>
-                            <textarea
+                            <input
                                 id="office_hours"
                                 v-model="form.office_hours"
-                                rows="2"
+                                type="text"
+                                placeholder="e.g. Sunday to Thursday, 9:00 AM – 4:00 PM"
                                 :class="inputClass"
                             />
                         </div>
                         <div>
-                            <label for="footer_tagline" :class="labelClass">Footer tagline</label>
-                            <input
-                                id="footer_tagline"
-                                v-model="form.footer_tagline"
-                                type="text"
-                                :class="inputClass"
+                            <label for="fee_notes" :class="labelClass">
+                                Fee payment instructions &amp; notes
+                            </label>
+                            <RichTextEditor
+                                v-model="form.fee_notes"
+                                :invalid="Boolean(errors.fee_notes)"
                             />
+                            <p v-if="errors.fee_notes" :class="errorClass">
+                                {{ errors.fee_notes }}
+                            </p>
                         </div>
-                    </div>
-                </section>
-
-                <!-- Dynamic facility cards -->
-                <section :class="sectionClass">
-                    <div class="mb-4 flex items-center justify-between gap-3">
-                        <h2 :class="sectionTitleClass" class="mb-0">Facility cards</h2>
-                        <button
-                            type="button"
-                            class="inline-flex items-center gap-1 rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200"
-                            @click="addFacilityItem"
-                        >
-                            <AppIcon name="plus" class="h-4 w-4" />
-                            Add card
-                        </button>
-                    </div>
-                    <p class="mb-4 text-sm text-slate-500">
-                        Each card appears on the public Facilities page. Category: lab or school.
-                    </p>
-                    <div
-                        v-for="(item, index) in form.facility_items"
-                        :key="index"
-                        class="mb-4 space-y-3 rounded-lg border border-slate-100 p-4 dark:border-slate-800"
-                    >
-                        <div class="flex gap-3">
-                            <input
-                                v-model="item.title"
-                                type="text"
-                                placeholder="Title"
-                                :class="inputClass"
-                                class="flex-1"
-                            />
-                            <select v-model="item.category" :class="inputClass" class="w-32">
-                                <option value="lab">Lab</option>
-                                <option value="school">School</option>
-                            </select>
-                            <button
-                                type="button"
-                                class="rounded-md p-2 text-rose-600 hover:bg-rose-50"
-                                @click="removeFacilityItem(index)"
-                            >
-                                <AppIcon name="trash" class="h-4 w-4" />
-                            </button>
-                        </div>
-                        <textarea
-                            v-model="item.body"
-                            rows="3"
-                            placeholder="Description"
-                            :class="inputClass"
-                        />
-                    </div>
-                </section>
-
-                <!-- Navigation -->
-                <section :class="sectionClass">
-                    <div class="mb-4 flex items-center justify-between gap-3">
-                        <h2 :class="sectionTitleClass" class="mb-0">Website menu</h2>
-                        <button
-                            type="button"
-                            class="inline-flex items-center gap-1 rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium"
-                            @click="addNavItem"
-                        >
-                            <AppIcon name="plus" class="h-4 w-4" />
-                            Add link
-                        </button>
-                    </div>
-                    <div
-                        v-for="(item, index) in form.nav_menu"
-                        :key="index"
-                        class="mb-3 flex flex-wrap items-center gap-2"
-                    >
-                        <input
-                            v-model="item.label"
-                            type="text"
-                            placeholder="Label"
-                            :class="inputClass"
-                            class="min-w-[8rem] flex-1"
-                        />
-                        <input
-                            v-model="item.href"
-                            type="text"
-                            placeholder="/path"
-                            :class="inputClass"
-                            class="min-w-[8rem] flex-1"
-                        />
-                        <label class="flex items-center gap-1.5 text-sm text-slate-600">
-                            <input v-model="item.enabled" type="checkbox" class="rounded" />
-                            Show
-                        </label>
-                        <button
-                            type="button"
-                            class="rounded-md p-2 text-rose-600 hover:bg-rose-50"
-                            @click="removeNavItem(index)"
-                        >
-                            <AppIcon name="trash" class="h-4 w-4" />
-                        </button>
-                    </div>
-                </section>
-
-                <!-- Home CTAs & sections -->
-                <section :class="sectionClass">
-                    <h2 :class="sectionTitleClass">Home page</h2>
-                    <div class="mb-4 flex flex-wrap gap-4 text-sm">
-                        <label
-                            v-for="key in (['stats', 'speech', 'notices', 'activities', 'blog'] as const)"
-                            :key="key"
-                            class="flex items-center gap-1.5 capitalize"
-                        >
-                            <input v-model="form.home_sections[key]" type="checkbox" class="rounded" />
-                            {{ key }}
-                        </label>
-                    </div>
-                    <div class="mb-3 flex items-center justify-between">
-                        <p class="text-sm font-medium text-slate-700 dark:text-slate-300">Hero buttons (CTAs)</p>
-                        <button
-                            type="button"
-                            class="inline-flex items-center gap-1 rounded-md border border-slate-200 px-3 py-1.5 text-sm"
-                            @click="addHomeCta"
-                        >
-                            <AppIcon name="plus" class="h-4 w-4" />
-                            Add CTA
-                        </button>
-                    </div>
-                    <div
-                        v-for="(cta, index) in form.home_ctas"
-                        :key="index"
-                        class="mb-2 flex gap-2"
-                    >
-                        <input v-model="cta.label" type="text" placeholder="Label" :class="inputClass" class="flex-1" />
-                        <input v-model="cta.href" type="text" placeholder="/path" :class="inputClass" class="flex-1" />
-                        <button
-                            type="button"
-                            class="rounded-md p-2 text-rose-600 hover:bg-rose-50"
-                            @click="removeHomeCta(index)"
-                        >
-                            <AppIcon name="trash" class="h-4 w-4" />
-                        </button>
                     </div>
                 </section>
 

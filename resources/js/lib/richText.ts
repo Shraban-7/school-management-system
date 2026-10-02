@@ -7,22 +7,22 @@
  */
 export function richTextHtml(value: string | null | undefined): string {
     if (!value) {
-        return ''
+        return '';
     }
 
     if (/<[a-z][\s\S]*>/i.test(value)) {
-        return value
+        return value;
     }
 
     const escaped = value
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
+        .replace(/>/g, '&gt;');
 
     return escaped
         .split(/\n{2,}/)
         .map((paragraph) => `<p>${paragraph.replace(/\n/g, '<br>')}</p>`)
-        .join('')
+        .join('');
 }
 
 /**
@@ -30,7 +30,7 @@ export function richTextHtml(value: string | null | undefined): string {
  */
 export function richTextPlain(value: string | null | undefined): string {
     if (!value) {
-        return ''
+        return '';
     }
 
     return value
@@ -38,5 +38,5 @@ export function richTextPlain(value: string | null | undefined): string {
         .replace(/&nbsp;/g, ' ')
         .replace(/&amp;/g, '&')
         .replace(/\s+/g, ' ')
-        .trim()
+        .trim();
 }

@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import AppIcon from '@/components/AppIcon.vue'
+import AppIcon from '@/components/AppIcon.vue';
 
 withDefaults(
     defineProps<{
-        placeholder?: string
-        collapsed?: boolean
+        placeholder?: string;
+        collapsed?: boolean;
     }>(),
     {
         placeholder: 'Search…',
         collapsed: false,
     },
-)
+);
 </script>
 
 <template>
@@ -20,7 +20,10 @@ withDefaults(
             collapsed ? 'h-9 w-9 justify-center px-0' : 'h-9 w-full max-w-sm',
         ]"
     >
-        <AppIcon name="search" class="h-4 w-4 shrink-0 text-slate-400 group-focus-within:text-accent-500" />
+        <AppIcon
+            name="search"
+            class="h-4 w-4 shrink-0 text-slate-400 group-focus-within:text-accent-500"
+        />
         <input
             v-if="!collapsed"
             type="search"

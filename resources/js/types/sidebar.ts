@@ -1,16 +1,16 @@
 export interface SidebarItem {
-    label: string
-    href: string
-    match?: string
-    icon: string
-    badge?: number | string
-    permission?: string
-    active?: boolean
+    label: string;
+    href: string;
+    match?: string;
+    icon: string;
+    badge?: number | string;
+    permission?: string;
+    active?: boolean;
 }
 
 export interface SidebarGroup {
-    title?: string
-    items: SidebarItem[]
+    title?: string;
+    items: SidebarItem[];
 }
 
-export type SidebarConfig = SidebarGroup[]
+export type SidebarConfig = SidebarGroup[];

@@ -34,10 +34,13 @@ it('lists only syllabuses with downloadable files and exposes download urls', fu
         'description' => 'No file yet',
     ])->save();
 
-    $this->get('/syllabus')
+    $user = User::factory()->create(['role' => UserRole::STUDENT]);
+
+    $this->actingAs($user)
+        ->get('/syllabus')
         ->assertSuccessful()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('Site/Syllabus')
+            ->component('Syllabus/Portal')
             ->has('syllabuses', 1)
             ->where('syllabuses.0.title', 'Class 9 Syllabus')
             ->where('syllabuses.0.file_name', 'class9-syllabus.pdf')
@@ -49,6 +52,7 @@ it('force-downloads a syllabus pdf with the original filename', function () {
     Storage::fake('public');
     $institution = makeInstitution();
     $class = makeClass($institution);
+    $user = User::factory()->create(['role' => UserRole::STUDENT]);
 
     $syllabus = new Syllabus;
     $path = UploadedFile::fake()->create('math.pdf', 100, 'application/pdf')->store('syllabus', 'public');
@@ -59,7 +63,8 @@ it('force-downloads a syllabus pdf with the original filename', function () {
         'file_original_name' => 'mathematics-syllabus.pdf',
     ])->save();
 
-    $this->get(route('syllabus.download', $syllabus))
+    $this->actingAs($user)
+        ->get(route('syllabus.download', $syllabus))
         ->assertSuccessful()
         ->assertDownload('mathematics-syllabus.pdf');
 });
@@ -88,9 +93,10 @@ it('lets admins upload a downloadable syllabus pdf', function () {
         ->and(Storage::disk('public')->exists($syllabus->file_path))->toBeTrue();
 });
 
-it('shows school notices with attachment download on the public pages', function () {
+it('shows school notices with attachment download on the portal notice board', function () {
     Storage::fake('public');
     makeInstitution();
+    $user = User::factory()->create(['role' => UserRole::STUDENT]);
 
     $path = UploadedFile::fake()->create('holiday.pdf', 80, 'application/pdf')->store('posts/attachments', 'public');
 
@@ -107,23 +113,26 @@ it('shows school notices with attachment download on the public pages', function
         'published_at' => now()->subDay(),
     ])->save();
 
-    $this->get('/notices')
+    $this->actingAs($user)
+        ->get('/notices')
         ->assertSuccessful()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('Site/Notices')
+            ->component('NoticeBoard/Index')
             ->where('posts.data.0.title_en', 'Eid holiday notice')
             ->where('posts.data.0.has_attachment', true)
         );
 
-    $this->get('/notices/eid-holiday-notice')
+    $this->actingAs($user)
+        ->get('/notices/eid-holiday-notice')
         ->assertSuccessful()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('Site/NoticeShow')
+            ->component('NoticeBoard/Show')
             ->where('post.attachment_name', 'eid-holiday-2026.pdf')
             ->where('post.attachment_download_url', route('notices.download', 'eid-holiday-notice'))
         );
 
-    $this->get(route('notices.download', 'eid-holiday-notice'))
+    $this->actingAs($user)
+        ->get(route('notices.download', 'eid-holiday-notice'))
         ->assertSuccessful()
         ->assertDownload('eid-holiday-2026.pdf');
 });
@@ -156,6 +165,7 @@ it('lets admins attach a pdf to a school notice', function () {
 it('does not download unpublished notice attachments', function () {
     Storage::fake('public');
     makeInstitution();
+    $user = User::factory()->create(['role' => UserRole::STUDENT]);
 
     $path = UploadedFile::fake()->create('draft.pdf', 40, 'application/pdf')->store('posts/attachments', 'public');
 
@@ -171,5 +181,7 @@ it('does not download unpublished notice attachments', function () {
         'published_at' => null,
     ])->save();
 
-    $this->get(route('notices.download', 'draft-notice'))->assertNotFound();
+    $this->actingAs($user)
+        ->get(route('notices.download', 'draft-notice'))
+        ->assertNotFound();
 });

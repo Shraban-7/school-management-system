@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { cn } from '@/lib/utils'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { cn } from '@/lib/utils';
 
-type Variant = 'light' | 'dark' | 'transparent'
+type Variant = 'light' | 'dark' | 'transparent';
 
 const props = withDefaults(
     defineProps<{
-        brand?: string
-        brandLogo?: string
-        brandHref?: string
-        variant?: Variant
-        sticky?: boolean
-        bordered?: boolean
+        brand?: string;
+        brandLogo?: string;
+        brandHref?: string;
+        variant?: Variant;
+        sticky?: boolean;
+        bordered?: boolean;
     }>(),
     {
         brand: '',
@@ -21,33 +21,33 @@ const props = withDefaults(
         sticky: false,
         bordered: true,
     },
-)
+);
 
-const mobileOpen = ref(false)
-const scrolled = ref(false)
+const mobileOpen = ref(false);
+const scrolled = ref(false);
 
 const onScroll = () => {
-    scrolled.value = window.scrollY > 8
-}
+    scrolled.value = window.scrollY > 8;
+};
 
 onMounted(() => {
     if (props.sticky) {
-        window.addEventListener('scroll', onScroll, { passive: true })
-        onScroll()
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
     }
-})
+});
 
 onBeforeUnmount(() => {
-    window.removeEventListener('scroll', onScroll)
-    document.body.style.overflow = ''
-})
+    window.removeEventListener('scroll', onScroll);
+    document.body.style.overflow = '';
+});
 
 watch(mobileOpen, (open) => {
-    document.body.style.overflow = open ? 'hidden' : ''
-})
+    document.body.style.overflow = open ? 'hidden' : '';
+});
 
 const navClasses = cn(
-    'w-full z-40 transition-colors duration-200',
+    'z-40 w-full transition-colors duration-200',
     props.variant === 'dark'
         ? 'bg-slate-900 text-slate-100'
         : props.variant === 'transparent'
@@ -59,25 +59,25 @@ const navClasses = cn(
         (props.variant === 'dark'
             ? 'border-b border-slate-800'
             : 'border-b border-slate-200'),
-)
+);
 
 const linkHover = cn(
-    'inline-flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors',
+    'inline-flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors',
     props.variant === 'dark'
-        ? 'text-slate-300 hover:text-white hover:bg-white/5'
-        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
-)
+        ? 'text-slate-300 hover:bg-white/5 hover:text-white'
+        : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
+);
 </script>
 
 <template>
     <nav :class="navClasses" aria-label="Primary">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="flex h-16 items-center justify-between">
                 <!-- Brand -->
-                <div class="flex items-center gap-3 shrink-0">
+                <div class="flex shrink-0 items-center gap-3">
                     <a
                         :href="brandHref"
-                        class="flex items-center gap-2 font-semibold text-base tracking-tight"
+                        class="flex items-center gap-2 text-base font-semibold tracking-tight"
                     >
                         <img
                             v-if="brandLogo"
@@ -92,11 +92,11 @@ const linkHover = cn(
                 <!-- Desktop nav -->
                 <div
                     v-if="$slots.nav"
-                    class="hidden md:flex md:items-center md:gap-1 flex-1 ml-6"
+                    class="ml-6 hidden flex-1 md:flex md:items-center md:gap-1"
                 >
                     <slot name="nav" :link-class="linkHover" />
                 </div>
-                <div v-else class="hidden md:block flex-1" />
+                <div v-else class="hidden flex-1 md:block" />
 
                 <!-- Right actions -->
                 <div
@@ -109,11 +109,11 @@ const linkHover = cn(
                 <!-- Mobile toggle -->
                 <button
                     type="button"
-                    class="md:hidden p-2 rounded-md transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                    class="rounded-md p-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 md:hidden"
                     :class="
                         variant === 'dark'
-                            ? 'text-slate-300 hover:text-white hover:bg-white/5 focus-visible:ring-white/40 focus-visible:ring-offset-slate-900'
-                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 focus-visible:ring-slate-400 focus-visible:ring-offset-white'
+                            ? 'text-slate-300 hover:bg-white/5 hover:text-white focus-visible:ring-white/40 focus-visible:ring-offset-slate-900'
+                            : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus-visible:ring-slate-400 focus-visible:ring-offset-white'
                     "
                     :aria-expanded="mobileOpen"
                     aria-controls="mobile-menu"
@@ -122,7 +122,7 @@ const linkHover = cn(
                 >
                     <svg
                         v-if="!mobileOpen"
-                        class="w-6 h-6"
+                        class="h-6 w-6"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -137,7 +137,7 @@ const linkHover = cn(
                     </svg>
                     <svg
                         v-else
-                        class="w-6 h-6"
+                        class="h-6 w-6"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -159,19 +159,19 @@ const linkHover = cn(
             <div
                 v-if="mobileOpen"
                 id="mobile-menu"
-                class="md:hidden border-t"
+                class="border-t md:hidden"
                 :class="
                     variant === 'dark'
                         ? 'border-slate-800 bg-slate-900'
                         : 'border-slate-200 bg-white'
                 "
             >
-                <div class="px-4 py-3 space-y-1">
+                <div class="space-y-1 px-4 py-3">
                     <slot name="mobile" :link-class="linkHover" />
                 </div>
                 <div
                     v-if="$slots['mobile-actions']"
-                    class="px-4 py-3 border-t flex flex-col gap-2"
+                    class="flex flex-col gap-2 border-t px-4 py-3"
                     :class="
                         variant === 'dark'
                             ? 'border-slate-800'
@@ -188,7 +188,9 @@ const linkHover = cn(
 <style scoped>
 .mob-enter-active,
 .mob-leave-active {
-    transition: max-height 0.25s ease, opacity 0.2s ease;
+    transition:
+        max-height 0.25s ease,
+        opacity 0.2s ease;
     overflow: hidden;
 }
 .mob-enter-from,

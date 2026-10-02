@@ -8,23 +8,24 @@ Status legend: ✅ built · 🟡 partially built · ❌ not started.
 
 | Feature | Status | Notes |
 |---|---|---|
-| School profile (EIIN, board, MPO, contact, about, headmaster speech) | ✅ | Single-school mode — edit at `/admin/settings/school` |
-| Public school website | ✅ | Fully dynamic: school profile + nav/CTAs/sections/facility cards editable in admin; fees from Fee structures; notices/blog/activities/syllabus/teachers/staff from DB |
+| School profile (EIIN, board, MPO, contact, leadership, campus) | ✅ | Single-school administrative mode — edit at `/admin/settings/school` |
+| Dedicated Management Portal | ✅ | Fully integrated management app: student, teacher, guardian, staff & admin dashboards |
 | Academic sessions/years | ✅ | |
 | Classes & sections, medium (Bangla/English), group/stream | ✅ | |
 | Student admission with BD-specific fields | ✅ | NID, birth cert no., religion, blood group, bilingual name |
-| Teacher records | ✅ | Public Teachers vs Staff split by designation |
+| Teacher records | ✅ | Teachers & Staff management with designations |
 | Subjects with full/pass marks | ✅ | |
 | Exams | ✅ | |
 | Marks entry (written/MCQ/practical, grade point, grade letter) | ✅ | Auto-calculated on save using each subject's `full_marks`/`pass_marks`; see `GradeScale` + `ResultService` |
 | Attendance (daily) | ✅ | Marking exists; no analytics/reports yet |
 | Role-based access (admin/headmaster/teacher/student/staff) | ✅ | |
 | Phone-based auth with rate limiting | ✅ | |
-| Root route → public homepage | ✅ | `/` is the school website; login at `/login` |
+| Root route → Portal entry | ✅ | `/` redirects guests to `/login`, and authenticated users to their dashboard |
 | **Parent/guardian role & login** | ✅ | |
 | **Result / gradesheet generation** | ✅ | Tabulation, merit list, PDF, student/parent views |
 | **Fee / payment management** | ✅ | Manual ledger; bKash/Nagad/Rocket/bank ref tracking (no gateway) |
-| **Website CMS (notices, blog, activities, syllabus)** | ✅ | Admin CRUD; syllabus PDF force-download; notice PDF/Word attachments |
+| **Institutional Notice Board** | ✅ | Admin CRUD; circular PDF/Word attachments; portal notice board for all roles |
+| **Academic Syllabus Repository** | ✅ | Admin upload & management; class-filtered syllabus download in portal |
 
 ## Missing — recommended priority order
 

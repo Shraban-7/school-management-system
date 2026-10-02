@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, type FunctionalComponent } from 'vue'
+import { computed, type FunctionalComponent } from 'vue';
 import {
     Activity,
     ArrowDown,
@@ -52,7 +52,7 @@ import {
     Users,
     Wallet,
     X,
-} from '@lucide/vue'
+} from '@lucide/vue';
 
 export type IconName =
     | 'home'
@@ -105,17 +105,17 @@ export type IconName =
     | 'briefcase'
     | 'megaphone'
     | 'wallet'
-    | 'panel-left'
+    | 'panel-left';
 
 const props = withDefaults(
     defineProps<{
-        name: string
-        class?: string
+        name: string;
+        class?: string;
     }>(),
     {
         class: 'h-5 w-5',
     },
-)
+);
 
 const icons: Record<string, FunctionalComponent> = {
     home: Home,
@@ -169,9 +169,9 @@ const icons: Record<string, FunctionalComponent> = {
     megaphone: Megaphone,
     wallet: Wallet,
     'panel-left': PanelLeft,
-}
+};
 
-const icon = computed(() => icons[props.name] ?? LayoutGrid)
+const icon = computed(() => icons[props.name] ?? LayoutGrid);
 </script>
 
 <template>

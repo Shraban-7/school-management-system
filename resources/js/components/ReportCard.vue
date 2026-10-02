@@ -106,9 +106,7 @@ function fmt(value: number | null): string {
             <div
                 class="border-b border-slate-200 p-6 text-center dark:border-slate-800"
             >
-                <h2
-                    class="text-xl font-bold text-slate-900 dark:text-slate-50"
-                >
+                <h2 class="text-xl font-bold text-slate-900 dark:text-slate-50">
                     {{ report.institution.name_en }}
                 </h2>
                 <p
@@ -210,13 +208,21 @@ function fmt(value: number | null): string {
                                 >
                                     {{ s.subject_en }}
                                 </td>
-                                <td class="px-3 py-3 text-center font-mono text-xs">
-                                    {{ s.is_absent ? '—' : fmt(s.written_marks) }}
+                                <td
+                                    class="px-3 py-3 text-center font-mono text-xs"
+                                >
+                                    {{
+                                        s.is_absent ? '—' : fmt(s.written_marks)
+                                    }}
                                 </td>
-                                <td class="px-3 py-3 text-center font-mono text-xs">
+                                <td
+                                    class="px-3 py-3 text-center font-mono text-xs"
+                                >
                                     {{ s.is_absent ? '—' : fmt(s.mcq_marks) }}
                                 </td>
-                                <td class="px-3 py-3 text-center font-mono text-xs">
+                                <td
+                                    class="px-3 py-3 text-center font-mono text-xs"
+                                >
                                     {{
                                         s.is_absent
                                             ? '—'
@@ -228,7 +234,9 @@ function fmt(value: number | null): string {
                                 >
                                     {{ s.is_absent ? 'Abs' : fmt(s.total) }}
                                 </td>
-                                <td class="px-3 py-3 text-center font-mono text-xs">
+                                <td
+                                    class="px-3 py-3 text-center font-mono text-xs"
+                                >
                                     {{ fmt(s.full_marks) }}
                                 </td>
                                 <td class="px-3 py-3 text-center">

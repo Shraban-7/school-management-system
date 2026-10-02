@@ -1,7 +1,7 @@
 <?php
 
-test('shows the public school homepage for guests', function () {
+test('redirects guests to the login page at the root route', function () {
     makeInstitution();
 
-    $this->get(route('home'))->assertSuccessful();
+    $this->get(route('home'))->assertRedirect(route('login'));
 });

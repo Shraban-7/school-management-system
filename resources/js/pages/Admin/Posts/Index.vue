@@ -51,7 +51,11 @@ const filtered = computed(() => {
 });
 
 function destroy(id: number) {
-    if (confirm(`Are you sure you want to delete this ${props.typeLabel.toLowerCase()}?`)) {
+    if (
+        confirm(
+            `Are you sure you want to delete this ${props.typeLabel.toLowerCase()}?`,
+        )
+    ) {
         router.delete(`/admin/posts/${props.type}/${id}`);
     }
 }
@@ -69,7 +73,7 @@ function destroy(id: number) {
                     <p
                         class="text-xs font-semibold tracking-widest text-slate-500 uppercase dark:text-slate-400"
                     >
-                        Website
+                        Communication
                     </p>
                     <h1
                         class="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-50"
@@ -77,8 +81,8 @@ function destroy(id: number) {
                         {{ typeLabel }}
                     </h1>
                     <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                        Manage {{ typeLabel.toLowerCase() }} shown on the
-                        website.
+                        Manage institutional {{ typeLabel.toLowerCase() }} and
+                        announcements.
                     </p>
                 </div>
                 <Link

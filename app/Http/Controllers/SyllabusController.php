@@ -11,6 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class SyllabusController extends Controller
 {
@@ -156,5 +157,32 @@ class SyllabusController extends Controller
                 'label' => $s->session_name,
             ])
             ->all();
+    }
+
+    public function portalIndex(): Response
+    {
+        $items = Syllabus::query()
+            ->with(['class:id,class_level,section_name', 'academicSession:id,session_name'])
+            ->whereNotNull('file_path')
+            ->orderBy('class_id')
+            ->get()
+            ->map->toPublicArray();
+
+        return Inertia::render('Syllabus/Portal', [
+            'syllabuses' => $items,
+        ]);
+    }
+
+    public function download(Syllabus $syllabus): StreamedResponse
+    {
+        abort_unless(
+            filled($syllabus->file_path) && Storage::disk('public')->exists($syllabus->file_path),
+            404,
+        );
+
+        return Storage::disk('public')->download(
+            $syllabus->file_path,
+            $syllabus->downloadFilename(),
+        );
     }
 }

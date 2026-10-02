@@ -404,6 +404,7 @@ class DashboardController extends Controller
                 'title' => __('ui.sidebar.academic'),
                 'items' => [
                     ['label' => __('ui.sidebar.subjects'), 'href' => '/admin/subjects', 'match' => 'admin/subjects', 'icon' => 'book-open'],
+                    ['label' => __('ui.sidebar.syllabus'), 'href' => '/admin/syllabus', 'match' => 'admin/syllabus', 'icon' => 'list'],
                     ['label' => __('ui.sidebar.exams'), 'href' => '/admin/exams', 'match' => 'admin/exams', 'icon' => 'sparkles'],
                     ['label' => __('ui.sidebar.results'), 'href' => '/admin/results', 'match' => 'admin/results', 'icon' => 'graduation-cap'],
                     ['label' => __('ui.sidebar.fee_structures'), 'href' => '/admin/fees/structures', 'match' => 'admin/fees/structures', 'icon' => 'wallet'],
@@ -412,12 +413,10 @@ class DashboardController extends Controller
                 ],
             ],
             [
-                'title' => __('ui.sidebar.website'),
+                'title' => __('ui.sidebar.communication'),
                 'items' => [
-                    ['label' => __('ui.sidebar.notices'), 'href' => '/admin/posts/notice', 'match' => 'admin/posts/notice', 'icon' => 'megaphone'],
-                    ['label' => __('ui.sidebar.blog'), 'href' => '/admin/posts/blog', 'match' => 'admin/posts/blog', 'icon' => 'book-open'],
-                    ['label' => __('ui.sidebar.activities'), 'href' => '/admin/posts/activity', 'match' => 'admin/posts/activity', 'icon' => 'sparkles'],
-                    ['label' => __('ui.sidebar.syllabus'), 'href' => '/admin/syllabus', 'match' => 'admin/syllabus', 'icon' => 'list'],
+                    ['label' => __('ui.sidebar.notice_board'), 'href' => '/notices', 'match' => 'notices', 'icon' => 'megaphone'],
+                    ['label' => __('ui.sidebar.manage_notices'), 'href' => '/admin/posts/notice', 'match' => 'admin/posts/notice', 'icon' => 'pencil'],
                 ],
             ],
             [

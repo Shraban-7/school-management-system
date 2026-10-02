@@ -41,7 +41,7 @@ class User extends Authenticatable
             UserRole::STUDENT => route('student.dashboard'),
             UserRole::STAFF => route('staff.dashboard'),
             UserRole::PARENT => route('parent.dashboard'),
-            default => route('home'),
+            default => route('login'),
         };
     }
 

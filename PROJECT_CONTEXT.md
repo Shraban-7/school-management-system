@@ -46,9 +46,19 @@ this session — see below).
 
 ## Changes made in this session (2026-07-17)
 
-1. **Root route (`/`) is the public school homepage.** Guests and
-   authenticated users both see the public site. Login remains at `/login`;
-   dashboards are reached from the public navbar or after login.
+1. **Total School Management App mode (public frontend removed).**
+   - Root route (`/`) redirects guests to `/login`, and authenticated users
+     directly to their role's dashboard.
+   - Public marketing website pages (`/about`, `/headmaster`, `/admission`,
+     `/facilities`, `/contact`, `/blog`, `/activities`, `/teachers`, `/staff`)
+     and `PublicLayout.vue` removed.
+   - `Auth/Login.vue` is now a standalone, modern, responsive portal sign-in
+     interface with school branding, EIIN, language switcher, and quick-login helpers.
+   - Internal Notice Board (`/notices`, `/notices/{slug}`) and Academic
+     Syllabus (`/syllabus`, `/syllabus/{syllabus}/download`) integrated into
+     the portal layout (`DashboardLayout.vue`).
+   - Sidebar reorganized: `Website` group removed; Notice Board moved under
+     `Communication`, and Syllabus moved under `Academic`.
 2. **`parent` role added** — was missing even though guardians are one of
    the four core user types for this school. Added:
    - `UserRole::PARENT` case

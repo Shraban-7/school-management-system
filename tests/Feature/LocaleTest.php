@@ -7,11 +7,11 @@ use Inertia\Testing\AssertableInertia as Assert;
 it('defaults to english locale', function () {
     makeInstitution();
 
-    $this->get('/')
+    $this->get('/login')
         ->assertSuccessful()
         ->assertInertia(fn (Assert $page) => $page
             ->where('locale', 'en')
-            ->where('translations.nav.home', 'Home')
+            ->where('translations.auth.sign_in', 'Sign in')
         );
 });
 
@@ -21,12 +21,11 @@ it('switches locale to bangla and keeps it in the session', function () {
     $this->post('/locale', ['locale' => 'bn'])
         ->assertRedirect();
 
-    $this->get('/')
+    $this->get('/login')
         ->assertSuccessful()
         ->assertInertia(fn (Assert $page) => $page
             ->where('locale', 'bn')
-            ->where('translations.nav.home', 'হোম')
-            ->where('translations.nav.about', 'আমাদের সম্পর্কে')
+            ->where('translations.auth.sign_in', 'প্রবেশ করুন')
         );
 });
 

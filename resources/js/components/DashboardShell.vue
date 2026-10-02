@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import { Link, usePage } from '@inertiajs/vue3'
-import { computed } from 'vue'
-import KpiCard from '@/components/KpiCard.vue'
-import type { Stat } from '@/types/dashboard'
+import { Link, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import KpiCard from '@/components/KpiCard.vue';
+import type { Stat } from '@/types/dashboard';
 
 defineProps<{
-    role: string
-    title: string
-    subtitle?: string
-    stats?: Stat[]
-    actions?: Array<{ label: string; href: string }>
-}>()
+    role: string;
+    title: string;
+    subtitle?: string;
+    stats?: Stat[];
+    actions?: Array<{ label: string; href: string }>;
+}>();
 
-const page = usePage()
-const user = computed(() => page.props.auth?.user ?? null)
-const flash = computed(() => page.props.flash?.message ?? null)
+const page = usePage();
+const user = computed(() => page.props.auth?.user ?? null);
+const flash = computed(() => page.props.flash?.message ?? null);
 </script>
 
 <template>
@@ -26,16 +26,29 @@ const flash = computed(() => page.props.flash?.message ?? null)
             {{ flash }}
         </div>
 
-        <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <header
+            class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
+        >
             <div>
-                <p class="text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                <p
+                    class="text-xs font-semibold tracking-widest text-slate-500 uppercase dark:text-slate-400"
+                >
                     {{ role }} dashboard
                 </p>
-                <h1 class="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-50">
+                <h1
+                    class="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-50"
+                >
                     {{ title }}
                 </h1>
-                <p v-if="subtitle" class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                    Welcome back, <span class="font-medium text-slate-900 dark:text-slate-100">{{ user?.name ?? 'there' }}</span>.
+                <p
+                    v-if="subtitle"
+                    class="mt-1 text-sm text-slate-600 dark:text-slate-400"
+                >
+                    Welcome back,
+                    <span
+                        class="font-medium text-slate-900 dark:text-slate-100"
+                        >{{ user?.name ?? 'there' }}</span
+                    >.
                     {{ subtitle }}
                 </p>
             </div>

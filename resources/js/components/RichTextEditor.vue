@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { watch, type FunctionalComponent } from 'vue'
-import { EditorContent, useEditor } from '@tiptap/vue-3'
-import StarterKit from '@tiptap/starter-kit'
+import { watch, type FunctionalComponent } from 'vue';
+import { EditorContent, useEditor } from '@tiptap/vue-3';
+import StarterKit from '@tiptap/starter-kit';
 import {
     Bold,
     Heading2,
@@ -15,23 +15,23 @@ import {
     TextQuote,
     Underline,
     Undo2,
-} from '@lucide/vue'
+} from '@lucide/vue';
 
 const props = withDefaults(
     defineProps<{
-        modelValue: string
-        placeholder?: string
-        invalid?: boolean
+        modelValue: string;
+        placeholder?: string;
+        invalid?: boolean;
     }>(),
     {
         placeholder: '',
         invalid: false,
     },
-)
+);
 
 const emit = defineEmits<{
-    (e: 'update:modelValue', value: string): void
-}>()
+    (e: 'update:modelValue', value: string): void;
+}>();
 
 const editor = useEditor({
     content: props.modelValue,
@@ -42,25 +42,25 @@ const editor = useEditor({
         },
     },
     onUpdate: ({ editor }) => {
-        emit('update:modelValue', editor.isEmpty ? '' : editor.getHTML())
+        emit('update:modelValue', editor.isEmpty ? '' : editor.getHTML());
     },
-})
+});
 
 watch(
     () => props.modelValue,
     (value) => {
         if (editor.value && value !== editor.value.getHTML()) {
-            editor.value.commands.setContent(value || '')
+            editor.value.commands.setContent(value || '');
         }
     },
-)
+);
 
 interface ToolButton {
-    icon: FunctionalComponent
-    title: string
-    action: () => void
-    isActive?: () => boolean
-    isDisabled?: () => boolean
+    icon: FunctionalComponent;
+    title: string;
+    action: () => void;
+    isActive?: () => boolean;
+    isDisabled?: () => boolean;
 }
 
 const buttons: ToolButton[] = [
@@ -93,14 +93,16 @@ const buttons: ToolButton[] = [
         title: 'Heading',
         action: () =>
             editor.value?.chain().focus().toggleHeading({ level: 2 }).run(),
-        isActive: () => editor.value?.isActive('heading', { level: 2 }) ?? false,
+        isActive: () =>
+            editor.value?.isActive('heading', { level: 2 }) ?? false,
     },
     {
         icon: Heading3,
         title: 'Subheading',
         action: () =>
             editor.value?.chain().focus().toggleHeading({ level: 3 }).run(),
-        isActive: () => editor.value?.isActive('heading', { level: 3 }) ?? false,
+        isActive: () =>
+            editor.value?.isActive('heading', { level: 3 }) ?? false,
     },
     {
         icon: List,
@@ -137,7 +139,7 @@ const buttons: ToolButton[] = [
         action: () => editor.value?.chain().focus().redo().run(),
         isDisabled: () => !(editor.value?.can().redo() ?? false),
     },
-]
+];
 </script>
 
 <template>
@@ -166,7 +168,11 @@ const buttons: ToolButton[] = [
                 ]"
                 @click="button.action()"
             >
-                <component :is="button.icon" class="h-4 w-4" :stroke-width="2" />
+                <component
+                    :is="button.icon"
+                    class="h-4 w-4"
+                    :stroke-width="2"
+                />
             </button>
         </div>
 
