@@ -62,6 +62,7 @@ Route::middleware('auth')->group(function (): void {
 
         Route::get('/admin/settings/school', [SchoolProfileController::class, 'edit'])->name('admin.settings.school.edit');
         Route::put('/admin/settings/school', [SchoolProfileController::class, 'update'])->name('admin.settings.school.update');
+        Route::get('/admin/settings/zkteco', [AttendanceController::class, 'zktecoSettingsPage'])->name('admin.settings.zkteco');
 
         Route::resource('/admin/academic-sessions', AcademicSessionController::class)
             ->names([
@@ -139,6 +140,10 @@ Route::middleware('auth')->group(function (): void {
 
         Route::get('/admin/attendance', [AttendanceController::class, 'index'])->name('admin.attendance.index');
         Route::post('/admin/attendance', [AttendanceController::class, 'store'])->name('admin.attendance.store');
+        Route::post('/admin/attendance/zkteco/settings', [AttendanceController::class, 'saveZktecoSettings'])->name('admin.attendance.zkteco.settings');
+        Route::post('/admin/attendance/zkteco/test', [AttendanceController::class, 'testZktecoConnection'])->name('admin.attendance.zkteco.test');
+        Route::post('/admin/attendance/zkteco/sync', [AttendanceController::class, 'syncZktecoAttendance'])->name('admin.attendance.zkteco.sync');
+        Route::post('/admin/attendance/zkteco/import', [AttendanceController::class, 'importZktecoFile'])->name('admin.attendance.zkteco.import');
 
         Route::resource('/admin/fees/structures', FeeStructureController::class)
             ->names([
@@ -197,3 +202,6 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/parent/children/{student}/fees', [FeeInvoiceController::class, 'parentChild'])->name('parent.fees.child');
     });
 });
+
+Route::any('/iclock/cdata', [AttendanceController::class, 'admsWebhook'])->name('attendance.zkteco.adms');
+

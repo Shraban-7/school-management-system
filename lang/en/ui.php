@@ -131,6 +131,7 @@ return [
         'fee_structures' => 'Fee structures',
         'fee_invoices' => 'Fee invoices',
         'attendance' => 'Attendance',
+        'zkteco' => 'ZKTeco Biometrics',
         'communication' => 'Communication',
         'notice_board' => 'Notice board',
         'manage_notices' => 'Manage notices',

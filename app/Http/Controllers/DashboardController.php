@@ -410,6 +410,7 @@ class DashboardController extends Controller
                     ['label' => __('ui.sidebar.fee_structures'), 'href' => '/admin/fees/structures', 'match' => 'admin/fees/structures', 'icon' => 'wallet'],
                     ['label' => __('ui.sidebar.fee_invoices'), 'href' => '/admin/fees/invoices', 'match' => 'admin/fees/invoices', 'icon' => 'list'],
                     ['label' => __('ui.sidebar.attendance'), 'href' => '/admin/attendance', 'match' => 'admin/attendance', 'icon' => 'check'],
+                    ['label' => __('ui.sidebar.zkteco'), 'href' => '/admin/settings/zkteco', 'match' => 'admin/settings/zkteco', 'icon' => 'server'],
                 ],
             ],
             [

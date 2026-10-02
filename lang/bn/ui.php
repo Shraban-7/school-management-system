@@ -131,6 +131,7 @@ return [
         'fee_structures' => 'ফি কাঠামো',
         'fee_invoices' => 'ফি চালান',
         'attendance' => 'উপস্থিতি',
+        'zkteco' => 'জেডকেটেকো বায়োমেট্রিক',
         'communication' => 'যোগাযোগ',
         'notice_board' => 'নোটিশ বোর্ড',
         'manage_notices' => 'নোটিশ পরিচালনা',

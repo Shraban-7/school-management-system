@@ -50,13 +50,22 @@ export default function AdminSettings({ groups, sidebar }: AdminSettingsProps) {
                         <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
                             Control application variables, integrations, and defaults.
                         </p>
-                        <Link
-                            href="/admin/settings/school"
-                            className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-accent-700 hover:text-accent-800 dark:text-accent-300"
-                        >
-                            <AppIcon name="cog" className="h-4 w-4" />
-                            Edit school profile
-                        </Link>
+                        <div className="mt-3 flex flex-wrap items-center gap-4">
+                            <Link
+                                href="/admin/settings/school"
+                                className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent-700 hover:text-accent-800 dark:text-accent-300"
+                            >
+                                <AppIcon name="cog" className="h-4 w-4" />
+                                Edit school profile
+                            </Link>
+                            <Link
+                                href="/admin/settings/zkteco"
+                                className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent-700 hover:text-accent-800 dark:text-accent-300"
+                            >
+                                <AppIcon name="server" className="h-4 w-4" />
+                                ZKTeco Biometrics &amp; RFID
+                            </Link>
+                        </div>
                     </div>
                     <button
                         type="button"
