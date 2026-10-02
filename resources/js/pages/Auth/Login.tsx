@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { useI18n } from '@/composables/useI18n';
 import AppIcon from '@/components/AppIcon';
+import AppLogo from '@/components/AppLogo';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import ThemeToggle from '@/components/ThemeToggle';
 
@@ -86,17 +87,11 @@ export default function Login() {
             {/* Top navigation bar */}
             <header className="flex items-center justify-between border-b border-slate-200/60 bg-white/70 px-6 py-4 backdrop-blur-md dark:border-slate-800/60 dark:bg-slate-900/70">
                 <div className="flex items-center gap-3">
-                    {school.logo_url ? (
-                        <img
-                            src={school.logo_url}
-                            alt={schoolName}
-                            className="h-9 w-9 rounded-lg object-cover ring-1 ring-slate-200 dark:ring-slate-700"
-                        />
-                    ) : (
-                        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent-600 text-sm font-bold text-white shadow-xs">
-                            {crestInitial}
-                        </span>
-                    )}
+                    <AppLogo
+                        src={school.logo_url}
+                        name={schoolName}
+                        size="md"
+                    />
                     <div>
                         <span className="block text-sm font-bold tracking-tight text-slate-900 dark:text-slate-100">
                             {schoolName}
@@ -120,16 +115,13 @@ export default function Login() {
                 <div className="w-full max-w-md space-y-6">
                     {/* Branding Card Header */}
                     <div className="text-center">
-                        <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-accent-500 to-accent-700 text-2xl font-bold text-white shadow-lg ring-4 shadow-accent-600/20 ring-white dark:ring-slate-900">
-                            {school.logo_url ? (
-                                <img
-                                    src={school.logo_url}
-                                    alt={schoolName}
-                                    className="h-16 w-16 rounded-2xl object-cover"
-                                />
-                            ) : (
-                                <span>{crestInitial}</span>
-                            )}
+                        <div className="mb-4 inline-flex items-center justify-center">
+                            <AppLogo
+                                src={school.logo_url}
+                                name={schoolName}
+                                size="xl"
+                                className="rounded-2xl ring-4 ring-white shadow-xl shadow-accent-950/20 dark:ring-slate-900"
+                            />
                         </div>
 
                         <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-50">

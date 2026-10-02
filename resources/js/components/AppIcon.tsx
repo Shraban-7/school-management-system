@@ -1,31 +1,37 @@
 import React from 'react';
 import {
     Activity,
+    AlertCircle,
     ArrowDown,
     ArrowLeft,
     ArrowRight,
     ArrowUp,
+    Award,
     Bell,
     BookOpen,
     Briefcase,
     Calendar,
     Check,
+    CheckCircle2,
     ChevronDown,
     ChevronLeft,
     ChevronRight,
     ChevronUp,
     Clock,
     Cog,
+    CreditCard,
     Database,
     Download,
     EllipsisVertical,
     Eye,
     EyeOff,
+    FileText,
     Filter,
     Globe,
     GraduationCap,
     Home,
     Key,
+    Layers,
     LayoutGrid,
     List,
     Lock,
@@ -38,7 +44,9 @@ import {
     Phone,
     Pencil,
     Plus,
+    RefreshCw,
     Search,
+    Send,
     Server,
     Settings,
     Shield,
@@ -50,6 +58,8 @@ import {
     User,
     Users,
     Wallet,
+    Wifi,
+    WifiOff,
     X,
     type LucideProps,
 } from 'lucide-react';
@@ -105,7 +115,17 @@ export type IconName =
     | 'briefcase'
     | 'megaphone'
     | 'wallet'
-    | 'panel-left';
+    | 'panel-left'
+    | 'credit-card'
+    | 'file-text'
+    | 'check-circle'
+    | 'alert-circle'
+    | 'refresh'
+    | 'send'
+    | 'award'
+    | 'layers'
+    | 'wifi'
+    | 'wifi-off';
 
 const iconMap: Record<string, React.ComponentType<LucideProps>> = {
     home: Home,
@@ -159,6 +179,16 @@ const iconMap: Record<string, React.ComponentType<LucideProps>> = {
     megaphone: Megaphone,
     wallet: Wallet,
     'panel-left': PanelLeft,
+    'credit-card': CreditCard,
+    'file-text': FileText,
+    'check-circle': CheckCircle2,
+    'alert-circle': AlertCircle,
+    refresh: RefreshCw,
+    send: Send,
+    award: Award,
+    layers: Layers,
+    wifi: Wifi,
+    'wifi-off': WifiOff,
 };
 
 interface AppIconProps {

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, router, usePage } from '@inertiajs/react';
 import AppIcon from '@/components/AppIcon';
+import AppLogo from '@/components/AppLogo';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import NotificationBell from '@/components/NotificationBell';
 import SearchBar from '@/components/SearchBar';
@@ -115,17 +116,11 @@ export default function DashboardLayout({
                         className="flex min-w-0 shrink items-center gap-3"
                         title={brandName}
                     >
-                        {!brandLogoUrl ? (
-                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-accent-500 to-accent-700 text-sm font-bold text-white shadow-lg shadow-accent-900/30">
-                                {brandInitial}
-                            </span>
-                        ) : (
-                            <img
-                                src={brandLogoUrl}
-                                alt={brandName}
-                                className="h-9 w-9 shrink-0 rounded-xl object-cover shadow-lg shadow-black/30"
-                            />
-                        )}
+                        <AppLogo
+                            src={brandLogoUrl}
+                            name={brandName}
+                            size="md"
+                        />
                         {!collapsed && (
                             <span className="truncate font-semibold tracking-tight text-white">
                                 {brandName}
@@ -155,13 +150,11 @@ export default function DashboardLayout({
                                 className="flex min-w-0 items-center gap-2.5 font-semibold tracking-tight text-white"
                                 onClick={() => setMobileOpen(false)}
                             >
-                                {brandLogoUrl && (
-                                    <img
-                                        src={brandLogoUrl}
-                                        alt={brandName}
-                                        className="h-8 w-8 shrink-0 rounded-lg object-cover"
-                                    />
-                                )}
+                                <AppLogo
+                                    src={brandLogoUrl}
+                                    name={brandName}
+                                    size="sm"
+                                />
                                 <span className="truncate">{brandName}</span>
                             </Link>
                             <button
@@ -193,6 +186,16 @@ export default function DashboardLayout({
                         >
                             <AppIcon name="menu" className="h-5 w-5" />
                         </button>
+                        <div className="flex items-center gap-2 lg:hidden">
+                            <AppLogo
+                                src={brandLogoUrl}
+                                name={brandName}
+                                size="xs"
+                            />
+                            <span className="text-sm font-bold truncate max-w-[120px] sm:max-w-[200px] text-slate-900 dark:text-slate-100">
+                                {brandName}
+                            </span>
+                        </div>
                         <button
                             type="button"
                             className="hidden h-9 w-9 items-center justify-center rounded-md text-slate-600 transition hover:bg-slate-100 lg:inline-flex dark:text-slate-300 dark:hover:bg-slate-800"

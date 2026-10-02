@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import AppLogo from '@/components/AppLogo';
 import { cn } from '@/lib/utils';
 
 type Variant = 'light' | 'dark' | 'transparent';
@@ -78,15 +79,13 @@ export default function Navbar({
                     <div className="flex shrink-0 items-center gap-3">
                         <a
                             href={brandHref}
-                            className="flex items-center gap-2 text-base font-semibold tracking-tight"
+                            className="flex items-center gap-2.5 text-base font-semibold tracking-tight"
                         >
-                            {brandLogo && (
-                                <img
-                                    src={brandLogo}
-                                    alt={brand}
-                                    className="h-8 w-8 rounded-lg object-cover"
-                                />
-                            )}
+                            <AppLogo
+                                src={brandLogo || null}
+                                name={brand}
+                                size="sm"
+                            />
                             {brand && <span>{brand}</span>}
                         </a>
                     </div>

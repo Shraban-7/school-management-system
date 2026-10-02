@@ -4,13 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Enums\UserRole;
 use App\Enums\PostType;
+use App\Models\AcademicSession;
 use App\Models\AttendanceRecord;
+use App\Models\ClassesAndSection;
+use App\Models\CommunicationLog;
 use App\Models\CommunicationSetting;
 use App\Models\Exam;
+use App\Models\FeeInvoice;
 use App\Models\Institution;
 use App\Models\Post;
 use App\Models\Student;
+use App\Models\Syllabus;
+use App\Models\Teacher;
 use App\Models\User;
+use App\Models\ZktecoDevice;
 use App\Services\FeeService;
 use App\Services\ResultService;
 use Illuminate\Http\Request;
@@ -127,33 +134,40 @@ class DashboardController extends Controller
      */
     protected function adminData(User $user): array
     {
+        $totalStudents = Student::query()->count();
+        $totalTeachers = Teacher::query()->count();
+        $totalClasses = ClassesAndSection::query()->count();
+        $totalUsers = User::query()->count();
+
+        $attendanceSummary = $this->getAttendanceSummary();
+        $financeSummary = $this->getFinanceSummary();
+        $zktecoSummary = $this->getZktecoSummary();
+
         return [
             'role' => 'admin',
-            'title' => 'System overview',
-            'subtitle' => 'Manage users, monitor system health, and configure the platform.',
+            'title' => 'School management',
+            'subtitle' => 'Manage academic operations, student attendance, examinations, and fee collections.',
             'stats' => [
-                ['label' => 'Total users', 'value' => User::count(), 'icon' => 'users', 'tone' => 'accent', 'trend' => 12, 'href' => '/admin/users'],
-                ['label' => 'Active now', 'value' => '—', 'icon' => 'sparkles', 'tone' => 'success', 'trend' => 4],
-                ['label' => 'System health', 'value' => 'Operational', 'icon' => 'shield', 'tone' => 'success'],
-                ['label' => 'Open alerts', 'value' => 0, 'icon' => 'bell', 'tone' => 'default'],
+                ['label' => 'Total students', 'value' => $totalStudents, 'icon' => 'graduation-cap', 'tone' => 'default', 'href' => '/admin/students'],
+                ['label' => 'Teaching staff', 'value' => $totalTeachers, 'icon' => 'briefcase', 'tone' => 'default', 'href' => '/admin/teachers'],
+                ['label' => 'Attendance today', 'value' => $attendanceSummary['marked_today'] > 0 ? $attendanceSummary['rate'].'%' : 'Pending', 'icon' => 'check-circle', 'tone' => 'default', 'href' => '/admin/attendance'],
+                ['label' => 'Classes & Sections', 'value' => $totalClasses, 'icon' => 'book-open', 'tone' => 'default', 'href' => '/admin/classes-and-sections'],
             ],
-            'cards' => [
-                [
-                    'title' => 'System health',
-                    'items' => [
-                        ['label' => 'Database', 'value' => 'Operational', 'status' => 'ok'],
-                        ['label' => 'Cache', 'value' => 'Operational', 'status' => 'ok'],
-                        ['label' => 'Queue', 'value' => 'Operational', 'status' => 'ok'],
-                        ['label' => 'Storage', 'value' => '42% used', 'status' => 'ok'],
-                    ],
-                ],
-            ],
+            'cards' => [],
             'sidebar' => $this->adminSidebar(),
             'notificationCount' => 2,
+            'attendanceSummary' => $attendanceSummary,
+            'financeSummary' => $financeSummary,
+            'upcomingExams' => $this->getUpcomingExams(),
+            'recentNotices' => $this->getRecentNotices(),
+            'zktecoSummary' => $zktecoSummary,
+            'communicationSummary' => $this->getCommunicationSummary(),
+            'schoolInfo' => $this->getSchoolInfo(),
             'recentActivity' => [
-                ['actor' => 'Admin', 'action' => 'updated', 'target' => 'System settings', 'time' => '2 minutes ago'],
-                ['actor' => 'Headmaster', 'action' => 'joined', 'target' => 'the platform', 'time' => '1 hour ago'],
-                ['actor' => 'Teacher', 'action' => 'submitted', 'target' => 'Q1 grades', 'time' => '3 hours ago'],
+                ['actor' => 'Class Teacher', 'action' => 'submitted attendance for', 'target' => 'Class 10-A', 'time' => '15 minutes ago'],
+                ['actor' => 'Accounts Office', 'action' => 'issued tuition fees for', 'target' => 'Monthly Session', 'time' => '1 hour ago'],
+                ['actor' => 'Exam Controller', 'action' => 'recorded grades for', 'target' => 'Terminal Exam', 'time' => '2 hours ago'],
+                ['actor' => 'Notice Board', 'action' => 'published announcement for', 'target' => 'Annual Sports Day', 'time' => '4 hours ago'],
             ],
         ];
     }
@@ -163,28 +177,31 @@ class DashboardController extends Controller
      */
     protected function headmasterData(User $user): array
     {
+        $totalStudents = Student::query()->count();
+        $totalTeachers = Teacher::query()->count();
+        $totalClasses = ClassesAndSection::query()->count();
+        $attendanceSummary = $this->getAttendanceSummary();
+
         return [
             'role' => 'headmaster',
             'title' => 'School overview',
             'subtitle' => 'Track academic performance, staff, and key metrics across the school.',
             'stats' => [
-                ['label' => 'Students', 'value' => '—', 'icon' => 'graduation-cap', 'tone' => 'accent'],
-                ['label' => 'Teachers', 'value' => '—', 'icon' => 'briefcase', 'tone' => 'success'],
-                ['label' => 'Attendance today', 'value' => '—', 'icon' => 'check', 'tone' => 'warning'],
-                ['label' => 'Open notices', 'value' => Post::query()->ofType(PostType::NOTICE)->published()->count(), 'icon' => 'megaphone', 'href' => '/notices'],
+                ['label' => 'Total students', 'value' => $totalStudents, 'icon' => 'graduation-cap', 'tone' => 'default', 'href' => '/admin/students'],
+                ['label' => 'Teaching staff', 'value' => $totalTeachers, 'icon' => 'briefcase', 'tone' => 'default', 'href' => '/admin/teachers'],
+                ['label' => 'Attendance today', 'value' => $attendanceSummary['marked_today'] > 0 ? $attendanceSummary['rate'].'%' : 'Pending', 'icon' => 'check-circle', 'tone' => 'default', 'href' => '/admin/attendance'],
+                ['label' => 'Classes & Sections', 'value' => $totalClasses, 'icon' => 'book-open', 'tone' => 'default', 'href' => '/admin/classes-and-sections'],
             ],
-            'cards' => [
-                [
-                    'title' => 'Today at a glance',
-                    'items' => [
-                        ['label' => 'Students present', 'value' => '—'],
-                        ['label' => 'Teachers present', 'value' => '—'],
-                        ['label' => 'Classes in session', 'value' => '—'],
-                    ],
-                ],
-            ],
+            'cards' => [],
             'sidebar' => $this->roleSidebar('headmaster'),
             'notificationCount' => 0,
+            'attendanceSummary' => $attendanceSummary,
+            'financeSummary' => $this->getFinanceSummary(),
+            'upcomingExams' => $this->getUpcomingExams(),
+            'recentNotices' => $this->getRecentNotices(),
+            'zktecoSummary' => $this->getZktecoSummary(),
+            'communicationSummary' => $this->getCommunicationSummary(),
+            'schoolInfo' => $this->getSchoolInfo(),
         ];
     }
 
@@ -193,26 +210,35 @@ class DashboardController extends Controller
      */
     protected function teacherData(User $user): array
     {
+        $totalStudents = Student::query()->count();
+        $totalClasses = ClassesAndSection::query()->count();
+        $attendanceSummary = $this->getAttendanceSummary();
+
         return [
             'role' => 'teacher',
-            'title' => 'Your classes',
+            'title' => 'Your academic desk',
             'subtitle' => 'Manage attendance, grades, and lessons for your classes.',
             'stats' => [
-                ['label' => 'Classes', 'value' => '—', 'icon' => 'book-open', 'tone' => 'accent'],
-                ['label' => 'Students', 'value' => '—', 'icon' => 'users', 'tone' => 'success'],
-                ['label' => 'Pending grades', 'value' => '—', 'icon' => 'pencil', 'tone' => 'warning'],
-                ['label' => 'Avg. attendance', 'value' => '—', 'icon' => 'check'],
+                ['label' => 'Classes', 'value' => $totalClasses, 'icon' => 'book-open', 'tone' => 'accent', 'href' => '/admin/classes-and-sections'],
+                ['label' => 'Students', 'value' => $totalStudents, 'icon' => 'users', 'tone' => 'success', 'href' => '/admin/students'],
+                ['label' => 'Today attendance', 'value' => $attendanceSummary['marked_today'] > 0 ? $attendanceSummary['rate'].'%' : 'Pending', 'icon' => 'check', 'tone' => 'warning', 'href' => '/admin/attendance'],
+                ['label' => 'Open notices', 'value' => Post::query()->ofType(PostType::NOTICE)->published()->count(), 'icon' => 'megaphone', 'href' => '/notices'],
             ],
             'cards' => [
                 [
-                    'title' => "Today's schedule",
+                    'title' => "Today's summary",
                     'items' => [
-                        ['label' => 'No classes scheduled', 'value' => '—'],
+                        ['label' => 'Attendance status', 'value' => $attendanceSummary['marked_today'] > 0 ? $attendanceSummary['present'].' Present' : 'Attendance pending', 'status' => $attendanceSummary['marked_today'] > 0 ? 'good' : 'warn'],
+                        ['label' => 'Academic session', 'value' => $this->getSchoolInfo()['session'], 'status' => 'ok'],
                     ],
                 ],
             ],
             'sidebar' => $this->roleSidebar('teacher'),
             'notificationCount' => 0,
+            'attendanceSummary' => $attendanceSummary,
+            'upcomingExams' => $this->getUpcomingExams(),
+            'recentNotices' => $this->getRecentNotices(),
+            'schoolInfo' => $this->getSchoolInfo(),
         ];
     }
 
@@ -221,26 +247,33 @@ class DashboardController extends Controller
      */
     protected function studentData(User $user): array
     {
+        $student = Student::where('user_id', $user->id)->with('class')->first();
+        $className = $student?->class ? trim($student->class->class_level.' '.$student->class->section_name) : 'Assigned';
+
         return [
             'role' => 'student',
-            'title' => 'Your learning',
-            'subtitle' => 'View your classes, grades, and upcoming assignments.',
+            'title' => 'Your learning portal',
+            'subtitle' => 'View your classes, examination schedules, and syllabus materials.',
             'stats' => [
-                ['label' => 'Classes', 'value' => '—', 'icon' => 'book-open', 'tone' => 'accent'],
-                ['label' => 'Avg. grade', 'value' => '—', 'icon' => 'sparkles', 'tone' => 'success'],
-                ['label' => 'Assignments due', 'value' => '—', 'icon' => 'clock', 'tone' => 'warning'],
-                ['label' => 'Attendance', 'value' => '—', 'icon' => 'check'],
+                ['label' => 'Class / Section', 'value' => $className, 'icon' => 'book-open', 'tone' => 'accent'],
+                ['label' => 'Published exams', 'value' => Exam::where('is_published', true)->count(), 'icon' => 'sparkles', 'tone' => 'success'],
+                ['label' => 'Notices', 'value' => Post::query()->ofType(PostType::NOTICE)->published()->count(), 'icon' => 'megaphone', 'tone' => 'warning', 'href' => '/notices'],
+                ['label' => 'Syllabus documents', 'value' => Syllabus::count(), 'icon' => 'download', 'href' => '/syllabus'],
             ],
             'cards' => [
                 [
-                    'title' => 'Upcoming',
+                    'title' => 'Academic status',
                     'items' => [
-                        ['label' => 'No upcoming assignments', 'value' => '—'],
+                        ['label' => 'Enrolled class', 'value' => $className],
+                        ['label' => 'Current session', 'value' => $this->getSchoolInfo()['session']],
                     ],
                 ],
             ],
             'sidebar' => $this->roleSidebar('student'),
             'notificationCount' => 0,
+            'upcomingExams' => $this->getUpcomingExams(),
+            'recentNotices' => $this->getRecentNotices(),
+            'schoolInfo' => $this->getSchoolInfo(),
         ];
     }
 
@@ -249,26 +282,35 @@ class DashboardController extends Controller
      */
     protected function staffData(User $user): array
     {
+        $attendanceSummary = $this->getAttendanceSummary();
+        $zktecoSummary = $this->getZktecoSummary();
+
         return [
             'role' => 'staff',
-            'title' => 'Operations',
-            'subtitle' => 'Manage day-to-day operations and tasks.',
+            'title' => 'Operations dashboard',
+            'subtitle' => 'Manage day-to-day operations, attendance logs, and school facilities.',
             'stats' => [
-                ['label' => 'Open tasks', 'value' => '—', 'icon' => 'check', 'tone' => 'warning'],
-                ['label' => 'Completed today', 'value' => '—', 'icon' => 'sparkles', 'tone' => 'success'],
-                ['label' => 'Active notices', 'value' => Post::query()->ofType(PostType::NOTICE)->published()->count(), 'icon' => 'megaphone', 'tone' => 'accent', 'href' => '/notices'],
-                ['label' => 'Pending requests', 'value' => '—', 'icon' => 'clock'],
+                ['label' => 'Students', 'value' => Student::count(), 'icon' => 'users', 'tone' => 'accent', 'href' => '/admin/students'],
+                ['label' => 'Attendance today', 'value' => $attendanceSummary['marked_today'] > 0 ? $attendanceSummary['present'].' present' : 'Pending', 'icon' => 'check', 'tone' => 'success', 'href' => '/admin/attendance'],
+                ['label' => 'Active notices', 'value' => Post::query()->ofType(PostType::NOTICE)->published()->count(), 'icon' => 'megaphone', 'tone' => 'warning', 'href' => '/notices'],
+                ['label' => 'ZKTeco devices', 'value' => $zktecoSummary['total'], 'icon' => 'server', 'href' => '/admin/settings/zkteco'],
             ],
             'cards' => [
                 [
-                    'title' => 'Recent activity',
+                    'title' => 'Operational status',
                     'items' => [
-                        ['label' => 'No recent activity', 'value' => '—'],
+                        ['label' => 'Biometric system', 'value' => $zktecoSummary['online'].' online', 'status' => 'ok'],
+                        ['label' => 'Notice board', 'value' => 'Active', 'status' => 'ok'],
                     ],
                 ],
             ],
             'sidebar' => $this->roleSidebar('staff'),
             'notificationCount' => 0,
+            'attendanceSummary' => $attendanceSummary,
+            'upcomingExams' => $this->getUpcomingExams(),
+            'recentNotices' => $this->getRecentNotices(),
+            'zktecoSummary' => $zktecoSummary,
+            'schoolInfo' => $this->getSchoolInfo(),
         ];
     }
 
@@ -347,6 +389,180 @@ class DashboardController extends Controller
             ],
             'sidebar' => $this->roleSidebar('parent'),
             'notificationCount' => 0,
+            'attendanceSummary' => $this->getAttendanceSummary(),
+            'upcomingExams' => $this->getUpcomingExams(),
+            'recentNotices' => $this->getRecentNotices(),
+            'schoolInfo' => $this->getSchoolInfo(),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function getAttendanceSummary(): array
+    {
+        $todayAttendance = AttendanceRecord::query()
+            ->whereDate('date', today())
+            ->get(['status']);
+
+        $totalStudents = Student::query()->count();
+        $markedToday = $todayAttendance->count();
+        $present = $todayAttendance->where('status', 'present')->count();
+        $absent = $todayAttendance->where('status', 'absent')->count();
+        $late = $todayAttendance->where('status', 'late')->count();
+        $rate = $markedToday > 0 ? round(($present / $markedToday) * 100, 1) : 0;
+
+        return [
+            'marked_today' => $markedToday,
+            'total_students' => $totalStudents,
+            'present' => $present,
+            'absent' => $absent,
+            'late' => $late,
+            'rate' => $rate,
+            'date_formatted' => now()->format('D, M d, Y'),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function getFinanceSummary(): array
+    {
+        $totalInvoiced = (float) FeeInvoice::query()->sum('amount');
+        $totalCollected = (float) FeeInvoice::query()->sum('paid_amount');
+        $totalDue = max(0, $totalInvoiced - $totalCollected);
+        $rate = $totalInvoiced > 0 ? round(($totalCollected / $totalInvoiced) * 100, 1) : 0;
+
+        return [
+            'total_invoiced' => $totalInvoiced,
+            'total_collected' => $totalCollected,
+            'total_due' => $totalDue,
+            'collection_rate' => $rate,
+            'currency' => '৳',
+        ];
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    protected function getUpcomingExams(): array
+    {
+        return Exam::query()
+            ->with('session')
+            ->orderBy('start_date', 'desc')
+            ->take(4)
+            ->get()
+            ->map(function (Exam $exam) {
+                $today = today();
+                $status = 'Upcoming';
+                if ($exam->start_date && $exam->end_date) {
+                    if ($today->between($exam->start_date, $exam->end_date)) {
+                        $status = 'Ongoing';
+                    } elseif ($today->gt($exam->end_date)) {
+                        $status = 'Completed';
+                    }
+                }
+                return [
+                    'id' => $exam->id,
+                    'name' => $exam->name_en,
+                    'session' => $exam->session?->session_name ?? '—',
+                    'start_date' => $exam->start_date?->format('M d, Y'),
+                    'end_date' => $exam->end_date?->format('M d, Y'),
+                    'is_published' => (bool) $exam->is_published,
+                    'status' => $status,
+                ];
+            })
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    protected function getRecentNotices(): array
+    {
+        return Post::query()
+            ->ofType(PostType::NOTICE)
+            ->published()
+            ->latest('published_at')
+            ->take(4)
+            ->get(['id', 'title_en', 'published_at', 'slug'])
+            ->map(fn (Post $p) => [
+                'id' => $p->id,
+                'title' => $p->title_en,
+                'slug' => $p->slug,
+                'time' => $p->published_at?->diffForHumans() ?? 'Recently',
+                'date' => $p->published_at?->format('M d, Y') ?? '—',
+            ])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function getZktecoSummary(): array
+    {
+        $devices = ZktecoDevice::query()
+            ->select(['id', 'name', 'ip_address', 'port', 'is_enabled', 'last_sync_at', 'last_sync_status'])
+            ->take(5)
+            ->get()
+            ->map(fn (ZktecoDevice $d) => [
+                'id' => $d->id,
+                'device_name' => $d->name,
+                'ip_address' => $d->ip_address,
+                'port' => $d->port,
+                'status' => $d->is_enabled ? 'online' : 'disabled',
+                'is_enabled' => (bool) $d->is_enabled,
+                'last_sync_at' => $d->last_sync_at?->diffForHumans() ?? 'Never',
+            ])
+            ->values()
+            ->all();
+
+        $total = ZktecoDevice::count();
+        $online = ZktecoDevice::where('is_enabled', true)->count();
+
+        return [
+            'total' => $total,
+            'online' => $online,
+            'offline' => max(0, $total - $online),
+            'devices' => $devices,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function getCommunicationSummary(): array
+    {
+        $smsSent = CommunicationLog::query()->where('channel', 'sms')->count();
+        $emailSent = CommunicationLog::query()->where('channel', 'email')->count();
+
+        return [
+            'sms_sent' => $smsSent,
+            'email_sent' => $emailSent,
+            'total' => $smsSent + $emailSent,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function getSchoolInfo(): array
+    {
+        $institution = null;
+        try {
+            $institution = Institution::query()->orderBy('id')->first();
+        } catch (\Throwable) {}
+
+        $activeSession = AcademicSession::where('is_active', true)->first();
+
+        return [
+            'name' => $institution?->name_en ?? 'School Management System',
+            'name_bn' => $institution?->name_bn ?? '',
+            'eiin' => $institution?->eiin_number ?? '',
+            'session' => $activeSession?->session_name ?? (string) date('Y'),
+            'logo_url' => $institution?->logoUrl(),
         ];
     }
 

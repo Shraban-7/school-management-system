@@ -17,62 +17,72 @@ export default function KpiCard({
     icon,
     trend,
     trendLabel,
-    tone = 'default',
     href,
 }: KpiCardProps) {
-    let toneClass = 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300';
-    if (tone === 'accent') {
-        toneClass = 'bg-accent-50 text-accent-600 dark:bg-accent-950/40 dark:text-accent-300';
-    } else if (tone === 'success') {
-        toneClass = 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-300';
-    } else if (tone === 'warning') {
-        toneClass = 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-300';
-    } else if (tone === 'danger') {
-        toneClass = 'bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-300';
-    }
+    // Consistent, professional enterprise styling for all KPI cards
+    const iconContainerClass =
+        'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200/70 dark:border-slate-700/60';
 
     const trendClass =
         trend !== undefined
             ? trend >= 0
-                ? 'text-emerald-600 dark:text-emerald-400'
-                : 'text-rose-600 dark:text-rose-400'
+                ? 'text-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 dark:text-emerald-300'
+                : 'text-rose-700 bg-rose-50 dark:bg-rose-950/40 dark:text-rose-300'
             : '';
 
-    const cardClasses = `group relative flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition dark:border-slate-800 dark:bg-slate-900 ${
-        href ? 'hover:border-accent-300 hover:shadow dark:hover:border-accent-700' : ''
+    const cardClasses = `group relative overflow-hidden flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition-all duration-200 dark:border-slate-800/80 dark:bg-slate-900 ${
+        href
+            ? 'cursor-pointer hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm dark:hover:border-slate-700'
+            : ''
     }`;
 
     const content = (
         <>
-            <div className="flex items-start justify-between">
-                <p className="text-xs font-medium tracking-wider text-slate-500 uppercase dark:text-slate-400">
-                    {label}
-                </p>
-                {icon && (
-                    <span
-                        className={`inline-flex h-9 w-9 items-center justify-center rounded-lg ${toneClass}`}
-                    >
-                        <AppIcon name={icon} className="h-5 w-5" />
-                    </span>
-                )}
-            </div>
-            <p className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-slate-50">
-                {value}
-            </p>
-            {(trend !== undefined || trendLabel) && (
-                <div className="flex items-center gap-1.5 text-xs">
-                    {trend !== undefined && (
-                        <span className={`inline-flex items-center gap-0.5 font-medium ${trendClass}`}>
-                            <AppIcon
-                                name={trend >= 0 ? 'trend-up' : 'trend-down'}
-                                className="h-3.5 w-3.5"
-                            />
-                            {Math.abs(trend)}%
+            <div>
+                <div className="flex items-start justify-between gap-3">
+                    <p className="text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400">
+                        {label}
+                    </p>
+                    {icon && (
+                        <span
+                            className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-transform group-hover:scale-105 ${iconContainerClass}`}
+                        >
+                            <AppIcon name={icon} className="h-5 w-5" />
                         </span>
                     )}
-                    <span className="text-slate-500 dark:text-slate-400">
-                        {trendLabel ?? 'vs last period'}
-                    </span>
+                </div>
+                <div className="mt-3 flex items-baseline gap-2">
+                    <p className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
+                        {value}
+                    </p>
+                </div>
+            </div>
+
+            {(trend !== undefined || trendLabel || href) && (
+                <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs dark:border-slate-800/60">
+                    <div className="flex items-center gap-1.5">
+                        {trend !== undefined && (
+                            <span
+                                className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 font-semibold ${trendClass}`}
+                            >
+                                <AppIcon
+                                    name={trend >= 0 ? 'trend-up' : 'trend-down'}
+                                    className="h-3 w-3"
+                                />
+                                {Math.abs(trend)}%
+                            </span>
+                        )}
+                        <span className="text-slate-500 dark:text-slate-400">
+                            {trendLabel ?? (trend !== undefined ? 'vs last period' : '')}
+                        </span>
+                    </div>
+
+                    {href && (
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-600 opacity-80 transition group-hover:translate-x-0.5 group-hover:text-slate-900 group-hover:opacity-100 dark:text-slate-400 dark:group-hover:text-slate-200">
+                            View
+                            <AppIcon name="arrow-right" className="h-3 w-3" />
+                        </span>
+                    )}
                 </div>
             )}
         </>
