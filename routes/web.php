@@ -4,6 +4,7 @@ use App\Http\Controllers\AcademicSessionController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ClassesAndSectionController;
+use App\Http\Controllers\CommunicationController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExamController;
 use App\Http\Controllers\FeeInvoiceController;
@@ -64,6 +65,14 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/admin/settings/school', [SchoolProfileController::class, 'edit'])->name('admin.settings.school.edit');
         Route::put('/admin/settings/school', [SchoolProfileController::class, 'update'])->name('admin.settings.school.update');
         Route::get('/admin/settings/zkteco', [AttendanceController::class, 'zktecoSettingsPage'])->name('admin.settings.zkteco');
+
+        // Communication (SMS & Custom Email Broadcast, Templates, Settings)
+        Route::get('/admin/communication/messages', [CommunicationController::class, 'index'])->name('admin.communication.index');
+        Route::post('/admin/communication/messages/send', [CommunicationController::class, 'send'])->name('admin.communication.send');
+        Route::post('/admin/communication/templates', [CommunicationController::class, 'storeTemplate'])->name('admin.communication.templates.store');
+        Route::put('/admin/communication/templates/{template}', [CommunicationController::class, 'updateTemplate'])->name('admin.communication.templates.update');
+        Route::delete('/admin/communication/templates/{template}', [CommunicationController::class, 'destroyTemplate'])->name('admin.communication.templates.destroy');
+        Route::put('/admin/communication/settings', [CommunicationController::class, 'updateSettings'])->name('admin.communication.settings.update');
 
         Route::resource('/admin/academic-sessions', AcademicSessionController::class)
             ->names([

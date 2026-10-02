@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import AppIcon from '@/components/AppIcon';
 import ZktecoModal, { type ZktecoConfig, type ZktecoTestResult } from '@/components/attendance/ZktecoModal';
@@ -307,6 +307,15 @@ export default function AttendanceIndex({
                                 </span>
                             )}
                         </button>
+
+                        <Link
+                            href={`/admin/communication/messages?audience=absent_today&class_id=${selectedClass || class_id || ''}&date=${selectedDate}`}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800 shadow-sm transition hover:bg-amber-100 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-200"
+                            title="Send automated SMS / Email alert to absent students' guardians"
+                        >
+                            <AppIcon name="megaphone" className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                            <span>Notify Absentees (SMS/Email)</span>
+                        </Link>
 
                         {attendance.length > 0 && (
                             <button

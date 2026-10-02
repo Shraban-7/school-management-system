@@ -133,6 +133,7 @@ return [
         'attendance' => 'Attendance',
         'zkteco' => 'ZKTeco Biometrics',
         'communication' => 'Communication',
+        'sms_email' => 'SMS & Email Broadcast',
         'notice_board' => 'Notice board',
         'manage_notices' => 'Manage notices',
         'notices' => 'Notices',

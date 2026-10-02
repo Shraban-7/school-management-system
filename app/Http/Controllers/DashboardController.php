@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\UserRole;
 use App\Enums\PostType;
 use App\Models\AttendanceRecord;
+use App\Models\CommunicationSetting;
 use App\Models\Exam;
 use App\Models\Institution;
 use App\Models\Post;
@@ -84,6 +85,7 @@ class DashboardController extends Controller
         return Inertia::render('Admin/Settings', [
             'sidebar' => $this->adminSidebar(),
             'school' => Institution::current()->toAdminArray(),
+            'commSettings' => CommunicationSetting::current(),
             'groups' => [
                 [
                     'title' => 'General',
@@ -417,6 +419,7 @@ class DashboardController extends Controller
             [
                 'title' => __('ui.sidebar.communication'),
                 'items' => [
+                    ['label' => __('ui.sidebar.sms_email'), 'href' => '/admin/communication/messages', 'match' => 'admin/communication/messages', 'icon' => 'mail'],
                     ['label' => __('ui.sidebar.notice_board'), 'href' => '/notices', 'match' => 'notices', 'icon' => 'megaphone'],
                     ['label' => __('ui.sidebar.manage_notices'), 'href' => '/admin/posts/notice', 'match' => 'admin/posts/notice', 'icon' => 'pencil'],
                 ],

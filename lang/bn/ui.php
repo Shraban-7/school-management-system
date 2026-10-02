@@ -133,6 +133,7 @@ return [
         'attendance' => 'উপস্থিতি',
         'zkteco' => 'জেডকেটেকো বায়োমেট্রিক',
         'communication' => 'যোগাযোগ',
+        'sms_email' => 'এসএমএস ও ইমেইল',
         'notice_board' => 'নোটিশ বোর্ড',
         'manage_notices' => 'নোটিশ পরিচালনা',
         'notices' => 'নোটিশ',

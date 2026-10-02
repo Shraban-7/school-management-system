@@ -27,13 +27,32 @@ export interface MandatorySchool {
     logo_url: string | null;
 }
 
+export interface GatewaySettingsProps {
+    id?: number;
+    sms_provider: string;
+    sms_api_key: string | null;
+    sms_sender_id: string | null;
+    sms_api_url: string | null;
+    sms_enabled: boolean;
+    mail_mailer: string;
+    mail_host: string | null;
+    mail_port: number;
+    mail_username: string | null;
+    mail_password?: string | null;
+    mail_encryption: string | null;
+    mail_from_address: string | null;
+    mail_from_name: string | null;
+    email_enabled: boolean;
+}
+
 interface AdminSettingsProps {
     groups?: { title: string; fields: Field[] }[];
     sidebar: SidebarConfig;
     school?: MandatorySchool;
+    commSettings?: GatewaySettingsProps;
 }
 
-export default function AdminSettings({ groups = [], sidebar, school }: AdminSettingsProps) {
+export default function AdminSettings({ groups = [], sidebar, school, commSettings }: AdminSettingsProps) {
     const sidebarStack = useSidebarStack();
     useEffect(() => {
         if (sidebar) {
@@ -45,7 +64,7 @@ export default function AdminSettings({ groups = [], sidebar, school }: AdminSet
     const props = page.props as Record<string, unknown>;
     const flash = (props.flash as { message?: string | null; error?: string | null })?.message ?? null;
 
-    const [activeTab, setActiveTab] = useState<'institution' | 'system' | 'hardware'>('institution');
+    const [activeTab, setActiveTab] = useState<'institution' | 'communication' | 'system' | 'hardware'>('institution');
 
     // Mandatory Institution Management Form state
     const [instForm, setInstForm] = useState({
@@ -67,6 +86,25 @@ export default function AdminSettings({ groups = [], sidebar, school }: AdminSet
     const [isSaving, setIsSaving] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
 
+    // Gateway settings state
+    const [gwForm, setGwForm] = useState<GatewaySettingsProps>({
+        sms_provider: commSettings?.sms_provider ?? 'generic_http',
+        sms_api_key: commSettings?.sms_api_key ?? '',
+        sms_sender_id: commSettings?.sms_sender_id ?? 'SMS-APP',
+        sms_api_url: commSettings?.sms_api_url ?? '',
+        sms_enabled: commSettings?.sms_enabled ?? true,
+        mail_mailer: commSettings?.mail_mailer ?? 'smtp',
+        mail_host: commSettings?.mail_host ?? '',
+        mail_port: commSettings?.mail_port ?? 587,
+        mail_username: commSettings?.mail_username ?? '',
+        mail_password: commSettings?.mail_password ?? '',
+        mail_encryption: commSettings?.mail_encryption ?? 'tls',
+        mail_from_address: commSettings?.mail_from_address ?? '',
+        mail_from_name: commSettings?.mail_from_name ?? (school?.name_en ?? ''),
+        email_enabled: commSettings?.email_enabled ?? true,
+    });
+    const [isSavingGw, setIsSavingGw] = useState(false);
+
     // System settings state
     const [sysValues, setSysValues] = useState<Record<string, string | number | boolean>>(() =>
         Object.fromEntries(
@@ -75,6 +113,19 @@ export default function AdminSettings({ groups = [], sidebar, school }: AdminSet
             ),
         ),
     );
+
+    function submitGateways(e: React.FormEvent) {
+        e.preventDefault();
+        setIsSavingGw(true);
+        router.put(
+            '/admin/communication/settings',
+            { ...gwForm },
+            {
+                onSuccess: () => setIsSavingGw(false),
+                onError: () => setIsSavingGw(false),
+            },
+        );
+    }
 
     function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0] ?? null;
@@ -175,6 +226,18 @@ export default function AdminSettings({ groups = [], sidebar, school }: AdminSet
                     >
                         <AppIcon name="cog" className="h-4 w-4" />
                         Institution Profile (Mandatory)
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setActiveTab('communication')}
+                        className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition ${
+                            activeTab === 'communication'
+                                ? 'bg-accent-600 text-white shadow-sm'
+                                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100'
+                        }`}
+                    >
+                        <AppIcon name="mail" className="h-4 w-4" />
+                        SMS &amp; Email Gateways
                     </button>
                     <button
                         type="button"
@@ -611,6 +674,242 @@ export default function AdminSettings({ groups = [], sidebar, school }: AdminSet
                             </div>
                         </div>
                     </section>
+                )}
+
+                {/* TAB: SMS & EMAIL GATEWAYS */}
+                {activeTab === 'communication' && (
+                    <form onSubmit={submitGateways} className="space-y-6">
+                        <div className="flex flex-col gap-4 rounded-xl border border-indigo-200 bg-indigo-50/70 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-indigo-900/60 dark:bg-indigo-950/40">
+                            <div>
+                                <h3 className="text-sm font-bold text-indigo-950 dark:text-indigo-200">
+                                    Broadcast &amp; Message Delivery Hub
+                                </h3>
+                                <p className="text-xs text-indigo-800 dark:text-indigo-300">
+                                    Manage audience dispatches, dynamic email templates, and view message transmission history.
+                                </p>
+                            </div>
+                            <Link
+                                href="/admin/communication/messages"
+                                className="inline-flex items-center gap-1.5 rounded-lg bg-accent-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-accent-700 shrink-0"
+                            >
+                                <AppIcon name="megaphone" className="h-4 w-4" />
+                                Open Broadcast &amp; Messaging Hub
+                            </Link>
+                        </div>
+
+                        <div className="grid gap-6 lg:grid-cols-2">
+                            {/* SMS Gateway Settings */}
+                            <section className={sectionClass}>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <AppIcon name="phone" className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                                        <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+                                            SMS Gateway Configuration
+                                        </h2>
+                                    </div>
+                                    <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                        <input
+                                            type="checkbox"
+                                            checked={gwForm.sms_enabled}
+                                            onChange={(e) => setGwForm((prev) => ({ ...prev, sms_enabled: e.target.checked }))}
+                                            className="h-4 w-4 rounded border-slate-300 text-accent-600"
+                                        />
+                                        Enable SMS
+                                    </label>
+                                </div>
+                                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                    Connect any HTTP SMS gateway (e.g. BulkSMS BD, Greenweb, Twilio, Onnorokom, or Generic API).
+                                </p>
+
+                                <div className="mt-5 space-y-4">
+                                    <div>
+                                        <label className={labelClass}>SMS Provider</label>
+                                        <select
+                                            value={gwForm.sms_provider}
+                                            onChange={(e) => setGwForm((prev) => ({ ...prev, sms_provider: e.target.value }))}
+                                            className={inputClass}
+                                        >
+                                            <option value="generic_http">Generic HTTP POST / GET API</option>
+                                            <option value="bulksmsbd">BulkSMS BD</option>
+                                            <option value="greenweb">Greenweb SMS</option>
+                                            <option value="twilio">Twilio</option>
+                                            <option value="simulator">Development Simulator (Logs only)</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className={labelClass}>API Endpoint URL</label>
+                                        <input
+                                            type="text"
+                                            value={gwForm.sms_api_url ?? ''}
+                                            onChange={(e) => setGwForm((prev) => ({ ...prev, sms_api_url: e.target.value }))}
+                                            placeholder="https://api.sms-provider.com/v2/send"
+                                            className={inputClass}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className={labelClass}>API Secret Key / Token</label>
+                                        <input
+                                            type="password"
+                                            value={gwForm.sms_api_key ?? ''}
+                                            onChange={(e) => setGwForm((prev) => ({ ...prev, sms_api_key: e.target.value }))}
+                                            placeholder="••••••••••••••••"
+                                            className={inputClass}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className={labelClass}>Masking / Sender ID</label>
+                                        <input
+                                            type="text"
+                                            value={gwForm.sms_sender_id ?? ''}
+                                            onChange={(e) => setGwForm((prev) => ({ ...prev, sms_sender_id: e.target.value }))}
+                                            placeholder="e.g. SMS-APP or approved sender ID"
+                                            className={inputClass}
+                                        />
+                                    </div>
+                                </div>
+                            </section>
+
+                            {/* Email / SMTP Settings */}
+                            <section className={sectionClass}>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <AppIcon name="mail" className="h-5 w-5 text-sky-600 dark:text-sky-400" />
+                                        <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+                                            Email / SMTP Settings
+                                        </h2>
+                                    </div>
+                                    <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                        <input
+                                            type="checkbox"
+                                            checked={gwForm.email_enabled}
+                                            onChange={(e) => setGwForm((prev) => ({ ...prev, email_enabled: e.target.checked }))}
+                                            className="h-4 w-4 rounded border-slate-300 text-accent-600"
+                                        />
+                                        Enable Email
+                                    </label>
+                                </div>
+                                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                    SMTP server configuration for sending custom templated emails.
+                                </p>
+
+                                <div className="mt-5 space-y-4">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className={labelClass}>Mailer Transport</label>
+                                            <select
+                                                value={gwForm.mail_mailer}
+                                                onChange={(e) => setGwForm((prev) => ({ ...prev, mail_mailer: e.target.value }))}
+                                                className={inputClass}
+                                            >
+                                                <option value="smtp">SMTP</option>
+                                                <option value="mailgun">Mailgun</option>
+                                                <option value="ses">Amazon SES</option>
+                                                <option value="log">Local Log (Testing)</option>
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label className={labelClass}>SMTP Host</label>
+                                            <input
+                                                type="text"
+                                                value={gwForm.mail_host ?? ''}
+                                                onChange={(e) => setGwForm((prev) => ({ ...prev, mail_host: e.target.value }))}
+                                                placeholder="smtp.mailtrap.io"
+                                                className={inputClass}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className={labelClass}>SMTP Port</label>
+                                            <input
+                                                type="number"
+                                                value={gwForm.mail_port}
+                                                onChange={(e) => setGwForm((prev) => ({ ...prev, mail_port: parseInt(e.target.value, 10) || 587 }))}
+                                                className={inputClass}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className={labelClass}>Encryption</label>
+                                            <select
+                                                value={gwForm.mail_encryption ?? 'tls'}
+                                                onChange={(e) => setGwForm((prev) => ({ ...prev, mail_encryption: e.target.value }))}
+                                                className={inputClass}
+                                            >
+                                                <option value="tls">TLS</option>
+                                                <option value="ssl">SSL</option>
+                                                <option value="null">None</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className={labelClass}>Username</label>
+                                            <input
+                                                type="text"
+                                                value={gwForm.mail_username ?? ''}
+                                                onChange={(e) => setGwForm((prev) => ({ ...prev, mail_username: e.target.value }))}
+                                                placeholder="smtp-user"
+                                                className={inputClass}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className={labelClass}>Password</label>
+                                            <input
+                                                type="password"
+                                                value={gwForm.mail_password ?? ''}
+                                                onChange={(e) => setGwForm((prev) => ({ ...prev, mail_password: e.target.value }))}
+                                                placeholder="••••••••"
+                                                className={inputClass}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className={labelClass}>From Sender Email</label>
+                                            <input
+                                                type="email"
+                                                value={gwForm.mail_from_address ?? ''}
+                                                onChange={(e) => setGwForm((prev) => ({ ...prev, mail_from_address: e.target.value }))}
+                                                placeholder="noreply@school.edu.bd"
+                                                className={inputClass}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className={labelClass}>From Sender Name</label>
+                                            <input
+                                                type="text"
+                                                value={gwForm.mail_from_name ?? ''}
+                                                onChange={(e) => setGwForm((prev) => ({ ...prev, mail_from_name: e.target.value }))}
+                                                placeholder={school?.name_en ?? 'School SMS'}
+                                                className={inputClass}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+
+                        <div className="flex justify-end">
+                            <button
+                                type="submit"
+                                disabled={isSavingGw}
+                                className="inline-flex items-center gap-2 rounded-lg bg-accent-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-accent-700 disabled:opacity-50"
+                            >
+                                <AppIcon name="check" className="h-4 w-4" />
+                                {isSavingGw ? 'Saving Gateways...' : 'Save Gateway Credentials'}
+                            </button>
+                        </div>
+                    </form>
                 )}
             </div>
         </DashboardLayout>
